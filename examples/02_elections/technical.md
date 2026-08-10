@@ -25,6 +25,16 @@ bash scripts/04_list.sh
 
 Демо-учётка: phone `+79000000003`, password `DemoAdmin!12345`, tenant `agency-demo`.
 
+## UI
+
+```bash
+cd examples/02_elections/files/ui
+php -S 127.0.0.1:8763 router.php
+# → http://127.0.0.1:8763/
+```
+
+Proxy `/proxy/rbac` и `/proxy/manifest`. Вход: `+79000000003` / `DemoAdmin!12345` / `agency-demo`.
+
 ## Seed (кратко)
 
 - Кампания: «Муниципальные выборы 2026»

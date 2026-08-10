@@ -24,6 +24,16 @@ bash scripts/04_list.sh
 
 Демо-учётка: phone `+79000000003`, password `DemoAdmin!12345`, tenant `agency-demo`.
 
+## UI
+
+```bash
+cd examples/03_hr/files/ui
+php -S 127.0.0.1:8764 router.php
+# → http://127.0.0.1:8764/
+```
+
+Proxy `/proxy/rbac` и `/proxy/manifest`. Вход: `+79000000003` / `DemoAdmin!12345` / `agency-demo`.
+
 ## Seed
 
 - 2 вакансии (кладовщик, менеджер B2B)
