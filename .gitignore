@@ -1,7 +1,8 @@
-# Secrets & local env
-.env
-.env.local
-.env.*.local
+# Examples local state
+examples/**/.env
+examples/**/.session.json
+examples/**/.last_record_id
+
 *.pem
 *.key
 credentials.json

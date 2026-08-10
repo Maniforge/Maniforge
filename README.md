@@ -127,6 +127,7 @@ make frontend-all       # admin + scanner → public/
 
 ## Примеры
 
+- [`examples/00_access_desk/`](examples/00_access_desk/) — **Access Desk**: временные пропуска на RBAC + Manifest Engine ([marketing](examples/00_access_desk/marketing.md) · [technical](examples/00_access_desk/technical.md))
 - [`examples/print_task/`](examples/print_task/) — демо UI заданий печати (не ядро платформы)
 
 ## Репозиторий
