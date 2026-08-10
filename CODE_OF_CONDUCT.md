@@ -33,7 +33,7 @@ Examples of unacceptable behavior:
 
 ## Enforcement
 
-Report issues to **conduct@maniforge.dev**. Community leaders will review and
+Report issues to **support@maniforge.ru**. Community leaders will review and
 respond as appropriate. All complaints will be handled confidentially.
 
 ## Attribution

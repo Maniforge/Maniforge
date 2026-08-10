@@ -2,6 +2,13 @@
 
 Спасибо за интерес к Maniforge.
 
+## Контакты
+
+| | |
+|---|---|
+| Поддержка | **support@maniforge.ru** |
+| Security | **security@maniforge.dev** (см. [`SECURITY.md`](SECURITY.md)) |
+
 ## Перед началом
 
 1. Прочитайте [`docs/MANIFORGE_GLOSSARY.md`](docs/MANIFORGE_GLOSSARY.md) — термины tenant / subtenant / grant.
