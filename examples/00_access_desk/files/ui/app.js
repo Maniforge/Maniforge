@@ -58,7 +58,10 @@
       body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },
     });
-    const token = data?.session?.access_token || data?.access_token;
+    const token =
+      data?.session?.access_token ||
+      data?.credentials?.session?.access_token ||
+      data?.access_token;
     if (!token) throw new Error("Нет access_token в ответе login");
     state.token = token;
     state.loginName = body.phone;
@@ -70,16 +73,40 @@
   }
 
   async function ensureManifest() {
-    const manifest = await fetch("../manifest.access_pass.json").then((r) => r.json());
+    const res = await fetch("/manifest.access_pass.json");
+    if (!res.ok) {
+      throw new Error("Не удалось загрузить manifest.access_pass.json");
+    }
+    const manifest = await res.json();
     try {
       const created = await api(`${manifestBase()}/api/v1/manifests`, {
         method: "POST",
         body: JSON.stringify(manifest),
       });
-      dump($("deskOut"), created);
+      dump($("deskOut"), { ok: true, message: "Схема access_pass создана", created });
+      return;
     } catch (e) {
-      const existing = await api(`${manifestBase()}/api/v1/manifests/access_pass`);
-      dump($("deskOut"), { note: "Схема уже есть или POST отклонён", existing, error: e.body || String(e) });
+      // 409 = already exists — success for this demo button
+      if (e.status === 409) {
+        const existing = await api(`${manifestBase()}/api/v1/manifests/access_pass`);
+        dump($("deskOut"), {
+          ok: true,
+          message: "Схема access_pass уже есть — можно выдавать пропуска",
+          existing,
+        });
+        return;
+      }
+      try {
+        const existing = await api(`${manifestBase()}/api/v1/manifests/access_pass`);
+        dump($("deskOut"), {
+          ok: true,
+          message: "Схема уже доступна",
+          existing,
+          create_error: e.body || String(e),
+        });
+      } catch (e2) {
+        dump($("deskOut"), { ok: false, error: e.body || String(e), fallback: e2.body || String(e2) });
+      }
     }
   }
 
