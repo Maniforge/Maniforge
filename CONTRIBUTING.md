@@ -7,6 +7,7 @@
 | | |
 |---|---|
 | Поддержка | **support@maniforge.ru** |
+| Предложения / связь с разработчиками | **hello@maniforge.ru** |
 | Security | **security@maniforge.dev** (см. [`SECURITY.md`](SECURITY.md)) |
 
 ## Перед началом

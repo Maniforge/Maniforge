@@ -17,6 +17,9 @@
 
 ## Support
 
-Общие вопросы по платформе и поддержка: **support@maniforge.ru**.
+| | |
+|---|---|
+| Поддержка | **support@maniforge.ru** |
+| Предложения / связь с разработчиками | **hello@maniforge.ru** |
 
 Для инцидентов в эксплуатации см. также `docs/MANIFORGE_SECURITY_INCIDENT_WORKFLOW.md`.

@@ -135,7 +135,8 @@ make frontend-all       # admin + scanner → public/
 |---|---|
 | GitHub | https://github.com/Maniforge/maniforge_low_code_platform |
 | Issues | https://github.com/Maniforge/maniforge_low_code_platform/issues |
-| Support | **support@maniforge.ru** |
+| Поддержка | **support@maniforge.ru** |
+| Предложения / связь с разработчиками | **hello@maniforge.ru** |
 | Security | **security@maniforge.dev** · [`SECURITY.md`](SECURITY.md) |
 | Contributing | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 
