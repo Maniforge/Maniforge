@@ -1,0 +1,43 @@
+{
+  "code": "wh_sku",
+  "name": "Warehouse SKU",
+  "fields": [
+    {
+      "name": "sku",
+      "type": "string",
+      "required": true,
+      "max_length": 64
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "required": true,
+      "max_length": 255
+    },
+    {
+      "name": "uom",
+      "type": "string",
+      "required": true,
+      "max_length": 16
+    },
+    {
+      "name": "barcode",
+      "type": "string",
+      "max_length": 64
+    },
+    {
+      "name": "track_lot",
+      "type": "boolean"
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "required": true,
+      "max_length": 32
+    }
+  ],
+  "metadata": {
+    "example": "04_warehouse_ux",
+    "module": "warehouse"
+  }
+}

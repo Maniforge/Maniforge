@@ -131,6 +131,7 @@ make frontend-all       # admin + scanner → public/
 - [`examples/01_org_structure/`](examples/01_org_structure/) — оргструктура компании
 - [`examples/02_elections/`](examples/02_elections/) — выборы (кампания / УИК / кандидаты)
 - [`examples/03_hr/`](examples/03_hr/) — HR (вакансии / отпуска)
+- [`examples/04_warehouse_ux/`](examples/04_warehouse_ux/) — **10 UI/UX экранов** складского учёта
 - [`examples/print_task/`](examples/print_task/) — демо UI заданий печати
 
 Набор примеров закрыт; новые — только по явному запросу.

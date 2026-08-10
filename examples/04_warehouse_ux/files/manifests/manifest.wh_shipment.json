@@ -1,0 +1,50 @@
+{
+  "code": "wh_shipment",
+  "name": "Shipment / Pick",
+  "fields": [
+    {
+      "name": "doc_no",
+      "type": "string",
+      "required": true,
+      "max_length": 64
+    },
+    {
+      "name": "order_ref",
+      "type": "string",
+      "required": true,
+      "max_length": 64
+    },
+    {
+      "name": "sku",
+      "type": "string",
+      "required": true,
+      "max_length": 64
+    },
+    {
+      "name": "qty",
+      "type": "number",
+      "required": true,
+      "min": 0
+    },
+    {
+      "name": "location_code",
+      "type": "string",
+      "max_length": 64
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "required": true,
+      "max_length": 32
+    },
+    {
+      "name": "customer",
+      "type": "string",
+      "max_length": 255
+    }
+  ],
+  "metadata": {
+    "example": "04_warehouse_ux",
+    "module": "warehouse"
+  }
+}

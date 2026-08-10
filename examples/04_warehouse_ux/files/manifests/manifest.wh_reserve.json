@@ -1,0 +1,50 @@
+{
+  "code": "wh_reserve",
+  "name": "Stock Reserve",
+  "fields": [
+    {
+      "name": "reserve_no",
+      "type": "string",
+      "required": true,
+      "max_length": 64
+    },
+    {
+      "name": "order_ref",
+      "type": "string",
+      "required": true,
+      "max_length": 64
+    },
+    {
+      "name": "sku",
+      "type": "string",
+      "required": true,
+      "max_length": 64
+    },
+    {
+      "name": "qty",
+      "type": "number",
+      "required": true,
+      "min": 0
+    },
+    {
+      "name": "location_code",
+      "type": "string",
+      "max_length": 64
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "required": true,
+      "max_length": 32
+    },
+    {
+      "name": "expires_at",
+      "type": "string",
+      "max_length": 32
+    }
+  ],
+  "metadata": {
+    "example": "04_warehouse_ux",
+    "module": "warehouse"
+  }
+}

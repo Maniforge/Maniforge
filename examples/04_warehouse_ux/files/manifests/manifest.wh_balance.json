@@ -1,0 +1,44 @@
+{
+  "code": "wh_balance",
+  "name": "Stock Balance",
+  "fields": [
+    {
+      "name": "sku",
+      "type": "string",
+      "required": true,
+      "max_length": 64
+    },
+    {
+      "name": "location_code",
+      "type": "string",
+      "required": true,
+      "max_length": 64
+    },
+    {
+      "name": "qty",
+      "type": "number",
+      "required": true,
+      "min": 0
+    },
+    {
+      "name": "lot_code",
+      "type": "string",
+      "max_length": 64
+    },
+    {
+      "name": "expires_at",
+      "type": "string",
+      "max_length": 32
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "required": true,
+      "max_length": 32
+    }
+  ],
+  "metadata": {
+    "example": "04_warehouse_ux",
+    "module": "warehouse"
+  }
+}
