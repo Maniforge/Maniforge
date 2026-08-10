@@ -2,7 +2,13 @@ blank_issues_enabled: false
 contact_links:
   - name: Security report
     url: https://github.com/Maniforge/maniforge_low_code_platform/security/advisories/new
-    about: Уязвимости — только через Security Advisories / SECURITY.md
+    about: Уязвимости — security@maniforge.dev / Security Advisories
+  - name: Support
+    url: mailto:support@maniforge.ru
+    about: Поддержка пользователей — support@maniforge.ru
+  - name: Hello / proposals
+    url: mailto:hello@maniforge.ru
+    about: Предложения и связь с разработчиками — hello@maniforge.ru
   - name: Platform docs
-    url: https://github.com/Maniforge/maniforge_low_code_platform/tree/master/docs
+    url: https://github.com/Maniforge/maniforge_low_code_platform/tree/main/docs
     about: Обзор, архитектура, glossary
