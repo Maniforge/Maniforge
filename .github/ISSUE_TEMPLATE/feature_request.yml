@@ -1,0 +1,38 @@
+name: Feature request
+description: Предложить улучшение или новый модуль/контракт
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Проблема / мотивация
+      description: Какую боль закрываем
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Предложение
+      description: API, UX, границы модуля
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Область
+      options:
+        - Manifest Engine
+        - RBAC / security
+        - Tenant / licensing
+        - Supply chain
+        - UI / DX
+        - Ops / CI
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Альтернативы
+      description: Что рассматривали и почему отклонили

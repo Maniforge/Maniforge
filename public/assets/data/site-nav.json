@@ -1,0 +1,18 @@
+{
+  "brand": {
+    "name": "Maniforge",
+    "mark": "M",
+    "href": "/"
+  },
+  "zones": [
+    { "id": "marketing", "label": "Сайт", "href": "/", "icon": "house" },
+    { "id": "admin", "label": "Admin", "href": "/app", "icon": "grid" },
+    { "id": "scanner", "label": "Scanner", "href": "/scanner", "icon": "upc-scan" }
+  ],
+  "marketingLinks": [
+    { "id": "modules", "label": "Модули", "href": "/modules" },
+    { "id": "pricing", "label": "Тарифы", "href": "/pricing" },
+    { "id": "developers", "label": "Разработчикам", "href": "/developers" },
+    { "id": "api", "label": "API", "href": "/api" }
+  ]
+}

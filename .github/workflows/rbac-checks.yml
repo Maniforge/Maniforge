@@ -1,0 +1,323 @@
+name: RBAC Checks
+
+on:
+  push:
+    paths:
+      - 'app/Maniforge/Rbac/**'
+      - 'app/Maniforge/TenantLicensing/**'
+      - 'maniforge/rbac/**'
+      - 'maniforge/tenant-licensing/**'
+      - 'templates/**'
+      - 'public/**'
+      - 'docs/**'
+      - '.github/workflows/rbac-checks.yml'
+  pull_request:
+    paths:
+      - 'app/Maniforge/Rbac/**'
+      - 'app/Maniforge/TenantLicensing/**'
+      - 'maniforge/rbac/**'
+      - 'maniforge/tenant-licensing/**'
+      - 'templates/**'
+      - 'public/**'
+      - 'docs/**'
+      - '.github/workflows/rbac-checks.yml'
+  workflow_dispatch:
+    inputs:
+      run_http_smoke:
+        description: 'Run optional HTTP e2e smoke job'
+        required: false
+        default: false
+        type: boolean
+      smoke_login:
+        description: 'Login for HTTP smoke admin user'
+        required: false
+        default: smoke_admin
+        type: string
+      smoke_password:
+        description: 'Password for HTTP smoke admin user'
+        required: false
+        default: smoke_admin_password_123
+        type: string
+
+jobs:
+  rbac-smoke:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test_calculation
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_NAME: test_calculation
+      DB_USER: root
+      DB_PASS: root
+      TENANCY_MODE: single
+      DEFAULT_TENANT_ID: default
+      DEFAULT_SUBTENANT_ID: default
+      RBAC_ADMIN_ALLOWED_HOUR_START_UTC: 0
+      RBAC_ADMIN_ALLOWED_HOUR_END_UTC: 23
+      RBAC_ADMIN_REQUIRE_STEP_UP: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            php -r 'try { new PDO("mysql:host=127.0.0.1;dbname=test_calculation;charset=utf8mb4", "root", "root"); echo "DB ready\n"; exit(0);} catch (Throwable $e) {fwrite(STDERR, "DB not ready\n"); exit(1);}';
+            if [ $? -eq 0 ]; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MySQL did not become ready in time"
+          exit 1
+
+      - name: Run migrations
+        run: php maniforge/rbac/tools/migrate.php
+
+      - name: Run smoke preflight checks
+        run: php maniforge/rbac/tools/preflight.php
+
+  rbac-full:
+    runs-on: ubuntu-latest
+    needs: rbac-smoke
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test_calculation
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_NAME: test_calculation
+      DB_USER: root
+      DB_PASS: root
+      TENANCY_MODE: single
+      DEFAULT_TENANT_ID: default
+      DEFAULT_SUBTENANT_ID: default
+      RBAC_ADMIN_ALLOWED_HOUR_START_UTC: 0
+      RBAC_ADMIN_ALLOWED_HOUR_END_UTC: 23
+      RBAC_ADMIN_REQUIRE_STEP_UP: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            php -r 'try { new PDO("mysql:host=127.0.0.1;dbname=test_calculation;charset=utf8mb4", "root", "root"); echo "DB ready\n"; exit(0);} catch (Throwable $e) {fwrite(STDERR, "DB not ready\n"); exit(1);}';
+            if [ $? -eq 0 ]; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MySQL did not become ready in time"
+          exit 1
+
+      - name: Run migrations
+        run: php maniforge/rbac/tools/migrate.php
+
+      - name: Run full unified RBAC checks
+        run: php maniforge/rbac/tools/check_all.php
+
+  rbac-http-smoke:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_http_smoke }}
+    runs-on: ubuntu-latest
+    needs: rbac-full
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test_calculation
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_NAME: test_calculation
+      DB_USER: root
+      DB_PASS: root
+      TENANCY_MODE: single
+      DEFAULT_TENANT_ID: default
+      DEFAULT_SUBTENANT_ID: default
+      RBAC_ADMIN_ALLOWED_HOUR_START_UTC: 0
+      RBAC_ADMIN_ALLOWED_HOUR_END_UTC: 23
+      RBAC_ADMIN_REQUIRE_STEP_UP: true
+      RBAC_SMOKE_BASE_URL: http://127.0.0.1:8092/rbac
+      RBAC_SMOKE_LOGIN: ${{ inputs.smoke_login }}
+      RBAC_SMOKE_PASSWORD: ${{ inputs.smoke_password }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            php -r 'try { new PDO("mysql:host=127.0.0.1;dbname=test_calculation;charset=utf8mb4", "root", "root"); echo "DB ready\n"; exit(0);} catch (Throwable $e) {fwrite(STDERR, "DB not ready\n"); exit(1);}';
+            if [ $? -eq 0 ]; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MySQL did not become ready in time"
+          exit 1
+
+      - name: Run migrations
+        run: php maniforge/rbac/tools/migrate.php
+
+      - name: Create smoke admin user
+        run: php maniforge/rbac/tools/create_admin.php "$RBAC_SMOKE_LOGIN" "$RBAC_SMOKE_PASSWORD" "$RBAC_SMOKE_LOGIN@example.test"
+
+      - name: Start PHP server for RBAC
+        run: |
+          php -S 127.0.0.1:8092 -t "$GITHUB_WORKSPACE/maniforge/rbac/public" "$GITHUB_WORKSPACE/maniforge/rbac/public/index.php" > /tmp/rbac-http.log 2>&1 &
+          echo $! > /tmp/rbac-http.pid
+
+      - name: Wait for health endpoint
+        run: |
+          for i in {1..30}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8092/rbac/health" || true)
+            if [ "$code" = "200" ]; then
+              echo "RBAC HTTP server is ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "RBAC HTTP server is not ready in time"
+          exit 1
+
+      - name: Run HTTP e2e smoke checks
+        run: php maniforge/rbac/tools/http_smoke.php
+
+      - name: Show server log on failure
+        if: failure()
+        run: cat /tmp/rbac-http.log || true
+
+      - name: Stop PHP server
+        if: always()
+        run: kill "$(cat /tmp/rbac-http.pid)" || true
+
+  tenant-licensing-http-smoke:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_http_smoke }}
+    runs-on: ubuntu-latest
+    needs: rbac-full
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test_calculation
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_NAME: test_calculation
+      DB_USER: root
+      DB_PASS: root
+      APP_ENV: local
+      TENANCY_MODE: single
+      DEFAULT_TENANT_ID: default
+      DEFAULT_SUBTENANT_ID: default
+      TL_SMOKE_BASE_URL: http://127.0.0.1:8093/tenant-licensing
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            php -r 'try { new PDO("mysql:host=127.0.0.1;dbname=test_calculation;charset=utf8mb4", "root", "root"); echo "DB ready\n"; exit(0);} catch (Throwable $e) {fwrite(STDERR, "DB not ready\n"); exit(1);}';
+            if [ $? -eq 0 ]; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MySQL did not become ready in time"
+          exit 1
+
+      - name: Run migrations
+        run: php maniforge/rbac/tools/migrate.php
+
+      - name: Start PHP server for app router
+        run: |
+          php -S 127.0.0.1:8093 -t "$GITHUB_WORKSPACE/public" "$GITHUB_WORKSPACE/public/index.php" > /tmp/tl-http.log 2>&1 &
+          echo $! > /tmp/tl-http.pid
+
+      - name: Wait for Tenant Licensing health endpoint
+        run: |
+          for i in {1..30}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8093/tenant-licensing/health" || true)
+            if [ "$code" = "200" ]; then
+              echo "Tenant Licensing HTTP server is ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Tenant Licensing HTTP server is not ready in time"
+          exit 1
+
+      - name: Run Tenant Licensing HTTP smoke checks
+        run: php maniforge/tenant-licensing/tools/http_smoke.php
+
+      - name: Show server log on failure
+        if: failure()
+        run: cat /tmp/tl-http.log || true
+
+      - name: Stop PHP server
+        if: always()
+        run: kill "$(cat /tmp/tl-http.pid)" || true

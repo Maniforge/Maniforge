@@ -1,0 +1,39 @@
+---
+description: Обязательная документация Go-файлов Maniforge — заголовок, godoc, карта кода
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# Документирование Go-кода Maniforge
+
+Каждый `.go` файл **обязан** иметь заголовок **перед** `package`:
+
+```go
+// Файл: <имя>.go
+// Назначение: <1–2 предложения — зачем файл существует>
+// Зависимости: <пакеты, таблицы БД, внешние сервисы>
+// См. также: <связанные файлы или docs/MANIFORGE_GO_CODEMAP.md>
+package foo
+```
+
+## Правила
+
+1. **Новый файл** — заголовок добавляется сразу при создании.
+2. **Экспортируемые** типы, функции, методы — godoc на русском или английском (единообразно в пакете).
+3. **Нет «голых» пакетов** — у каждого пакета в `internal/` есть описание в codemap.
+4. **Бизнес-логика** — комментарий у неочевидных веток (security_version, revoke, licensing).
+5. **Индекс** — при добавлении/переименовании файла обновить `docs/MANIFORGE_GO_CODEMAP.md`.
+
+## Разделение users / user_profile
+
+- `maniforge_users` — критичная идентичность; изменение → `security_version++` + отзыв сессий.
+- `maniforge_user_profile` — мягкий профиль; сессии не рвутся.
+
+## Архитектура
+
+Слои, границы сервисов, ADR: [docs/MANIFORGE_ARCHITECTURE.md](../../docs/MANIFORGE_ARCHITECTURE.md).  
+Правило: [maniforge-architecture.mdc](maniforge-architecture.mdc) (`alwaysApply`).
+
+## Карта кода
+
+Полный реестр: [docs/MANIFORGE_GO_CODEMAP.md](../../docs/MANIFORGE_GO_CODEMAP.md)

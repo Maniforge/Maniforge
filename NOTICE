@@ -1,0 +1,8 @@
+Maniforge
+Copyright 2026 Maniforge
+
+This product includes software developed at Maniforge
+(https://github.com/Maniforge).
+
+Third-party dependencies are listed in go.mod / go.sum and frontend package.json
+files and retain their respective licenses.

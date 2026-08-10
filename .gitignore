@@ -1,0 +1,42 @@
+# Secrets & local env
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+credentials.json
+**/config.local.php
+examples/print_task/function/config.local.php
+
+# Build artifacts
+bin/
+var/
+logs/
+*.exe
+*.test
+*.out
+coverage.*
+dist/
+
+# Dependencies
+node_modules/
+vendor/
+frontend/**/node_modules/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Runtime / caches
+*.log
+tmp/
+.cache/
+public/app/assets/*.map
+public/scanner/assets/*.map
+
+# Go
+*.prof

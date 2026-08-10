@@ -1,0 +1,261 @@
+:root {
+  color-scheme: light;
+  --sc-bg: #0f172a;
+  --sc-surface: #ffffff;
+  --sc-border: #dbe3ef;
+  --sc-text: #172033;
+  --sc-muted: #66758a;
+  --sc-primary: #0d6efd;
+  --sc-primary-soft: #eaf2ff;
+  --sc-radius: 1rem;
+  --sc-touch: 3rem;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 18px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--sc-bg);
+  color: var(--sc-text);
+}
+
+a {
+  color: var(--sc-primary);
+}
+
+.sc-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sc-nav-logout {
+  width: auto;
+  min-height: 2.25rem;
+  font-size: 0.85rem;
+}
+
+.sc-main {
+  flex: 1;
+  width: min(100%, 480px);
+  margin: 0 auto;
+  padding: 1rem 1rem 2rem;
+}
+
+.sc-panel {
+  border: 1px solid var(--sc-border);
+  border-radius: var(--sc-radius);
+  background: var(--sc-surface);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sc-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.sc-lead {
+  margin: 0.35rem 0 0;
+  color: var(--sc-muted);
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.sc-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  margin-top: 1rem;
+}
+
+.sc-op-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-height: 5.5rem;
+  padding: 1rem;
+  border: 1px solid var(--sc-border);
+  border-radius: var(--sc-radius);
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sc-op-card strong {
+  font-size: 1.05rem;
+}
+
+.sc-op-card small {
+  color: var(--sc-muted);
+  font-size: 0.82rem;
+}
+
+.sc-field {
+  width: 100%;
+  min-height: var(--sc-touch);
+  margin-top: 0.35rem;
+  padding: 0.65rem 0.85rem;
+  border: 2px solid var(--sc-border);
+  border-radius: var(--sc-radius);
+  font: inherit;
+  font-size: 1.05rem;
+}
+
+.sc-field:focus {
+  outline: none;
+  border-color: var(--sc-primary);
+}
+
+.sc-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: var(--sc-touch);
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: var(--sc-radius);
+  background: var(--sc-primary);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sc-button-secondary {
+  background: #fff;
+  border: 1px solid var(--sc-border);
+  color: var(--sc-text);
+}
+
+.sc-muted {
+  color: var(--sc-muted);
+}
+
+.sc-error {
+  color: #dc3545;
+  font-size: 0.9rem;
+}
+
+.sc-scan-input {
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+}
+
+.sc-result {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: var(--sc-radius);
+  background: var(--sc-primary-soft);
+}
+
+.sc-result pre {
+  margin: 0.5rem 0 0;
+  overflow-x: auto;
+  font-size: 0.8rem;
+}
+
+.sc-preview {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: var(--sc-radius);
+  background: var(--sc-primary-soft);
+}
+
+.sc-preview-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sc-preview-kind {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sc-primary);
+}
+
+.sc-preview-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--sc-muted);
+  font-size: 0.9rem;
+}
+
+.sc-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.sc-success {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--sc-radius);
+  background: #d1e7dd;
+  color: #0f5132;
+  font-weight: 700;
+}
+
+.sc-recent-list {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--sc-muted);
+  font-size: 0.9rem;
+}
+
+.sc-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.sc-modal {
+  width: min(100%, 28rem);
+  padding: 1rem;
+  border-radius: var(--sc-radius) var(--sc-radius) 0 0;
+  background: var(--sc-surface);
+}
+
+.h5 {
+  font-size: 1.1rem;
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+.sc-qr-payload {
+  margin: 0.35rem 0 0;
+  padding: 0.5rem;
+  overflow-x: auto;
+  font-size: 0.75rem;
+  background: #fff;
+  border-radius: 0.5rem;
+}
+
+.sc-footer {
+  margin-top: auto;
+  padding: 0.75rem 1rem 1.25rem;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  text-align: center;
+}

@@ -1,0 +1,56 @@
+name: Bug report
+description: Сообщить о дефекте в платформе
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Для уязвимостей используйте [SECURITY.md](../../SECURITY.md), не этот шаблон.
+  - type: textarea
+    id: what
+    attributes:
+      label: Что произошло
+      description: Кратко и по факту
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемое поведение
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Шаги воспроизведения
+      placeholder: |
+        1. …
+        2. …
+        3. …
+    validations:
+      required: true
+  - type: dropdown
+    id: module
+    attributes:
+      label: Модуль
+      options:
+        - RBAC
+        - Tenant Licensing
+        - Manifest Engine
+        - Products / Warehouses / Inventory / WMS
+        - Versioning / Realtime
+        - Frontend
+        - Docs / other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit / tag
+      placeholder: master @ abc1234
+  - type: textarea
+    id: env
+    attributes:
+      label: Окружение
+      placeholder: OS, Go/PHP версии, docker-compose, APP_ENV

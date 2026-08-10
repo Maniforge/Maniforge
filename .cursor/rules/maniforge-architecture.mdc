@@ -1,0 +1,33 @@
+---
+description: Архитектура Maniforge — обязательные границы, оси tenant/project, слои Go
+alwaysApply: true
+---
+
+# Архитектура Maniforge (обязательно)
+
+**Источник истины:** [docs/MANIFORGE_ARCHITECTURE.md](../../docs/MANIFORGE_ARCHITECTURE.md) (после согласования v1.0).
+
+Перед нетривиальными изменениями сверяйся с архитектурой. Архитектурное изменение → ADR в `docs/adr/` + обновление MANIFORGE_ARCHITECTURE.md.
+
+## Нельзя нарушать
+
+1. **`subtenant_id` = workspace (ось B)**, не клиент. Клиент/реферал = **managed tenant + grant** (ось A).
+2. **Данные модулей:** `tenant_id` + `project_id`. Licensing runtime: tenant + project.
+3. **`maniforge_users`** — identity; любое изменение → `security_version++` + revoke sessions. Профиль — только **`maniforge_user_profile`**.
+4. **Слои Go:** handler → service → repository. Без SQL в handler.
+5. **Licensing:** RBAC проверяет доступ только через `licensingclient`, не напрямую по TL-таблицам.
+6. **Паритет API:** при портировании с PHP — те же JSON и HTTP-коды, что journey-тесты.
+
+## Слои нового Go-кода
+
+`cmd/` → `app.go` → `handler/` → `service/` → `repository/`
+
+## Документирование
+
+- Заголовок в каждом `.go` файле — [go-file-documentation.mdc](go-file-documentation.mdc)
+- Новый файл → [MANIFORGE_GO_CODEMAP.md](../../docs/MANIFORGE_GO_CODEMAP.md)
+- Термины → [MANIFORGE_GLOSSARY.md](../../docs/MANIFORGE_GLOSSARY.md)
+
+## ADR
+
+Принятые решения: `docs/adr/`. Индекс в MANIFORGE_ARCHITECTURE.md §9.

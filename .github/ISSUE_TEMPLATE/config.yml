@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/Maniforge/maniforge_low_code_platform/security/advisories/new
+    about: Уязвимости — только через Security Advisories / SECURITY.md
+  - name: Platform docs
+    url: https://github.com/Maniforge/maniforge_low_code_platform/tree/master/docs
+    about: Обзор, архитектура, glossary

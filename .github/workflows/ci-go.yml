@@ -1,0 +1,71 @@
+name: CI — Go
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'cmd/**'
+      - 'internal/**'
+      - 'migrations/**'
+      - 'go.mod'
+      - 'go.sum'
+      - 'Makefile'
+      - '.github/workflows/ci-go.yml'
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'cmd/**'
+      - 'internal/**'
+      - 'migrations/**'
+      - 'go.mod'
+      - 'go.sum'
+      - 'Makefile'
+      - '.github/workflows/ci-go.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: maniforge
+          POSTGRES_USER: maniforge
+          POSTGRES_PASSWORD: maniforge
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U maniforge -d maniforge"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=10
+
+    env:
+      MANIFORGE_DB_HOST: 127.0.0.1
+      MANIFORGE_DB_PORT: 5433
+      MANIFORGE_DB_NAME: maniforge
+      MANIFORGE_DB_USER: maniforge
+      MANIFORGE_DB_PASS: maniforge
+      MANIFORGE_DB_SSLMODE: disable
+      APP_ENV: local
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.x'
+          cache: true
+
+      - name: Build
+        run: make build
+
+      - name: Migrate
+        run: make migrate
+
+      - name: Preflight
+        run: make preflight
+
+      - name: Test
+        run: make test

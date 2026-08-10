@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: maniforge-postgres
+    environment:
+      POSTGRES_DB: maniforge
+      POSTGRES_USER: maniforge
+      POSTGRES_PASSWORD: maniforge
+    ports:
+      - "5433:5432"
+    volumes:
+      - maniforge_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maniforge -d maniforge"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  maniforge_pg_data:
