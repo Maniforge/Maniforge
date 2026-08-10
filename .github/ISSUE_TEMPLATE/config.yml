@@ -2,7 +2,7 @@ blank_issues_enabled: false
 contact_links:
   - name: Security report
     url: https://github.com/Maniforge/maniforge_low_code_platform/security/advisories/new
-    about: Уязвимости — security@maniforge.dev / Security Advisories
+    about: Уязвимости — support@maniforge.ru (тема [security]) / Security Advisories
   - name: Support
     url: mailto:support@maniforge.ru
     about: Поддержка пользователей — support@maniforge.ru

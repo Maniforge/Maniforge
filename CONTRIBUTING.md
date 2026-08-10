@@ -8,7 +8,7 @@
 |---|---|
 | Поддержка | **support@maniforge.ru** |
 | Предложения / связь с разработчиками | **hello@maniforge.ru** |
-| Security | **security@maniforge.dev** (см. [`SECURITY.md`](SECURITY.md)) |
+| Security | **support@maniforge.ru** (см. [`SECURITY.md`](SECURITY.md)) |
 
 ## Перед началом
 
@@ -46,7 +46,7 @@ make test
 Если на машине нет git identity:
 
 ```bash
-git -c user.name="Maniforge" -c user.email="dev@maniforge.dev" commit -m "…"
+git -c user.name="Maniforge" -c user.email="hello@maniforge.ru" commit -m "…"
 ```
 
 Не используйте `--global` без явного решения команды.
