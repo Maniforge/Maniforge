@@ -14,6 +14,22 @@ if (is_file($root . '/.env')) {
     }
 }
 
+// Process env (CI / docker) wins over empty .env placeholders; fills missing keys.
+foreach ([
+    'APP_ENV', 'APP_DEBUG', 'APP_URL', 'APP_TIMEZONE',
+    'DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASS', 'DB_CHARSET',
+    'TENANCY_MODE', 'DEFAULT_TENANT_ID', 'DEFAULT_SUBTENANT_ID',
+] as $envKey) {
+    $fromProcess = getenv($envKey);
+    if ($fromProcess === false) {
+        continue;
+    }
+    $current = $_ENV[$envKey] ?? null;
+    if ($current === null || $current === '') {
+        $_ENV[$envKey] = $fromProcess;
+    }
+}
+
 date_default_timezone_set($_ENV['APP_TIMEZONE'] ?? 'Europe/Moscow');
 
 session_start([

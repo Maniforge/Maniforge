@@ -1,4 +1,5 @@
-GO ?= $(HOME)/.local/go/bin/go
+# Prefer PATH go (CI / system); fall back to local toolchain install.
+GO ?= $(shell command -v go 2>/dev/null || echo $(HOME)/.local/go/bin/go)
 
 .PHONY: deps build migrate preflight siem-forward token-gen backup-drill enterprise-journey run-web frontend-install frontend-dev frontend-build scanner-install scanner-dev scanner-build frontend-all run-rbac run-tl test health racebench \
 	rbac-security-journey rbac-admin-journey rbac-platform-ops-journey rbac-delegation-journey
