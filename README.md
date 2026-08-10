@@ -127,9 +127,13 @@ make frontend-all       # admin + scanner → public/
 
 ## Примеры
 
-- [`examples/00_access_desk/`](examples/00_access_desk/) — временные пропуска (RBAC + Manifest Engine)
-- [`examples/01_org_structure/`](examples/01_org_structure/) — оргструктура компании: `org_unit` + `org_employee`
+- [`examples/00_access_desk/`](examples/00_access_desk/) — временные пропуска
+- [`examples/01_org_structure/`](examples/01_org_structure/) — оргструктура компании
+- [`examples/02_elections/`](examples/02_elections/) — выборы (кампания / УИК / кандидаты)
+- [`examples/03_hr/`](examples/03_hr/) — HR (вакансии / отпуска)
 - [`examples/print_task/`](examples/print_task/) — демо UI заданий печати
+
+Набор примеров закрыт; новые — только по явному запросу.
 
 ## Репозиторий
 

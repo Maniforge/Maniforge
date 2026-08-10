@@ -15,10 +15,12 @@ maniforge_low_code_platform/
 ├── frontend/             # Исходники React (admin, scanner)
 ├── docs/                 # Документация платформы
 │   └── openapi/          # Канонические OpenAPI (RBAC, Tenant Licensing)
-├── examples/             # Демо поверх платформы
-│   ├── 00_access_desk/   # Пропуска
-│   ├── 01_org_structure/ # Оргструктура компании
-│   └── print_task/       # Демо заданий печати
+├── examples/             # Демо поверх платформы (набор закрыт)
+│   ├── 00_access_desk/
+│   ├── 01_org_structure/
+│   ├── 02_elections/     # гос/муниципальные выборы
+│   ├── 03_hr/            # HR вакансии и отпуска
+│   └── print_task/
 ├── config/               # PHP bootstrap / database
 ├── .cursor/rules/        # Правила агента Cursor
 ├── .github/workflows/    # CI
