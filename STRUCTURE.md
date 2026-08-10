@@ -20,6 +20,7 @@ maniforge_low_code_platform/
 │   ├── 01_org_structure/
 │   ├── 02_elections/     # гос/муниципальные выборы
 │   ├── 03_hr/            # HR вакансии и отпуска
+│   ├── 04_warehouse_ux/  # 10 UI/UX экранов складского учёта
 │   └── print_task/
 ├── config/               # PHP bootstrap / database
 ├── .cursor/rules/        # Правила агента Cursor
