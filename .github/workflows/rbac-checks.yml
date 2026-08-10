@@ -156,6 +156,9 @@ jobs:
       - name: Run migrations
         run: php maniforge/rbac/tools/migrate.php
 
+      - name: Seed agency demo (delegation checks)
+        run: php maniforge/rbac/tools/demo_seed.php
+
       - name: Run full unified RBAC checks
         run: php maniforge/rbac/tools/check_all.php
 
