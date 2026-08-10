@@ -14,14 +14,12 @@ if (is_file($root . '/.env')) {
     }
 }
 
-// Process env (CI / docker) wins over empty .env placeholders; fills missing keys.
-foreach ([
-    'APP_ENV', 'APP_DEBUG', 'APP_URL', 'APP_TIMEZONE',
-    'DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASS', 'DB_CHARSET',
-    'TENANCY_MODE', 'DEFAULT_TENANT_ID', 'DEFAULT_SUBTENANT_ID',
-] as $envKey) {
-    $fromProcess = getenv($envKey);
-    if ($fromProcess === false) {
+// Process env (CI / docker) fills missing or empty keys from .env.
+foreach ($_SERVER as $envKey => $fromProcess) {
+    if (!is_string($envKey) || !is_string($fromProcess)) {
+        continue;
+    }
+    if (!preg_match('/^[A-Z][A-Z0-9_]*$/', $envKey)) {
         continue;
     }
     $current = $_ENV[$envKey] ?? null;

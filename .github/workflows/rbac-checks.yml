@@ -71,6 +71,8 @@ jobs:
       RBAC_ADMIN_ALLOWED_HOUR_START_UTC: 0
       RBAC_ADMIN_ALLOWED_HOUR_END_UTC: 23
       RBAC_ADMIN_REQUIRE_STEP_UP: true
+      APP_ENV: local
+      RBAC_REGISTRATION_ENABLED: true
 
     steps:
       - name: Checkout
@@ -127,6 +129,8 @@ jobs:
       RBAC_ADMIN_ALLOWED_HOUR_START_UTC: 0
       RBAC_ADMIN_ALLOWED_HOUR_END_UTC: 23
       RBAC_ADMIN_REQUIRE_STEP_UP: true
+      APP_ENV: local
+      RBAC_REGISTRATION_ENABLED: true
 
     steps:
       - name: Checkout
@@ -184,6 +188,8 @@ jobs:
       RBAC_ADMIN_ALLOWED_HOUR_START_UTC: 0
       RBAC_ADMIN_ALLOWED_HOUR_END_UTC: 23
       RBAC_ADMIN_REQUIRE_STEP_UP: true
+      APP_ENV: local
+      RBAC_REGISTRATION_ENABLED: true
       RBAC_SMOKE_BASE_URL: http://127.0.0.1:8092/rbac
       RBAC_SMOKE_LOGIN: ${{ inputs.smoke_login }}
       RBAC_SMOKE_PASSWORD: ${{ inputs.smoke_password }}
