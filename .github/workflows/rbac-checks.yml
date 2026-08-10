@@ -10,6 +10,8 @@ on:
       - 'templates/**'
       - 'public/**'
       - 'docs/**'
+      - 'config/**'
+      - 'app/Database/**'
       - '.github/workflows/rbac-checks.yml'
   pull_request:
     paths:
@@ -20,6 +22,8 @@ on:
       - 'templates/**'
       - 'public/**'
       - 'docs/**'
+      - 'config/**'
+      - 'app/Database/**'
       - '.github/workflows/rbac-checks.yml'
   workflow_dispatch:
     inputs:

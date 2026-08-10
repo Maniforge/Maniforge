@@ -80,7 +80,11 @@ try {
         'organization_name' => 'Credential Probe Org',
         'consents' => [['purpose_code' => 'account', 'policy_version' => '1.0']],
     ]);
-    assertCheck(($reg['ok'] ?? false) === true, 'Phone-first registration succeeds in probe tenant');
+    $regDetail = json_encode($reg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    assertCheck(
+        ($reg['ok'] ?? false) === true,
+        'Phone-first registration succeeds in probe tenant' . ($regDetail ? " ({$regDetail})" : '')
+    );
     $tenantId = (string) ($reg['tenant']['tenant_id'] ?? '');
     $subtenantId = (string) ($reg['tenant']['subtenant_id'] ?? 'main');
     $badPass = $auth->login(
