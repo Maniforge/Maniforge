@@ -16,7 +16,8 @@ maniforge_low_code_platform/
 ├── docs/                 # Документация платформы
 │   └── openapi/          # Канонические OpenAPI (RBAC, Tenant Licensing)
 ├── examples/             # Демо поверх платформы
-│   ├── 00_access_desk/   # Пропуска: marketing.md + technical.md + files/
+│   ├── 00_access_desk/   # Пропуска
+│   ├── 01_org_structure/ # Оргструктура компании
 │   └── print_task/       # Демо заданий печати
 ├── config/               # PHP bootstrap / database
 ├── .cursor/rules/        # Правила агента Cursor

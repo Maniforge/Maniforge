@@ -2,18 +2,17 @@
 
 Демонстрации **поверх** self-hosted Maniforge (не ядро платформы).
 
-| Пример | Описание |
-|--------|----------|
-| [`00_access_desk/`](00_access_desk/) | **Access Desk** — временные пропуска (RBAC + Manifest Engine). [`marketing.md`](00_access_desk/marketing.md) · [`technical.md`](00_access_desk/technical.md) |
-| [`print_task/`](print_task/) | UI заданий печати + калькулятор | `cd print_task && php -S 127.0.0.1:8765 -t .` |
+| Пример | Описание | Локально |
+|--------|----------|----------|
+| [`00_access_desk/`](00_access_desk/) | Временные пропуска (RBAC + Manifest) | UI `:8760` (когда запущен) |
+| [`01_org_structure/`](01_org_structure/) | **Оргструктура компании** — подразделения + сотрудники | UI `:8761` |
+| [`print_task/`](print_task/) | UI заданий печати + калькулятор | `:8760` / `:8765` |
 
-## Соглашение по структуре
-
-Нумерованные кейсы платформы:
+## Соглашение
 
 ```
-examples/00_name/
-  marketing.md    # зачем модуль бизнесу
-  technical.md    # как развернуть и вызвать API
-  files/          # manifest, scripts, ui, env.example
+examples/NN_name/
+  marketing.md
+  technical.md
+  files/          # manifests, scripts, ui, env.example
 ```

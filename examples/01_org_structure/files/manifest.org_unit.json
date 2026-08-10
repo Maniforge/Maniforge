@@ -1,0 +1,17 @@
+{
+  "code": "org_unit",
+  "name": "Org Unit",
+  "fields": [
+    { "name": "code", "type": "string", "required": true, "max_length": 64 },
+    { "name": "name", "type": "string", "required": true, "max_length": 255 },
+    { "name": "unit_type", "type": "string", "required": true, "max_length": 32 },
+    { "name": "parent_code", "type": "string", "max_length": 64 },
+    { "name": "status", "type": "string", "required": true, "max_length": 32 },
+    { "name": "head_title", "type": "string", "max_length": 128 },
+    { "name": "note", "type": "string", "max_length": 1024 }
+  ],
+  "metadata": {
+    "example": "01_org_structure",
+    "module": "org_structure"
+  }
+}

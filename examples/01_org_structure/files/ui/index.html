@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Org Structure · Maniforge</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">Org Structure</div>
+    <p class="tag">Бизнес-структура компании · org_unit + org_employee</p>
+  </header>
+
+  <main class="layout">
+    <section class="panel" id="login-panel">
+      <h1>Вход</h1>
+      <label>RBAC URL <input id="rbacUrl" value="/proxy/rbac" /></label>
+      <label>Manifest URL <input id="manifestUrl" value="/proxy/manifest" /></label>
+      <label>Tenant <input id="tenantId" value="agency-demo" /></label>
+      <label>Subtenant <input id="subtenantId" value="main" /></label>
+      <label>Phone <input id="phone" value="+79000000003" /></label>
+      <label>Password <input id="password" type="password" value="DemoAdmin!12345" /></label>
+      <button type="button" id="btnLogin">Войти</button>
+      <pre id="loginOut" class="out" hidden></pre>
+    </section>
+
+    <section class="panel" id="desk-panel" hidden>
+      <div class="row">
+        <h1>Структура</h1>
+        <button type="button" class="ghost" id="btnLogout">Выйти</button>
+      </div>
+      <div class="row actions">
+        <button type="button" id="btnEnsure">Создать схемы</button>
+        <button type="button" id="btnSeed">Засеять демо-компанию</button>
+        <button type="button" class="ghost" id="btnRefresh">Обновить</button>
+      </div>
+      <div class="grid">
+        <div>
+          <h2>Подразделения</h2>
+          <div id="tree" class="tree"></div>
+        </div>
+        <div>
+          <h2>Сотрудники</h2>
+          <div id="people" class="list"></div>
+        </div>
+      </div>
+      <h2>Добавить сотрудника</h2>
+      <div class="form-grid">
+        <label>ФИО <input id="empName" value="Новый Сотрудник" /></label>
+        <label>Unit code <input id="empUnit" value="ops-wh" /></label>
+        <label>Должность <input id="empPos" value="Специалист" /></label>
+        <label>Телефон <input id="empPhone" value="+79001119999" /></label>
+      </div>
+      <button type="button" id="btnAddEmp">Сохранить</button>
+      <pre id="deskOut" class="out" hidden></pre>
+    </section>
+  </main>
+  <footer class="foot">
+    <a href="../../marketing.md">marketing.md</a> ·
+    <a href="../../technical.md">technical.md</a>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>
