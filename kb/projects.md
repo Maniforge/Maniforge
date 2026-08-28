@@ -1,7 +1,7 @@
 # Projects map — Maniforge Platform Core
 
 **GitHub:** [`Maniforge/Maniforge`](https://github.com/Maniforge/Maniforge) — branch **`platform-core`**, tag **[`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box)**  
-**Buyer model:** customer clones repo → `install-production.sh --domain <customer-fqdn>` on **their** Ubuntu server. See `README.md`, `docs/PRODUCTION_BOX.md`.
+**Buyer model:** customer clones repo → `install-maniforge.sh --domain <customer-fqdn>` on **their** Ubuntu server. See `README.md`, `docs/PRODUCTION_BOX.md`.
 
 ## Internal — reference install / QA (not buyer path)
 
@@ -57,9 +57,9 @@ Details: `kb/PLATFORM_PRODUCTION.md`, `docs/DNS_PLATFORM.md`.
 |------|--------|
 | Install root | `/opt/maniforge/platform-core` (or customer-chosen path) |
 | Env | `deploy/.env.platform` (from `.env.platform.server.example`) |
-| Install | `sudo bash deploy/scripts/install-production.sh --domain <customer-fqdn>` |
-| Staging (no TLS) | `install-production.sh` without `--domain` → `http://<customer-ip>:18090` |
-| Verify | `bash deploy/scripts/verify-production.sh` (includes preflight) |
+| Install | `sudo bash deploy/scripts/install-maniforge.sh --domain <customer-fqdn>` |
+| Staging (no TLS) | `install-maniforge.sh` without `--domain` → `http://<customer-ip>:18090` |
+| Verify | `bash deploy/scripts/verify-maniforge.sh` (includes preflight) |
 | Acceptance | `https://<customer-fqdn>/rbac/health` |
 | Scheduler | `sudo bash deploy/scripts/install-scheduler.sh` (Phase C) |
 

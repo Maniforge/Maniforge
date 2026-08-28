@@ -19,28 +19,28 @@ cd /opt/maniforge/platform-core
 cp deploy/.env.platform.server.example deploy/.env.platform
 # отредактируйте секреты в deploy/.env.platform — не коммитьте файл
 
-sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive
-bash deploy/scripts/verify-production.sh
+sudo bash deploy/scripts/install-maniforge.sh --skip-apt --non-interactive
+bash deploy/scripts/verify-maniforge
 ```
 
 
 **HTTPS when :443 is already used (edge reverse proxy):**
 
 ```bash
-sudo bash deploy/scripts/install-production.sh --domain platform.example.com --edge-proxy --skip-apt --non-interactive
+sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com --edge-proxy --skip-apt --non-interactive
 # Append deploy/caddy/edge-platform.example.com.caddy to host edge Caddy — docs/DNS_PLATFORM.md
 ```
 **С HTTPS** (DNS A-record вашего FQDN указывает на **ваш** сервер):
 
 ```bash
-sudo bash deploy/scripts/install-production.sh --domain platform.example.com
-bash deploy/scripts/verify-production.sh
+sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com
+bash deploy/scripts/verify-maniforge
 ```
 
 **Staging на вашем сервере** (без TLS, порт 18090 — опция до выдачи домена):
 
 ```bash
-sudo bash deploy/scripts/install-production.sh
+sudo bash deploy/scripts/install-maniforge.sh
 ```
 
 ### Архитектура на сервере
@@ -74,13 +74,13 @@ cd /opt/maniforge/platform-core
 bash deploy/scripts/server-build.sh      # пересборка Go
 bash deploy/scripts/server-up.sh         # postgres + migrate + restart
 systemctl restart maniforge-rbac         # один сервис
-bash deploy/scripts/verify-production.sh
+bash deploy/scripts/verify-maniforge
 ```
 
 | Скрипт | Назначение |
 |--------|------------|
-| `install-production.sh` | apt + docker + go + caddy, env, build, migrate, systemd, health |
-| `verify-production.sh` | systemd active, gateway health, Postgres replication |
+| `install-maniforge.sh` | apt + docker + go + caddy, env, build, migrate, systemd, health |
+| `verify-maniforge` | systemd active, gateway health, Postgres replication |
 | `server-build.sh` | Пересборка Go-бинарников |
 | `server-up.sh` | Postgres compose + migrate + restart (upgrade path) |
 
@@ -147,5 +147,5 @@ make server-journey
 make server-journey GATEWAY=http://<IP>:18090
 ```
 
-**Sync с рабочей станции** — rsync дерева на сервер (исключить `.git`, `node_modules`, `.env`, `deploy/.env.platform`). `install-production.sh` выполняет `fix_deploy_script_perms` (CRLF → LF, `chmod +x`).
+**Sync с рабочей станции** — rsync дерева на сервер (исключить `.git`, `node_modules`, `.env`, `deploy/.env.platform`). `install-maniforge.sh` выполняет `fix_deploy_script_perms` (CRLF → LF, `chmod +x`).
 

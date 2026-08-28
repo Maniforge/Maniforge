@@ -6,7 +6,7 @@
 [![Release](https://img.shields.io/github/v/tag/Maniforge/Maniforge?label=v0.1.2-box&color=blue)](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-**Production Box** — комплект для развёртывания платформы Maniforge **на инфраструктуре заказчика** (on-premise, local-first): API-first backend с multi-tenant RBAC, tenant licensing, Manifest Engine (сущность → REST + OpenAPI), versioning и realtime. Вы клонируете репозиторий на **свой** Ubuntu-сервер, настраиваете секреты и FQDN, запускаете `install-production.sh` — Maniforge **не** хостит ваш production.
+**Production Box** — комплект для развёртывания платформы Maniforge **на инфраструктуре заказчика** (on-premise, local-first): API-first backend с multi-tenant RBAC, tenant licensing, Manifest Engine (сущность → REST + OpenAPI), versioning и realtime. Вы клонируете репозиторий на **свой** Ubuntu-сервер, настраиваете секреты и FQDN, запускаете `install-maniforge.sh` — Maniforge **не** хостит ваш production.
 
 | | |
 |---|---|
@@ -21,9 +21,9 @@
 
 ## Что такое продаваемый деплой (Production Box)
 
-**Production Box** — это готовый к установке комплект платформенного ядра Maniforge для **самостоятельного** развёртывания на сервере заказчика. Покупатель получает исходный код, скрипты установки и проверки, конфигурацию шлюза и базы данных, а также документацию по эксплуатации. Установка на **вашей** Ubuntu 22.04/24.04 LTS: `git clone` → `cp deploy/.env.platform.server.example deploy/.env.platform` → правка секретов → `install-production.sh --domain <ваш-fqdn>`.
+**Production Box** — это готовый к установке комплект платформенного ядра Maniforge для **самостоятельного** развёртывания на сервере. Вы получаете исходный код, скрипты установки и проверки, конфигурацию шлюза и базы данных, а также документацию по эксплуатации. Установка на **вашей** Ubuntu 22.04/24.04 LTS: `git clone` → `cp deploy/.env.platform.server.example deploy/.env.platform` → правка секретов → `install-maniforge.sh --domain <ваш-fqdn>`.
 
-Комплект **не** является облачным SaaS, **не** предполагает хостинг у Maniforge и **не** включает прикладные модули (WMS, supply chain, `.mfpack`) — они поставляются отдельными фазами. Версия **v0.1.2-box** — коммерчески воспроизводимый релиз platform core, публичен на GitHub, готов к передаче DevOps-команде заказчика.
+Комплект **не** является облачным SaaS, **не** предполагает хостинг у Maniforge и **не** включает прикладные модули (WMS, supply chain, `.mfpack`) — они поставляются отдельными фазами. Версия **v0.1.2-box** — коммерчески воспроизводимый релиз platform core, публичен на GitHub, готов к передаче DevOps-команде.
 
 ---
 
@@ -35,7 +35,7 @@
 | PostgreSQL 16 — primary + streaming replica | Модули supply chain (warehouses, WMS, inventory) |
 | Caddy gateway (HTTPS по вашему FQDN или staging по IP:18090 на вашем сервере) | Managed SaaS / мульти-тенант хостинг |
 | systemd unit-файлы с политикой перезапуска | Полный CI/CD pipeline заказчика |
-| Скрипты `install-production.sh`, `verify-production.sh`, upgrade path | PHP reference stack |
+| Скрипты `install-maniforge.sh`, `verify-maniforge.sh`, upgrade path | PHP reference stack |
 
 Подробности, backup/restore, TLS и post-install checklist — в [`docs/PRODUCTION_BOX.md`](docs/PRODUCTION_BOX.md).
 
@@ -70,15 +70,15 @@ cp deploy/.env.platform.server.example deploy/.env.platform
 # отредактируйте секреты в deploy/.env.platform — не коммитьте этот файл
 
 # Staging без TLS на вашем IP (порт 18090) — опционально до выдачи домена:
-sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive
-bash deploy/scripts/verify-production.sh
+sudo bash deploy/scripts/install-maniforge.sh --skip-apt --non-interactive
+bash deploy/scripts/verify-maniforge.sh
 ```
 
 **Production с HTTPS** (DNS A-record вашего FQDN уже указывает на сервер):
 
 ```bash
-sudo bash deploy/scripts/install-production.sh --domain platform.example.com
-bash deploy/scripts/verify-production.sh
+sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com
+bash deploy/scripts/verify-maniforge.sh
 ```
 
 Скрипт установки **идемпотентен** — повторный запуск безопасен.
@@ -87,7 +87,7 @@ bash deploy/scripts/verify-production.sh
 
 ## Проверка работоспособности
 
-После `verify-production.sh` ожидается: 6/6 systemd active, health всех сервисов через gateway, replica PostgreSQL в состоянии `streaming`.
+После `verify-maniforge` ожидается: 6/6 systemd active, health всех сервисов через gateway, replica PostgreSQL в состоянии `streaming`.
 
 | Профиль | URL health-check |
 |---------|------------------|

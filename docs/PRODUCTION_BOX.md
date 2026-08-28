@@ -19,15 +19,15 @@ cd Maniforge
 cp deploy/.env.platform.server.example deploy/.env.platform
 # отредактируйте секреты в deploy/.env.platform — не коммитьте этот файл
 
-sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive
-bash deploy/scripts/verify-production.sh
+sudo bash deploy/scripts/install-maniforge.sh --skip-apt --non-interactive
+bash deploy/scripts/verify-maniforge.sh
 ```
 
 **Production с HTTPS** — после того как DNS A-record вашего FQDN указывает на сервер:
 
 ```bash
-sudo bash deploy/scripts/install-production.sh --domain platform.example.com
-bash deploy/scripts/verify-production.sh
+sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com
+bash deploy/scripts/verify-maniforge.sh
 ```
 
 ---
@@ -72,10 +72,10 @@ cp deploy/.env.platform.server.example deploy/.env.platform
 # отредактируйте секреты в deploy/.env.platform — не коммитьте файл
 
 # 2a. Production с HTTPS (ваш FQDN уже указывает на сервер)
-sudo bash deploy/scripts/install-production.sh --domain platform.example.com
+sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com
 
 # 2b. Staging на вашем IP (без TLS, порт 18090) — до выдачи домена
-# sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive
+# sudo bash deploy/scripts/install-maniforge.sh --skip-apt --non-interactive
 ```
 
 Скрипт **идемпотентен**: повторный запуск безопасен (apt/docker/go/caddy, build, migrate, systemd, verify).
@@ -98,7 +98,7 @@ sudo bash deploy/scripts/install-production.sh --domain platform.example.com
 - Публичный origin для journeys: `public_origin()` в `deploy/scripts/server-public-urls.sh`
 - Внутренние hop'ы: `MANIFORGE_*_ADDR=127.0.0.1:8093–8097` (не дублируть HTTP URL в env)
 
-`install-production.sh --domain` генерирует секреты (`openssl`), выставляет `APP_ENV=production`, рендерит `Caddyfile.active`.
+`install-maniforge.sh --domain` генерирует секреты (`openssl`), выставляет `APP_ENV=production`, рендерит `Caddyfile.active`.
 
 ---
 
@@ -128,7 +128,7 @@ systemctl restart maniforge-caddy
 
 ```bash
 # 1. Автоматическая проверка (systemd + gateway + replication)
-bash deploy/scripts/verify-production.sh
+bash deploy/scripts/verify-maniforge.sh
 
 # 2. Preflight (env + PostgreSQL guards)
 cd /opt/maniforge/platform-core && make preflight
@@ -160,7 +160,7 @@ systemctl stop maniforge-{rbac,tl,manifest,versioning,realtime,caddy}
 docker compose -f deploy/compose.platform.server.yml stop postgres-replica
 pg_restore -h 127.0.0.1 -p 18096 -U maniforge -d maniforge --clean /var/backups/maniforge-YYYY-MM-DD.dump
 bash deploy/scripts/server-up.sh
-bash deploy/scripts/verify-production.sh
+bash deploy/scripts/verify-maniforge.sh
 ```
 
 Полный RPO/RTO drill — backlog фазы C (`MANIFORGE_ENTERPRISE_HARDENING.md`).
@@ -174,7 +174,7 @@ cd /opt/maniforge/platform-core
 git pull   # или rsync нового релиза
 bash deploy/scripts/server-build.sh
 bash deploy/scripts/server-up.sh
-bash deploy/scripts/verify-production.sh
+bash deploy/scripts/verify-maniforge.sh
 make manifest-journey   # опционально, перед переключением трафика
 ```
 
@@ -225,8 +225,8 @@ bash deploy/scripts/backup-postgres.sh   # ручной pg_dump
 ```bash
 # 1. DNS A-record: platform.example.com → IP вашего сервера
 # 2. На сервере:
-sudo bash deploy/scripts/install-production.sh --domain platform.example.com --skip-apt --non-interactive
-bash deploy/scripts/verify-production.sh
+sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com --skip-apt --non-interactive
+bash deploy/scripts/verify-maniforge.sh
 curl -sf https://platform.example.com/rbac/health
 ```
 
@@ -239,7 +239,7 @@ curl -sf https://platform.example.com/rbac/health
 | Service logs | `journalctl -u maniforge-rbac -f` (и др.) |
 | Caddy | `journalctl -u maniforge-caddy -f` |
 | Postgres | `docker logs maniforge-pg-primary` |
-| Health | `verify-production.sh` |
+| Health | `verify-maniforge.sh` |
 | Metrics | backlog P5 — Prometheus endpoint |
 
 Restart policy: `Restart=always` на всех `maniforge-*.service`.
@@ -251,8 +251,8 @@ Restart policy: `Restart=always` на всех `maniforge-*.service`.
 Для internal releases рекомендуется:
 
 1. GitHub Actions: `make preflight`, `make test`, `make backup-drill` (см. `ci-go.yml`)
-2. Deploy job: rsync + `install-production.sh --skip-apt --non-interactive`
-3. Post-deploy: `verify-production.sh` + `make server-journey`
+2. Deploy job: rsync + `install-maniforge.sh --skip-apt --non-interactive`
+3. Post-deploy: `verify-maniforge.sh` + `make server-journey`
 
 ---
 
@@ -263,8 +263,8 @@ Restart policy: `Restart=always` на всех `maniforge-*.service`.
 1. Ubuntu 22.04/24.04, 4 GB RAM, DNS на **ваш** FQDN  
 2. `git clone --branch platform-core` → `/opt/maniforge/platform-core`  
 3. `cp deploy/.env.platform.server.example deploy/.env.platform` → отредактировать секреты  
-4. `sudo bash deploy/scripts/install-production.sh --domain YOUR_DOMAIN`  
-5. `bash deploy/scripts/verify-production.sh`  
+4. `sudo bash deploy/scripts/install-maniforge.sh --domain YOUR_DOMAIN`  
+5. `bash deploy/scripts/verify-maniforge.sh`  
 6. Открыть `https://YOUR_DOMAIN/rbac/health` — JSON ok  
 7. Admin onboarding: см. `docs/MANIFORGE_NEW_USER_WORKFLOW.md`  
 8. Backup: ежедневный `pg_dump` (см. выше)  
