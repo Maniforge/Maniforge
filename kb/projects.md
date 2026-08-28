@@ -47,7 +47,10 @@
 | Install root | `/opt/maniforge/platform-core` |
 | Env | `deploy/.env.platform` (from `.env.platform.server.example`) |
 | Install | `sudo bash deploy/scripts/install-production.sh` |
-| Verify | `bash deploy/scripts/verify-production.sh` |
+| Verify | `bash deploy/scripts/verify-production.sh` (includes preflight) |
+| Scheduler | `sudo bash deploy/scripts/install-scheduler.sh` (Phase C) |
+
+**Status (2026-08-28):** Phase **C in progress** @ `7673ca0` — scheduler timers, preflight in verify, platform-ops journey 14/14, backup-drill OK on nzgapp. **Gate:** TLS/domain (COO DNS A-record).
 
 ## Ownership defaults
 
