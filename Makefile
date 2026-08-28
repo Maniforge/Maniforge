@@ -2,7 +2,14 @@
 GO ?= $(shell command -v go 2>/dev/null || echo $(HOME)/.local/go/bin/go)
 
 .PHONY: deps build migrate preflight siem-forward token-gen backup-drill enterprise-journey run-web frontend-install frontend-dev frontend-build scanner-install scanner-dev scanner-build frontend-all run-rbac run-tl test health racebench \
-	rbac-security-journey rbac-admin-journey rbac-platform-ops-journey rbac-delegation-journey
+	rbac-security-journey rbac-admin-journey rbac-platform-ops-journey rbac-delegation-journey \
+	platform-init platform-up platform-down platform-logs platform-health platform-migrate platform-journey \
+	server-rbac-journey server-manifest-journey server-journey
+
+# Server gateway (override: make server-journey GATEWAY=http://79.174.90.4:18090)
+GATEWAY ?= http://127.0.0.1:18090
+
+PLATFORM_COMPOSE = docker compose -f deploy/compose.platform.yml --env-file deploy/.env.platform
 
 deps:
 	$(GO) mod tidy
@@ -128,6 +135,18 @@ rbac-journey: build
 manifest-journey: build
 	./bin/maniforge-manifest-journey
 
+# nzgapp / production box — gateway + deploy/.env.platform (not dev loopback ports)
+server-rbac-journey: build
+	NEW_USER_BASE_URL=$(GATEWAY)/rbac \
+	NEW_USER_TL_URL=$(GATEWAY)/tenant-licensing \
+	NEW_USER_VER_URL=$(GATEWAY)/versioning \
+	php maniforge/rbac/tools/new_user_http_journey.php
+
+server-manifest-journey: build
+	bash -c 'set -a && source deploy/.env.platform && set +a && ./bin/maniforge-manifest-journey'
+
+server-journey: server-rbac-journey server-manifest-journey
+
 manifest-refine-gen: build
 	./bin/maniforge-manifest-refine-gen
 
@@ -160,3 +179,31 @@ test:
 health:
 	curl -s http://127.0.0.1:8093/rbac/health | jq .
 	curl -s http://127.0.0.1:8094/tenant-licensing/health | jq .
+
+platform-init:
+	@test -f deploy/.env.platform || cp deploy/.env.platform.example deploy/.env.platform
+	@echo "deploy/.env.platform ready"
+
+platform-up: platform-init
+	$(PLATFORM_COMPOSE) up -d --build
+
+platform-down:
+	$(PLATFORM_COMPOSE) down
+
+platform-logs:
+	$(PLATFORM_COMPOSE) logs -f --tail=100
+
+platform-migrate: platform-init
+	$(PLATFORM_COMPOSE) run --rm migrate
+
+platform-health:
+	@echo "=== direct services ==="
+	@curl -sf http://127.0.0.1:8093/rbac/health | jq . || echo "rbac: down"
+	@curl -sf http://127.0.0.1:8094/tenant-licensing/health | jq . || echo "tenant-licensing: down"
+	@curl -sf http://127.0.0.1:8095/health | jq . || echo "manifest-engine: down"
+	@curl -sf http://127.0.0.1:8096/versioning/health | jq . || echo "versioning: down"
+	@curl -sf http://127.0.0.1:8097/health | jq . || echo "realtime: down"
+	@echo "=== gateway :8080 ==="
+	@curl -sf http://127.0.0.1:8080/rbac/health | jq . || echo "gateway/rbac: down"
+
+platform-journey: platform-health rbac-journey manifest-journey

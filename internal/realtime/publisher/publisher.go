@@ -23,7 +23,7 @@ type Client struct {
 func New(cfg config.Config) *Client {
 	base := strings.TrimRight(cfg.RealtimeInternalURL, "/")
 	if base == "" {
-		base = "http://127.0.0.1:8097"
+		base = config.HTTPOriginFromListenAddr(cfg.RealtimeAddr)
 	}
 	return &Client{
 		baseURL: base,

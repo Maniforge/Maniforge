@@ -1,0 +1,13 @@
+---
+description: Maniforge agent crew — routing, ownership, kb-first
+alwaysApply: true
+---
+
+# Agent crew
+
+1. Prefer **`/maniforge`** for multi-file or cross-role work. See `kb/ORCHESTRATION.md` for `ROUTE:` (`tiny` | `single-area` | `eng-full` | `product` | `product→eng`).
+2. Before planning: read `kb/projects.md` and `kb/conventions.md` (paths are project-specific — never assume foreign starter layouts).
+3. **Collision rule:** two agents never edit the same path in one iteration. WorkPlan must list Ownership locks; specialists refuse out-of-owns edits.
+4. Specialists: frontend / backend / devops / qa — paths from kb + WorkPlan, not hardcoded defaults.
+5. Crew logging is **optional** (`scripts/crew-logging.md`); default off; never block delivery.
+6. Tiny single-path fixes may skip the full pipeline (`ROUTE: tiny`).

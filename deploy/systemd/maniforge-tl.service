@@ -1,0 +1,15 @@
+[Unit]
+Description=Maniforge Tenant Licensing
+After=docker.service network-online.target
+Wants=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/maniforge/platform-core
+EnvironmentFile=/opt/maniforge/platform-core/deploy/.env.platform
+ExecStart=/opt/maniforge/platform-core/bin/maniforge-tenant-licensing
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

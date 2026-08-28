@@ -1,0 +1,35 @@
+# syntax=docker/dockerfile:1
+
+FROM golang:1.25-alpine AS builder
+
+RUN apk add --no-cache git ca-certificates
+
+WORKDIR /src
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN mkdir -p /out && \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-migrate ./cmd/migrate && \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-preflight ./cmd/preflight && \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-rbac ./cmd/rbac && \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-tenant-licensing ./cmd/tenant-licensing && \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-manifest-engine ./cmd/manifest-engine && \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-versioning ./cmd/versioning && \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-realtime ./cmd/realtime
+
+FROM alpine:3.21
+
+RUN apk add --no-cache ca-certificates wget
+
+WORKDIR /app
+
+COPY --from=builder /out/* /usr/local/bin/
+COPY migrations/pg ./migrations/pg
+COPY deploy/scripts/service-entrypoint.sh /usr/local/bin/service-entrypoint.sh
+
+RUN chmod +x /usr/local/bin/service-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/service-entrypoint.sh"]

@@ -32,6 +32,15 @@ frontend/**/node_modules/
 .DS_Store
 Thumbs.db
 
+# Runtime / secrets
+.env
+deploy/.env.platform
+**/*.apk
+
+# Marketing / large local trees (lab only — not in v0.1-box)
+site-maniforge-ru/
+web/dist/
+
 # Runtime / caches
 *.log
 tmp/

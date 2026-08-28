@@ -1,0 +1,30 @@
+:8080 {
+	@rbac path /rbac /rbac/*
+	handle @rbac {
+		reverse_proxy rbac:8093
+	}
+
+	@tl path /tenant-licensing /tenant-licensing/*
+	handle @tl {
+		reverse_proxy tenant-licensing:8094
+	}
+
+	@versioning path /versioning /versioning/*
+	handle @versioning {
+		reverse_proxy versioning:8096
+	}
+
+	@manifest path /api/* /health /manifest-engine/*
+	handle @manifest {
+		reverse_proxy manifest-engine:8095
+	}
+
+	@realtime path /ws /ws/* /realtime /realtime/*
+	handle @realtime {
+		reverse_proxy realtime:8097
+	}
+
+	handle {
+		respond "Maniforge platform gateway" 200
+	}
+}

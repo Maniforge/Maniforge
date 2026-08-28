@@ -1,0 +1,144 @@
+name: maniforge-platform
+
+x-maniforge-base: &maniforge-base
+  build:
+    context: ..
+    dockerfile: deploy/Dockerfile.platform
+  image: maniforge/platform:latest
+  env_file:
+    - .env.platform
+  environment:
+    MANIFORGE_DB_HOST: postgres
+    MANIFORGE_DB_PORT: "5432"
+  networks:
+    - platform
+
+x-maniforge-service: &maniforge-service
+  <<: *maniforge-base
+  restart: unless-stopped
+  depends_on:
+    migrate:
+      condition: service_completed_successfully
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: maniforge-platform-postgres
+    environment:
+      POSTGRES_DB: maniforge
+      POSTGRES_USER: maniforge
+      POSTGRES_PASSWORD: maniforge
+    ports:
+      - "5435:5432"
+    volumes:
+      - maniforge_platform_pg:/var/lib/postgresql/data
+    networks:
+      - platform
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maniforge -d maniforge"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  migrate:
+    <<: *maniforge-base
+    container_name: maniforge-platform-migrate
+    command: ["maniforge-migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  rbac:
+    <<: *maniforge-service
+    container_name: maniforge-platform-rbac
+    command: ["maniforge-rbac"]
+    ports:
+      - "8093:8093"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8093/rbac/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  tenant-licensing:
+    <<: *maniforge-service
+    container_name: maniforge-platform-tl
+    command: ["maniforge-tenant-licensing"]
+    ports:
+      - "8094:8094"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8094/tenant-licensing/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  manifest-engine:
+    <<: *maniforge-service
+    container_name: maniforge-platform-manifest
+    command: ["maniforge-manifest-engine"]
+    ports:
+      - "8095:8095"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8095/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  versioning:
+    <<: *maniforge-service
+    container_name: maniforge-platform-versioning
+    command: ["maniforge-versioning"]
+    ports:
+      - "8096:8096"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8096/versioning/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  realtime:
+    <<: *maniforge-service
+    container_name: maniforge-platform-realtime
+    command: ["maniforge-realtime"]
+    ports:
+      - "8097:8097"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8097/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  gateway:
+    image: caddy:2-alpine
+    container_name: maniforge-platform-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    networks:
+      - platform
+    depends_on:
+      rbac:
+        condition: service_healthy
+      tenant-licensing:
+        condition: service_healthy
+      manifest-engine:
+        condition: service_healthy
+      versioning:
+        condition: service_healthy
+      realtime:
+        condition: service_healthy
+
+networks:
+  platform:
+    name: maniforge-platform
+
+volumes:
+  maniforge_platform_pg:

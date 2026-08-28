@@ -1,0 +1,79 @@
+# Maniforge platform — server Postgres only (primary + replica).
+# Go services run on the host via systemd; Caddy on the host listens :18090.
+# Host maps stay 127.0.0.1:18096/18097 → container 5432.
+name: maniforge-platform-core
+
+services:
+  postgres-primary:
+    image: postgres:16-alpine
+    container_name: maniforge-pg-primary
+    env_file:
+      - .env.platform
+    environment:
+      POSTGRES_DB: maniforge
+      POSTGRES_USER: maniforge
+      POSTGRES_PASSWORD: ${MANIFORGE_DB_PASS}
+      REPLICATOR_PASSWORD: ${REPLICATOR_PASSWORD}
+    command:
+      - postgres
+      - -c
+      - wal_level=replica
+      - -c
+      - max_wal_senders=10
+      - -c
+      - max_replication_slots=10
+      - -c
+      - hot_standby=on
+      - -c
+      - archive_mode=on
+      - -c
+      - archive_command=test ! -f /var/lib/postgresql/data/wal_archive/%f && cp %p /var/lib/postgresql/data/wal_archive/%f
+    ports:
+      - "127.0.0.1:${MANIFORGE_PG_PRIMARY_PORT:-18096}:5432"
+    volumes:
+      - maniforge_pg_primary:/var/lib/postgresql/data
+      - ./postgres/primary-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - platform
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maniforge -d maniforge"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  postgres-replica:
+    image: postgres:16-alpine
+    container_name: maniforge-pg-replica
+    env_file:
+      - .env.platform
+    environment:
+      POSTGRES_USER: maniforge
+      POSTGRES_PASSWORD: ${MANIFORGE_DB_PASS}
+      REPLICATOR_PASSWORD: ${REPLICATOR_PASSWORD}
+      PRIMARY_HOST: postgres-primary
+      PGDATA: /var/lib/postgresql/data
+    entrypoint: ["/replica-entrypoint.sh"]
+    ports:
+      - "127.0.0.1:${MANIFORGE_PG_REPLICA_PORT:-18097}:5432"
+    volumes:
+      - maniforge_pg_replica:/var/lib/postgresql/data
+      - ./postgres/replica-entrypoint.sh:/replica-entrypoint.sh:ro
+    networks:
+      - platform
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maniforge"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+networks:
+  platform:
+    name: maniforge-platform-core
+
+volumes:
+  maniforge_pg_primary:
+  maniforge_pg_replica:

@@ -1,0 +1,43 @@
+# Production Caddy — automatic HTTPS on {domain} (Let's Encrypt).
+#
+# Render before use (install-production.sh does this when MANIFORGE_DOMAIN is set):
+#   sed 's/{domain}/platform.customer.ru/g' deploy/Caddyfile.production > deploy/Caddyfile.active
+#
+# Requirements:
+#   - DNS A/AAAA for {domain} → this host
+#   - Ports 80 and 443 open (Caddy ACME + HTTPS)
+#   - Go services on loopback 8093–8097 (systemd)
+#
+# systemd maniforge-caddy.service reads MANIFORGE_CADDYFILE from deploy/.env.platform
+# (default: Caddyfile.server for IP:18090 staging).
+
+{domain} {
+	@rbac path /rbac /rbac/*
+	handle @rbac {
+		reverse_proxy 127.0.0.1:8093
+	}
+
+	@tl path /tenant-licensing /tenant-licensing/*
+	handle @tl {
+		reverse_proxy 127.0.0.1:8094
+	}
+
+	@versioning path /versioning /versioning/*
+	handle @versioning {
+		reverse_proxy 127.0.0.1:8096
+	}
+
+	@manifest path /api/* /health /manifest-engine/*
+	handle @manifest {
+		reverse_proxy 127.0.0.1:8095
+	}
+
+	@realtime path /ws /ws/* /realtime /realtime/*
+	handle @realtime {
+		reverse_proxy 127.0.0.1:8097
+	}
+
+	handle {
+		respond "Maniforge platform" 200
+	}
+}

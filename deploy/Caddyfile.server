@@ -1,0 +1,32 @@
+# Host Caddy — public gateway on :18090 only (do not bind 80/443).
+# Upstreams are host-run Go on loopback.
+:18090 {
+	@rbac path /rbac /rbac/*
+	handle @rbac {
+		reverse_proxy 127.0.0.1:8093
+	}
+
+	@tl path /tenant-licensing /tenant-licensing/*
+	handle @tl {
+		reverse_proxy 127.0.0.1:8094
+	}
+
+	@versioning path /versioning /versioning/*
+	handle @versioning {
+		reverse_proxy 127.0.0.1:8096
+	}
+
+	@manifest path /api/* /health /manifest-engine/*
+	handle @manifest {
+		reverse_proxy 127.0.0.1:8095
+	}
+
+	@realtime path /ws /ws/* /realtime /realtime/*
+	handle @realtime {
+		reverse_proxy 127.0.0.1:8097
+	}
+
+	handle {
+		respond "Maniforge platform (nzgapp)" 200
+	}
+}

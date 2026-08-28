@@ -1,0 +1,10 @@
+.git
+.github
+bin
+frontend/**/node_modules
+site-maniforge-ru
+**/*.md
+**/*_test.go
+.env
+.env.*
+!deploy/.env.platform.example
