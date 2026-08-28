@@ -1,4 +1,4 @@
-﻿// Р¤Р°Р№Р»: validate_production.go
+// Р¤Р°Р№Р»: validate_production.go
 // РќР°Р·РЅР°С‡РµРЅРёРµ: РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рµ РїСЂРѕРІРµСЂРєРё РїРµСЂРµРґ production rollout Go-СЃРµСЂРІРёСЃРѕРІ.
 // РЎРј. С‚Р°РєР¶Рµ: docs/MANIFORGE_ENTERPRISE_HARDENING.md, maniforge/rbac/tools/preflight.php
 package config
@@ -18,8 +18,8 @@ func (c Config) ValidateProduction() error {
 	if c.AppDebug {
 		failures = append(failures, "APP_DEBUG must be false in production")
 	}
-	if c.GoDBSSLMode == "disable" {
-		failures = append(failures, "MANIFORGE_DB_SSLMODE must not be disable in production")
+	if c.GoDBSSLMode == "disable" && !c.isLoopbackDBHost() {
+		failures = append(failures, "MANIFORGE_DB_SSLMODE must not be disable in production (except loopback Postgres on same host)")
 	}
 	if strings.TrimSpace(c.GoDBPass) == "" {
 		failures = append(failures, "MANIFORGE_DB_PASS is required in production")
