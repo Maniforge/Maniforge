@@ -1,7 +1,6 @@
 # Projects map — Maniforge Platform Core
 
-**Canonical GitHub:** [`Maniforge/Maniforge`](https://github.com/Maniforge/Maniforge) — branch **`platform-core`**, tag **[`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box)** (public, default branch)  
-**Lab remote:** [`Maniforge/maniforge_low_code_platform`](https://github.com/Maniforge/maniforge_low_code_platform) — R&D, PHP reference, frontends, supply chain  
+**GitHub:** [`Maniforge/Maniforge`](https://github.com/Maniforge/Maniforge) — branch **`platform-core`**, tag **[`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box)** (public, default branch)  
 **Server staging:** `79.174.90.4` — Caddy `:18090`, Go loopback `:8093–8097`, Postgres `:18096–18097`  
 **Server path:** `/opt/maniforge/platform-core` — `verify-production: OK`  
 **Clone (buyers):** `git clone --branch platform-core https://github.com/Maniforge/Maniforge.git`
@@ -21,8 +20,6 @@
 | `deploy/` | devops | Production box: compose, Caddy, systemd, install/verify |
 | `docs/` | tech-lead | Production box, architecture, OpenAPI |
 | `kb/` | tech-lead | Conventions, orchestration (internal crew) |
-
-**Not in this repo:** PHP reference (`maniforge/`), frontends (`frontend/`), WMS/supply chain, examples, marketing site — see lab repo.
 
 ## Current stack
 

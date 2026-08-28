@@ -2,8 +2,7 @@
 
 **Цель:** довести low-code платформу до уровня, когда на её «лего» можно спокойно собирать продукты (avtosbor, devent — позже).
 
-**Репозиторий:** `E:\Artem\maniforge_low_code_platform`  
-**Не путать с:** `E:\Maniforge-Enterprise` (Orbit/ZoomerX), `agent-crew` (только оркестрация Cursor).
+**Репозиторий:** [github.com/Maniforge/Maniforge](https://github.com/Maniforge/Maniforge) — ветка `platform-core`, релиз [`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box).
 
 ---
 
@@ -64,13 +63,12 @@
 
 ## 2. Быстрый старт (если забыл руки)
 
-```powershell
-cd E:\Artem\maniforge_low_code_platform
-copy .env.example .env   # если нет .env
-docker compose up -d postgres
-make deps
-make build
-make migrate
+```bash
+git clone --branch platform-core https://github.com/Maniforge/Maniforge.git
+cd Maniforge
+cp deploy/.env.platform.example deploy/.env.platform
+make platform-up
+make platform-health
 ```
 
 **Терминал 1:** `make run-tl`  
@@ -189,7 +187,7 @@ make warehouses-journey    # supply chain склад
 
 ## 6. Следующий конкретный шаг (сегодня)
 
-1. Открыть `E:\Artem\maniforge_low_code_platform`
+1. Клонировать `Maniforge/Maniforge` ветку `platform-core`
 2. Выполнить «Быстрый старт» (§2)
 3. Прогнать `make rbac-journey` и `make manifest-journey`
 4. Если падает — чиним, не откладываем

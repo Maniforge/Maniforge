@@ -49,7 +49,7 @@ Read ownership from `kb/projects.md`. Never assume foreign layouts (`apps/web`, 
 
 **Open items (not blocked for v0.1.0-box):** TLS by domain, RBAC journey 50/50, scheduler timers, full CI pipeline.
 
-**Paused until A–C:** avtosbor, devent cutover, `wms.svitex.online/platform/` draft.
+**Paused until A–C:** supply-chain modules (warehouses, WMS), `.mfpack` app store runtime.
 
 See `docs/PRODUCTION_PLAN.md`.
 

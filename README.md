@@ -169,4 +169,15 @@ flowchart LR
 
 ## Development
 
-Локальная разработка (Docker, `make`, PHP journey-тесты, примеры) — в отдельном lab-репозитории [`Maniforge/maniforge_low_code_platform`](https://github.com/Maniforge/maniforge_low_code_platform). Для production-установки используйте только **Maniforge/Maniforge** `platform-core`.
+Локальная разработка — в этом же репозитории ([`deploy/README.md`](deploy/README.md) → **Local dev**):
+
+```bash
+git clone --branch platform-core https://github.com/Maniforge/Maniforge.git
+cd Maniforge
+cp deploy/.env.platform.example deploy/.env.platform
+make platform-up
+make platform-health
+make manifest-journey
+```
+
+Production-установка — см. [Установка (greenfield)](#установка-greenfield) выше.

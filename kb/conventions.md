@@ -66,6 +66,5 @@ systemctl restart maniforge-rbac   # one service
 
 ## Git & deploy
 
-- Platform repo (canonical): `Maniforge/Maniforge` branch `platform-core`
-- Lab / R&D: `Maniforge/maniforge_low_code_platform`
+- Repo: [`Maniforge/Maniforge`](https://github.com/Maniforge/Maniforge) branch `platform-core`
 - Server path: `/opt/maniforge/platform-core`
