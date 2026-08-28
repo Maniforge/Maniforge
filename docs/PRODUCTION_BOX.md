@@ -1,42 +1,50 @@
 # Maniforge Production Box
 
-**Sellable deployment package** for platform core (RBAC, Tenant Licensing, Manifest Engine, Versioning, Realtime). Domain modules (WMS, avtosbor, `.mfpack`) — отдельные фазы.
+**Коммерческий пакет развёртывания** платформенного ядра: RBAC, Tenant Licensing, Manifest Engine, Versioning, Realtime. Прикладные модули (WMS, avtosbor, `.mfpack`) — отдельные фазы и лицензии.
 
-**Audience:** sales engineering, buyer DevOps, COO sign-off.
+**Аудитория:** sales engineering, DevOps покупателя, согласование COO.
 
-**Gate to sell (v0.1.0-box):** **published** — https://github.com/Maniforge/Maniforge/tree/platform-core · tag [`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box) · **public** · default branch `platform-core`.
+**Релиз v0.1.0-box:** опубликован — [github.com/Maniforge/Maniforge](https://github.com/Maniforge/Maniforge/tree/platform-core) · тег [`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box) · публичный репозиторий · ветка по умолчанию `platform-core`.
+
+---
+
+## Быстрый старт (копировать целиком)
 
 ```bash
 git clone --branch platform-core https://github.com/Maniforge/Maniforge.git
-cd Maniforge   # или: git clone ... /opt/maniforge/platform-core
+cd Maniforge
+# или: git clone --branch platform-core https://github.com/Maniforge/Maniforge.git /opt/maniforge/platform-core
+# cd /opt/maniforge/platform-core
+
 cp deploy/.env.platform.server.example deploy/.env.platform
-# отредактируйте секреты в deploy/.env.platform — не коммитьте файл
+# отредактируйте секреты в deploy/.env.platform — не коммитьте этот файл
+
 sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive
 bash deploy/scripts/verify-production.sh
 ```
 
-**Staging on `79.174.90.4:18090`:** git deploy @ `d7fafa8`, verify OK. **Next ops:** Phase C (TLS, RBAC 50/50).
+**Reference deployment:** staging `79.174.90.4:18090` — git deploy, `verify-production.sh` OK. Следующий этап эксплуатации: TLS по домену, RBAC journey 50/50.
 
 ---
 
 ## Что получает покупатель
 
-| Включено | Не включено (v1 box) |
-|----------|----------------------|
+| Включено | Не включено (v0.1.0-box) |
+|----------|--------------------------|
 | 5 Go-сервисов platform core | App Store / `.mfpack` runtime |
 | PostgreSQL 16 primary + streaming replica | Supply-chain modules (warehouses, WMS) |
-| Caddy gateway (HTTPS по домену или IP:18090 staging) | Полный CI/CD pipeline |
+| Caddy gateway (HTTPS по домену или IP:18090 staging) | Полный CI/CD pipeline заказчика |
 | systemd restart policies | Managed SaaS multi-tenant hosting |
 | Скрипты install / verify / upgrade | PHP reference stack |
 
-**Compliance hooks:** шаблоны 152-ФЗ в `docs/legal/` и `docs/152FZ_COMPLIANCE.md` — заполнение на стороне покупателя.
+**Compliance hooks:** шаблоны 152-ФЗ в `docs/legal/` и `docs/152FZ_COMPLIANCE.md` — заполнение и юридическое оформление на стороне покупателя.
 
 ---
 
 ## Минимальное железо
 
-| Ресурс | Минимум | Рекомендуется (demo + 50 users) |
-|--------|---------|----------------------------------|
+| Ресурс | Минимум | Рекомендуется (до 50 пользователей) |
+|--------|---------|-------------------------------------|
 | CPU | 2 vCPU | 4 vCPU |
 | RAM | 4 GB | 8 GB |
 | Disk | 40 GB SSD | 80 GB SSD (WAL archive + backups) |
@@ -45,24 +53,24 @@ bash deploy/scripts/verify-production.sh
 
 ---
 
-## Одна команда установки
+## Установка на чистой Ubuntu
 
-На **чистой Ubuntu** после копирования исходников на сервер:
+После клонирования репозитория на сервер:
 
 ```bash
-# 1. Исходники (пример)
+# 1. Исходники в стандартный каталог
 sudo mkdir -p /opt/maniforge
 sudo git clone --branch platform-core https://github.com/Maniforge/Maniforge.git /opt/maniforge/platform-core
+cd /opt/maniforge/platform-core
+
 cp deploy/.env.platform.server.example deploy/.env.platform
 # отредактируйте секреты в deploy/.env.platform — не коммитьте файл
-# или: rsync -a ./ /opt/maniforge/platform-core/
 
-# 2. Production с HTTPS (домен уже указывает на сервер)
-cd /opt/maniforge/platform-core
+# 2a. Production с HTTPS (домен уже указывает на сервер)
 sudo bash deploy/scripts/install-production.sh --domain platform.customer.ru
 
 # 2b. Staging по IP (без TLS, порт 18090)
-sudo bash deploy/scripts/install-production.sh
+# sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive
 ```
 
 Скрипт **идемпотентен**: повторный запуск безопасен (apt/docker/go/caddy, build, migrate, systemd, verify).
@@ -83,7 +91,7 @@ sudo bash deploy/scripts/install-production.sh
 - `MANIFORGE_GATEWAY_PORT` — `443` (HTTPS) или `18090` (staging)
 - `MANIFORGE_PUBLIC_HOST` — FQDN или IP для скриптов
 - Публичный origin для journeys: `public_origin()` в `deploy/scripts/server-public-urls.sh`
-- Внутренние hop'ы: `MANIFORGE_*_ADDR=127.0.0.1:8093–8097` (не дублировать HTTP URL в env)
+- Внутренние hop'ы: `MANIFORGE_*_ADDR=127.0.0.1:8093–8097` (не дублируть HTTP URL в env)
 
 `install-production.sh --domain` генерирует секреты (`openssl`), выставляет `APP_ENV=production`, рендерит `Caddyfile.active`.
 
@@ -120,7 +128,7 @@ bash deploy/scripts/verify-production.sh
 # 2. Preflight (env + PostgreSQL guards)
 cd /opt/maniforge/platform-core && make preflight
 
-# 3. E2E smoke (рекомендуется перед демо покупателю)
+# 3. E2E smoke (рекомендуется перед приёмкой)
 make rbac-journey
 make manifest-journey
 
@@ -211,13 +219,14 @@ Restart policy: `Restart=always` на всех `maniforge-*.service`.
 **Deploy Maniforge Platform Core**
 
 1. Ubuntu 22.04/24.04, 4 GB RAM, DNS на ваш домен  
-2. `git clone` → `/opt/maniforge/platform-core`  
-3. `sudo bash deploy/scripts/install-production.sh --domain YOUR_DOMAIN`  
-4. `bash deploy/scripts/verify-production.sh`  
-5. Открыть `https://YOUR_DOMAIN/rbac/health` — JSON ok  
-6. Admin onboarding: см. `docs/MANIFORGE_NEW_USER_WORKFLOW.md`  
-7. Backup: ежедневный `pg_dump` (см. выше)  
-8. Support: логи через `journalctl`, секреты только в `deploy/.env.platform`
+2. `git clone --branch platform-core` → `/opt/maniforge/platform-core`  
+3. `cp deploy/.env.platform.server.example deploy/.env.platform` → отредактировать секреты  
+4. `sudo bash deploy/scripts/install-production.sh --domain YOUR_DOMAIN`  
+5. `bash deploy/scripts/verify-production.sh`  
+6. Открыть `https://YOUR_DOMAIN/rbac/health` — JSON ok  
+7. Admin onboarding: см. `docs/MANIFORGE_NEW_USER_WORKFLOW.md`  
+8. Backup: ежедневный `pg_dump` (см. выше)  
+9. Support: логи через `journalctl`, секреты только в `deploy/.env.platform`
 
 ---
 

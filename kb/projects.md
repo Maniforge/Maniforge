@@ -1,4 +1,4 @@
-# Projects map — Maniforge low-code platform
+# Projects map — Maniforge Platform Core
 
 **Canonical GitHub:** [`Maniforge/Maniforge`](https://github.com/Maniforge/Maniforge) — branch **`platform-core`**, tag **[`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box)** (public, default branch)  
 **Lab remote:** [`Maniforge/maniforge_low_code_platform`](https://github.com/Maniforge/maniforge_low_code_platform) `main` @ `d7fafa8` — archive when COO ready  

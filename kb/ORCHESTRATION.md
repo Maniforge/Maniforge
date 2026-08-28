@@ -47,7 +47,7 @@ Read ownership from `kb/projects.md`. Never assume foreign layouts (`apps/web`, 
 
 **Staging (2026-08-28):** Phase **A→sell done** — GitHub public + nzgapp `git clone` @ `d7fafa8`, verify OK. **Next gate:** Phase **C** (TLS/domain, RBAC 50/50, scheduler).
 
-**Demo today (not blocked):** IP `:18090`, TLS, git on server, RBAC 48/50 internal steps, scheduler, public repo.
+**Open items (not blocked for v0.1.0-box):** TLS by domain, RBAC journey 50/50, scheduler timers, full CI pipeline.
 
 **Paused until A–C:** avtosbor, devent cutover, `wms.svitex.online/platform/` draft.
 
