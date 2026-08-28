@@ -1,0 +1,18 @@
+﻿# Paste into host edge Caddy (e.g. nilzyagram-business deploy/caddy/Caddyfile)
+# after DNS A-record for {domain} -> server IP.
+# Pattern: shared :443 edge terminates TLS; platform gateway stays on loopback :18090.
+
+{domain} {
+	encode gzip
+	reverse_proxy 172.17.0.1:18090 {
+		flush_interval -1
+		transport http {
+			versions 1.1
+		}
+	}
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}

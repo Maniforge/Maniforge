@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 # Idempotent production install for Ubuntu 22.04 / 24.04.
 # Fast path: Postgres in Docker, Go native systemd, Caddy gateway (HTTPS domain or IP:18090).
 # Never prints generated secrets.
@@ -12,6 +12,7 @@ GO_VERSION="${MANIFORGE_GO_VERSION:-1.25.0}"
 DOMAIN="${MANIFORGE_DOMAIN:-}"
 NONINTERACTIVE="${MANIFORGE_NONINTERACTIVE:-0}"
 SKIP_APT="${MANIFORGE_SKIP_APT:-0}"
+EDGE_PROXY="${MANIFORGE_EDGE_PROXY:-0}"
 
 usage() {
   cat <<'EOF'
@@ -25,7 +26,7 @@ Options:
   -h, --help           Show help
 
 Environment:
-  MANIFORGE_ROOT, MANIFORGE_DOMAIN, MANIFORGE_NONINTERACTIVE, MANIFORGE_SKIP_APT
+  MANIFORGE_ROOT, MANIFORGE_DOMAIN, MANIFORGE_EDGE_PROXY, MANIFORGE_NONINTERACTIVE, MANIFORGE_SKIP_APT
 
 Example (clean Ubuntu, source already at /opt/maniforge/platform-core):
   sudo bash deploy/scripts/install-production.sh --domain platform.customer.ru
@@ -70,6 +71,10 @@ parse_args() {
       --domain)
         DOMAIN="$2"
         shift 2
+        ;;
+      --edge-proxy)
+        EDGE_PROXY=1
+        shift
         ;;
       --non-interactive)
         NONINTERACTIVE=1
@@ -257,9 +262,12 @@ apply_production_secrets() {
 
 render_caddy() {
   cd "$DEPLOY"
-  if [ -n "$DOMAIN" ]; then
+  if [ -n "$DOMAIN" ] && [ "$EDGE_PROXY" != "1" ]; then
     log "render Caddyfile.active for ${DOMAIN}"
     sed "s/{domain}/${DOMAIN}/g" Caddyfile.production > Caddyfile.active
+  elif [ -n "$DOMAIN" ] && [ "$EDGE_PROXY" = "1" ]; then
+    log "edge-proxy: skip Caddyfile.active (use Caddyfile.server); see deploy/caddy/edge-platform.caddy"
+    sed "s/{domain}/${DOMAIN}/g" caddy/edge-platform.caddy > "caddy/edge-${DOMAIN}.caddy" 2>/dev/null || true
   else
     log "use Caddyfile.server (:18090)"
   fi
@@ -314,7 +322,7 @@ main() {
   MANIFORGE_ROOT="$ROOT" bash "${DEPLOY}/scripts/verify-production.sh"
 
   if [ -x "${ROOT}/bin/maniforge-tl-expire-licenses" ]; then
-    log "scheduler timers (optional — requires built scheduler binaries)"
+    log "scheduler timers (optional вЂ” requires built scheduler binaries)"
     MANIFORGE_ROOT="$ROOT" bash "${DEPLOY}/scripts/install-scheduler.sh" || \
       echo "warning: install-scheduler skipped or failed (non-fatal on first install)" >&2
   fi
@@ -328,13 +336,16 @@ install-production: complete
 Next (recommended before buyer demo):
   cd ${ROOT} && make preflight
   cd ${ROOT} && make server-journey GATEWAY=http://127.0.0.1:18090
-  docs/PRODUCTION_BOX.md — Phase C checklist, backup/upgrade runbook
+  docs/PRODUCTION_BOX.md вЂ” Phase C checklist, backup/upgrade runbook
 
-TLS / production domain (COO action required):
-  1. DNS A-record: YOUR_DOMAIN → this server
-  2. sudo bash ${DEPLOY}/scripts/install-production.sh --domain YOUR_DOMAIN --skip-apt --non-interactive
+TLS / production domain:
+  1. DNS A-record: YOUR_DOMAIN в†’ this server
+  2. Edge (shared :443): append deploy/caddy/edge-YOUR_DOMAIN.caddy — see docs/DNS_PLATFORM.md
+     OR direct: sudo bash ${DEPLOY}/scripts/install-production.sh --domain YOUR_DOMAIN --skip-apt --non-interactive
+     Edge path: ... --domain YOUR_DOMAIN --edge-proxy --skip-apt --non-interactive
   3. curl -sf https://YOUR_DOMAIN/rbac/health
 EOF
 }
 
 main "$@"
+

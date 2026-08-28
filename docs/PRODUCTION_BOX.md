@@ -1,4 +1,4 @@
-# Maniforge Production Box
+﻿# Maniforge Production Box
 
 **Коммерческий пакет развёртывания** платформенного ядра: RBAC, Tenant Licensing, Manifest Engine, Versioning, Realtime. Прикладные модули (WMS, avtosbor, `.mfpack`) — отдельные фазы и лицензии.
 
@@ -211,11 +211,11 @@ bash deploy/scripts/backup-postgres.sh   # ручной pg_dump
 | C2 | `make preflight` в verify-production | ✅ |
 | C3 | CI: build + migrate + preflight + backup-drill | ✅ ci-go.yml |
 | C4 | Go platform-ops journey (access-state smoke) | ✅ `make platform-ops-journey` |
-| C5 | TLS + domain (`install-production.sh --domain`) | ⏳ **COO: DNS A-record + домен** |
-| C6 | `APP_ENV=production` на домене | ⏳ вместе с C5 |
+| C5 | TLS + domain (edge or direct Caddy) | ⚠️ DNS A `platform` → server; edge snippet in `deploy/caddy/` — see [DNS_PLATFORM.md](DNS_PLATFORM.md) |
+| C6 | `APP_ENV=production` on reference box | ✅ `--domain` + `--edge-proxy` (gateway :18090) |
 | C7 | Полный PHP rbac 50-step journey | ❌ out-of-box (PHP ref не в platform-core) |
 
-**TLS (COO):**
+**TLS (edge-proxy on reference host):**
 
 ```bash
 # 1. DNS A-record: platform.customer.ru → server IP
@@ -273,3 +273,4 @@ Restart policy: `Restart=always` на всех `maniforge-*.service`.
 - [MANIFORGE_ENTERPRISE_HARDENING.md](MANIFORGE_ENTERPRISE_HARDENING.md) — production profile
 - [152FZ_COMPLIANCE.md](152FZ_COMPLIANCE.md) — ПДн (reference)
 - [deploy/README.md](../deploy/README.md) — операционные команды
+

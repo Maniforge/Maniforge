@@ -1,4 +1,4 @@
-# Maniforge — deploy
+﻿# Maniforge — deploy
 
 Операционная документация по развёртыванию платформы. Два контура: **production server** (покупатель / on-premise) и **local dev** (разработка).
 
@@ -23,6 +23,13 @@ sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive
 bash deploy/scripts/verify-production.sh
 ```
 
+
+**HTTPS when :443 is already used (edge reverse proxy):**
+
+```bash
+sudo bash deploy/scripts/install-production.sh --domain platform.customer.ru --edge-proxy --skip-apt --non-interactive
+# Append deploy/caddy/edge-platform.customer.ru.caddy to host edge Caddy — docs/DNS_PLATFORM.md
+```
 **С HTTPS** (DNS A-record указывает на сервер):
 
 ```bash
@@ -141,3 +148,4 @@ make server-journey GATEWAY=http://<IP>:18090
 ```
 
 **Sync с рабочей станции** — rsync дерева на сервер (исключить `.git`, `node_modules`, `.env`, `deploy/.env.platform`). `install-production.sh` выполняет `fix_deploy_script_perms` (CRLF → LF, `chmod +x`).
+

@@ -1,9 +1,9 @@
-# Maniforge Platform Core
+﻿# Maniforge Platform Core
 
 [![CI — Go](https://github.com/Maniforge/Maniforge/actions/workflows/ci-go.yml/badge.svg)](https://github.com/Maniforge/Maniforge/actions/workflows/ci-go.yml)
 [![Go 1.25](https://img.shields.io/badge/Go-1.25-00ADD8?logo=go&logoColor=white)](https://go.dev/)
 [![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Release](https://img.shields.io/github/v/tag/Maniforge/Maniforge?label=v0.1.1-box&color=blue)](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box)
+[![Release](https://img.shields.io/github/v/tag/Maniforge/Maniforge?label=v0.1.2-box&color=blue)](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 **Production deployment package** for the Maniforge platform: API-first backend with multi-tenant RBAC, tenant licensing, Manifest Engine (entity → REST + OpenAPI), versioning, and realtime services. Delivered as reproducible source, install scripts, and operational runbooks — ready for on-premise deployment on your infrastructure.
@@ -15,7 +15,7 @@
 | Обзор платформы | [`docs/MANIFORGE_PLATFORM_OVERVIEW.md`](docs/MANIFORGE_PLATFORM_OVERVIEW.md) |
 | OpenAPI | [`docs/openapi/`](docs/openapi/) |
 
-**Репозиторий:** [github.com/Maniforge/Maniforge](https://github.com/Maniforge/Maniforge) · ветка **`platform-core`** · релиз **[`v0.1.1-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box)**
+**Репозиторий:** [github.com/Maniforge/Maniforge](https://github.com/Maniforge/Maniforge) · ветка **`platform-core`** · релиз **[`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box)**
 
 ---
 
@@ -23,13 +23,13 @@
 
 **Production Box** — это готовый к установке комплект платформенного ядра Maniforge для развёртывания на сервере заказчика (on-premise). Покупатель получает исходный код, скрипты установки и проверки, конфигурацию шлюза и базы данных, а также документацию по эксплуатации. Установка выполняется на чистой Ubuntu 22.04/24.04 LTS за один проход: клонирование репозитория, настройка секретов, автоматическая сборка сервисов, миграции и запуск через systemd.
 
-Комплект **не** является облачным SaaS и **не** включает прикладные модули (WMS, supply chain, `.mfpack`) — они поставляются отдельными фазами. Версия **v0.1.1-box** — коммерчески воспроизводимый релиз platform core: проверен на production staging, публичен на GitHub, готов к передаче DevOps-команде покупателя.
+Комплект **не** является облачным SaaS и **не** включает прикладные модули (WMS, supply chain, `.mfpack`) — они поставляются отдельными фазами. Версия **v0.1.2-box** — коммерчески воспроизводимый релиз platform core: проверен на production staging, публичен на GitHub, готов к передаче DevOps-команде покупателя.
 
 ---
 
 ## Состав комплекта
 
-| Включено | Не включено (v0.1.1-box) |
+| Включено | Не включено (v0.1.2-box) |
 |----------|--------------------------|
 | 5 Go-сервисов platform core (RBAC, Tenant Licensing, Manifest Engine, Versioning, Realtime) | App Store / runtime `.mfpack` |
 | PostgreSQL 16 — primary + streaming replica | Модули supply chain (warehouses, WMS, inventory) |
@@ -54,6 +54,13 @@
 Дополнительно на сервере: `git`, `sudo`, доступ в интернет для apt/docker при первой установке.
 
 ---
+
+## Production URL (reference box)
+
+| Profile | Health check |
+|---------|----------------|
+| Target (HTTPS) | `https://platform.maniforge.ru/rbac/health` — requires [DNS + edge TLS](docs/DNS_PLATFORM.md) |
+| Staging gateway | `http://79.174.90.4:18090/rbac/health` |
 
 ## Установка (greenfield)
 
@@ -163,7 +170,7 @@ flowchart LR
 
 **Лицензия:** Apache License 2.0 — см. [`LICENSE`](LICENSE).
 
-**Версия:** [`v0.1.1-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box) · ветка `platform-core`
+**Версия:** [`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box) · ветка `platform-core`
 
 ---
 
@@ -181,3 +188,4 @@ make manifest-journey
 ```
 
 Production-установка — см. [Установка (greenfield)](#установка-greenfield) выше.
+
