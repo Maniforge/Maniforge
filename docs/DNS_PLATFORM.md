@@ -26,7 +26,7 @@ On reference host, edge Caddy owns public 80/443. Do **not** bind a second Caddy
 ## Production env before DNS propagates
 
 ```bash
-sudo bash deploy/scripts/install-production.sh \
+sudo bash deploy/scripts/install-maniforge.sh \
   --domain platform.maniforge.ru --edge-proxy \
   --skip-apt --non-interactive
 ```

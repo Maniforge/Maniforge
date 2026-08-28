@@ -213,7 +213,7 @@ bash deploy/scripts/backup-postgres.sh   # ручной pg_dump
 | # | Item | Status v0.1.2-box+ |
 |---|------|-------------------|
 | C1 | systemd scheduler (expire, dispatch, backup) | ✅ timers + install script |
-| C2 | `make preflight` в verify-production | ✅ |
+| C2 | `make preflight` в verify-maniforge | ✅ |
 | C3 | CI: build + migrate + preflight + backup-drill | ✅ ci-go.yml |
 | C4 | Go platform-ops journey (access-state smoke) | ✅ `make platform-ops-journey` |
 | C5 | TLS + domain (edge or direct Caddy) | ✅ `--domain` + опционально `--edge-proxy` |

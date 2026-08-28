@@ -18,7 +18,7 @@ RBAC_INTERNAL_TOKEN=<strong-random-token>
 
 Проверки:
 
-- `make preflight` — Go PostgreSQL + env guards (also in `verify-production.sh`)
+- `make preflight` — Go PostgreSQL + env guards (also in `verify-maniforge.sh`)
 - `make platform-ops-journey` — Go smoke: TL suspend/reactivate + internal access-state (production box)
 - `make manifest-journey` — Manifest Engine e2e
 - `make backup-drill` — snapshot row counts before pg_dump

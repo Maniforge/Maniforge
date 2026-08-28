@@ -1,6 +1,6 @@
 # Production Caddy — automatic HTTPS on {domain} (Let's Encrypt).
 #
-# Render before use (install-production.sh does this when MANIFORGE_DOMAIN is set):
+# Render before use (install-maniforge.sh does this when MANIFORGE_DOMAIN is set):
 #   sed 's/{domain}/platform.customer.ru/g' deploy/Caddyfile.production > deploy/Caddyfile.active
 #
 # Requirements:

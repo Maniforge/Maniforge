@@ -325,7 +325,7 @@ main() {
   MANIFORGE_ROOT="$ROOT" bash "${DEPLOY}/scripts/server-up.sh"
 
   log "verify"
-  MANIFORGE_ROOT="$ROOT" bash "${DEPLOY}/scripts/verify-production.sh"
+  MANIFORGE_ROOT="$ROOT" bash "${DEPLOY}/scripts/verify-maniforge.sh"
 
   if [ -x "${ROOT}/bin/maniforge-tl-expire-licenses" ]; then
     log "scheduler timers (optional вЂ” requires built scheduler binaries)"
@@ -335,19 +335,19 @@ main() {
 
   cat <<EOF
 
-install-production: complete
+install-maniforge: complete
   tree:   ${ROOT}
-  verify: bash ${DEPLOY}/scripts/verify-production.sh
+  verify: bash ${DEPLOY}/scripts/verify-maniforge.sh
 
 Next (recommended before buyer demo):
   cd ${ROOT} && make preflight
   cd ${ROOT} && make server-journey GATEWAY=http://127.0.0.1:18090
-  docs/PRODUCTION_BOX.md вЂ” Phase C checklist, backup/upgrade runbook
+  docs/PRODUCTION_BOX.md — Phase C checklist, backup/upgrade runbook
 
 TLS / production domain:
-  1. DNS A-record: YOUR_DOMAIN в†’ this server
+  1. DNS A-record: YOUR_DOMAIN → this server
   2. Edge (shared :443): append deploy/caddy/edge-YOUR_DOMAIN.caddy — see docs/DNS_PLATFORM.md
-     OR direct: sudo bash ${DEPLOY}/scripts/install-production.sh --domain YOUR_DOMAIN --skip-apt --non-interactive
+     OR direct: sudo bash ${DEPLOY}/scripts/install-maniforge.sh --domain YOUR_DOMAIN --skip-apt --non-interactive
      Edge path: ... --domain YOUR_DOMAIN --edge-proxy --skip-apt --non-interactive
   3. curl -sf https://YOUR_DOMAIN/rbac/health
 EOF

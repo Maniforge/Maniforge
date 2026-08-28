@@ -20,7 +20,7 @@ cp deploy/.env.platform.server.example deploy/.env.platform
 # отредактируйте секреты в deploy/.env.platform — не коммитьте файл
 
 sudo bash deploy/scripts/install-maniforge.sh --skip-apt --non-interactive
-bash deploy/scripts/verify-maniforge
+bash deploy/scripts/verify-maniforge.sh
 ```
 
 
@@ -34,7 +34,7 @@ sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com --ed
 
 ```bash
 sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com
-bash deploy/scripts/verify-maniforge
+bash deploy/scripts/verify-maniforge.sh
 ```
 
 **Staging на вашем сервере** (без TLS, порт 18090 — опция до выдачи домена):
@@ -74,13 +74,13 @@ cd /opt/maniforge/platform-core
 bash deploy/scripts/server-build.sh      # пересборка Go
 bash deploy/scripts/server-up.sh         # postgres + migrate + restart
 systemctl restart maniforge-rbac         # один сервис
-bash deploy/scripts/verify-maniforge
+bash deploy/scripts/verify-maniforge.sh
 ```
 
 | Скрипт | Назначение |
 |--------|------------|
 | `install-maniforge.sh` | apt + docker + go + caddy, env, build, migrate, systemd, health |
-| `verify-maniforge` | systemd active, gateway health, Postgres replication |
+| `verify-maniforge.sh` | systemd active, gateway health, Postgres replication |
 | `server-build.sh` | Пересборка Go-бинарников |
 | `server-up.sh` | Postgres compose + migrate + restart (upgrade path) |
 

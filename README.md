@@ -87,7 +87,7 @@ bash deploy/scripts/verify-maniforge.sh
 
 ## Проверка работоспособности
 
-После `verify-maniforge` ожидается: 6/6 systemd active, health всех сервисов через gateway, replica PostgreSQL в состоянии `streaming`.
+После `verify-maniforge.sh` ожидается: 6/6 systemd active, health всех сервисов через gateway, replica PostgreSQL в состоянии `streaming`.
 
 | Профиль | URL health-check |
 |---------|------------------|

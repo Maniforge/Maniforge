@@ -61,7 +61,7 @@ systemctl restart maniforge-rbac   # one service
 
 - `make health` or curl `/rbac/health` on active base URL
 - `make manifest-journey` (Go e2e)
-- `bash deploy/scripts/verify-production.sh` on server
+- `bash deploy/scripts/verify-maniforge.sh` on server
 - Replication: `SELECT * FROM pg_stat_replication` on primary
 
 ## Git & deploy

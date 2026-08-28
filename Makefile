@@ -7,7 +7,8 @@ GO ?= $(shell command -v go 2>/dev/null || echo $(HOME)/.local/go/bin/go)
 	run-rbac run-tl run-manifest run-versioning run-realtime \
 	manifest-journey platform-ops-journey \
 	server-manifest-journey server-platform-ops-journey server-journey \
-	platform-init platform-up platform-down platform-logs platform-health platform-migrate platform-journey
+	platform-init platform-up platform-down platform-logs platform-health platform-migrate platform-journey \
+	install-maniforge verify-maniforge
 
 # Server gateway (override: make server-journey GATEWAY=http://79.174.90.4:18090)
 GATEWAY ?= http://127.0.0.1:18090
@@ -120,3 +121,10 @@ platform-health:
 	@curl -sf http://127.0.0.1:8080/rbac/health | jq . || echo "gateway/rbac: down"
 
 platform-journey: platform-health manifest-journey platform-ops-journey
+
+# Production Box on customer server (pass args: make install-maniforge ARGS="--domain platform.example.com")
+install-maniforge:
+	sudo bash deploy/scripts/install-maniforge.sh $(ARGS)
+
+verify-maniforge:
+	bash deploy/scripts/verify-maniforge.sh
