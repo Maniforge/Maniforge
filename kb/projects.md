@@ -1,9 +1,9 @@
 # Projects map — Maniforge Platform Core
 
-**GitHub:** [`Maniforge/Maniforge`](https://github.com/Maniforge/Maniforge) — branch **`platform-core`**, tag **[`v0.1.1-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box)**
-**Server staging:** `79.174.90.4` — Caddy `:18090`, Go loopback `:8093–8097`, Postgres `:18096–18097`  
-**Server path:** `/opt/maniforge/platform-core` — `verify-production: OK`  
-**Clone (buyers):** `git clone --branch platform-core https://github.com/Maniforge/Maniforge.git`
+**GitHub:** [`Maniforge/Maniforge`](https://github.com/Maniforge/Maniforge) — branch **`platform-core`**, tag **[`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box)**  
+**Production FQDN:** `platform.maniforge.ru` (edge TLS via host Caddy :443 → backend :18090) — **DNS A-record pending** — see `docs/DNS_PLATFORM.md`  
+**Server:** `79.174.90.4` — `APP_ENV=production`, gateway `:18090`, verify OK @ `905e518`  
+**Health (now):** `http://79.174.90.4:18090/rbac/health` · **target:** `https://platform.maniforge.ru/rbac/health`
 
 ## Layout profile
 
@@ -50,7 +50,7 @@
 | Verify | `bash deploy/scripts/verify-production.sh` (includes preflight) |
 | Scheduler | `sudo bash deploy/scripts/install-scheduler.sh` (Phase C) |
 
-**Status (2026-08-28):** Phase **C in progress** @ `7673ca0` — scheduler timers, preflight in verify, platform-ops journey 14/14, backup-drill OK on nzgapp. **Gate:** TLS/domain (COO DNS A-record).
+**Status (2026-08-28):** Phase **C ~done** @ [`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box) — prod env, timers, preflight, backup-drill, edge-proxy install. **Last gate:** DNS `platform` → `79.174.90.4` + edge Caddy snippet → public HTTPS.
 
 ## Ownership defaults
 
