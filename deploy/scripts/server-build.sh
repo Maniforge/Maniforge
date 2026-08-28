@@ -19,6 +19,12 @@ echo "$(go version)"
 echo "building into $ROOT/bin"
 
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-migrate ./cmd/migrate
+go build -trimpath -ldflags="-s -w" -o bin/maniforge-preflight ./cmd/preflight
+go build -trimpath -ldflags="-s -w" -o bin/maniforge-siem-forward ./cmd/siem-forward
+go build -trimpath -ldflags="-s -w" -o bin/maniforge-token-gen ./cmd/token-gen
+go build -trimpath -ldflags="-s -w" -o bin/maniforge-backup-drill ./cmd/backup-drill
+go build -trimpath -ldflags="-s -w" -o bin/maniforge-tl-expire-licenses ./cmd/tl-expire-licenses
+go build -trimpath -ldflags="-s -w" -o bin/maniforge-tl-dispatch-events ./cmd/tl-dispatch-events
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-rbac ./cmd/rbac
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-tenant-licensing ./cmd/tenant-licensing
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-manifest-engine ./cmd/manifest-engine

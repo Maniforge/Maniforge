@@ -14,7 +14,8 @@
 | Path | Role owner | Purpose |
 |------|------------|---------|
 | `cmd/rbac`, `cmd/tenant-licensing`, `cmd/manifest-engine`, `cmd/versioning`, `cmd/realtime` | backend | Platform core services |
-| `cmd/migrate`, `cmd/preflight`, `cmd/manifest-journey` | backend | Ops + e2e smoke |
+| `cmd/migrate`, `cmd/preflight`, `cmd/manifest-journey`, `cmd/platform-ops-journey` | backend | Ops + e2e smoke |
+| `cmd/tl-expire-licenses`, `cmd/tl-dispatch-events`, `cmd/siem-forward`, `cmd/backup-drill` | backend | Scheduler / ops CLIs |
 | `internal/` | backend | Shared Go libraries, handlers, domain logic |
 | `migrations/pg/` | backend | PostgreSQL schema |
 | `deploy/` | devops | Production box: compose, Caddy, systemd, install/verify |

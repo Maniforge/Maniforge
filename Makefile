@@ -2,8 +2,11 @@
 GO ?= $(shell command -v go 2>/dev/null || echo $(HOME)/.local/go/bin/go)
 
 .PHONY: deps build migrate preflight test health \
+	siem-forward token-gen backup-drill \
+	tl-expire-licenses tl-dispatch-events \
 	run-rbac run-tl run-manifest run-versioning run-realtime \
-	manifest-journey server-manifest-journey server-journey \
+	manifest-journey platform-ops-journey \
+	server-manifest-journey server-platform-ops-journey server-journey \
 	platform-init platform-up platform-down platform-logs platform-health platform-migrate platform-journey
 
 # Server gateway (override: make server-journey GATEWAY=http://79.174.90.4:18090)
@@ -17,10 +20,16 @@ deps:
 build:
 	$(GO) build -o bin/maniforge-migrate ./cmd/migrate
 	$(GO) build -o bin/maniforge-preflight ./cmd/preflight
+	$(GO) build -o bin/maniforge-siem-forward ./cmd/siem-forward
+	$(GO) build -o bin/maniforge-token-gen ./cmd/token-gen
+	$(GO) build -o bin/maniforge-backup-drill ./cmd/backup-drill
+	$(GO) build -o bin/maniforge-tl-expire-licenses ./cmd/tl-expire-licenses
+	$(GO) build -o bin/maniforge-tl-dispatch-events ./cmd/tl-dispatch-events
 	$(GO) build -o bin/maniforge-rbac ./cmd/rbac
 	$(GO) build -o bin/maniforge-tenant-licensing ./cmd/tenant-licensing
 	$(GO) build -o bin/maniforge-manifest-engine ./cmd/manifest-engine
 	$(GO) build -o bin/maniforge-manifest-journey ./cmd/manifest-journey
+	$(GO) build -o bin/maniforge-platform-ops-journey ./cmd/platform-ops-journey
 	$(GO) build -o bin/maniforge-versioning ./cmd/versioning
 	$(GO) build -o bin/maniforge-realtime ./cmd/realtime
 
@@ -32,6 +41,21 @@ migrate: build
 
 preflight: build
 	./bin/maniforge-preflight
+
+siem-forward: build
+	./bin/maniforge-siem-forward
+
+token-gen: build
+	./bin/maniforge-token-gen
+
+backup-drill: build
+	./bin/maniforge-backup-drill
+
+tl-expire-licenses: build
+	./bin/maniforge-tl-expire-licenses
+
+tl-dispatch-events: build
+	./bin/maniforge-tl-dispatch-events
 
 run-rbac: build
 	./bin/maniforge-rbac
@@ -51,10 +75,16 @@ run-realtime: build
 manifest-journey: build
 	./bin/maniforge-manifest-journey
 
+platform-ops-journey: build
+	./bin/maniforge-platform-ops-journey
+
 server-manifest-journey: build
 	bash -c 'set -a && source deploy/.env.platform && set +a && ./bin/maniforge-manifest-journey'
 
-server-journey: server-manifest-journey
+server-platform-ops-journey: build
+	bash -c 'set -a && source deploy/.env.platform && set +a && JOURNEY_BASE_URL=$(GATEWAY)/rbac JOURNEY_TL_URL=$(GATEWAY)/tenant-licensing ./bin/maniforge-platform-ops-journey'
+
+server-journey: server-platform-ops-journey server-manifest-journey
 
 test:
 	$(GO) test ./...
@@ -89,4 +119,4 @@ platform-health:
 	@echo "=== gateway :8080 ==="
 	@curl -sf http://127.0.0.1:8080/rbac/health | jq . || echo "gateway/rbac: down"
 
-platform-journey: platform-health manifest-journey
+platform-journey: platform-health manifest-journey platform-ops-journey

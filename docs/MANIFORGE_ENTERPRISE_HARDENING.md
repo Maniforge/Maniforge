@@ -18,22 +18,23 @@ RBAC_INTERNAL_TOKEN=<strong-random-token>
 
 Проверки:
 
-- `make preflight` — Go PostgreSQL + env guards
-- `php maniforge/rbac/tools/preflight.php` — PHP/MySQL референс
-- `php maniforge/rbac/tools/integration_check.php`
-- `php maniforge/rbac/tools/http_smoke.php`
-- `php maniforge/tenant-licensing/tools/http_smoke.php`
-- `make enterprise-journey` — lockout, MFA, require_mfa policy (Go RBAC :8093)
+- `make preflight` — Go PostgreSQL + env guards (also in `verify-production.sh`)
+- `make platform-ops-journey` — Go smoke: TL suspend/reactivate + internal access-state (production box)
+- `make manifest-journey` — Manifest Engine e2e
+- `make backup-drill` — snapshot row counts before pg_dump
+- PHP reference journeys (`maniforge/rbac/tools/*`) — **not shipped** in platform-core; optional lab repo
 
 ## Scheduler
 
-Tenant Licensing lifecycle jobs должны запускаться регулярно:
+Tenant Licensing lifecycle jobs (Go binaries + systemd timers):
 
-- `php maniforge/tenant-licensing/tools/expire_licenses.php` каждые 5-15 минут;
-- `php maniforge/tenant-licensing/tools/dispatch_events.php` каждые 1-5 минут;
-- `make siem-forward` каждые 1-5 минут (если `RBAC_SIEM_WEBHOOK_ENABLED=true`);
-- `php maniforge/rbac/tools/pd_retention_enforce.php` по регламенту 152-ФЗ;
-- alert, если pending events не доставляются дольше SLA.
+- `bin/maniforge-tl-expire-licenses` — каждые 5–15 мин (`maniforge-tl-expire.timer`, default 10 min);
+- `bin/maniforge-tl-dispatch-events` — каждые 1–5 мин (`maniforge-tl-dispatch.timer`, default 2 min);
+- `make siem-forward` / `maniforge-siem-forward.timer` — если `RBAC_SIEM_WEBHOOK_ENABLED=true`;
+- `deploy/scripts/backup-postgres.sh` + `maniforge-backup.timer` — ежедневный pg_dump;
+- `php maniforge/rbac/tools/pd_retention_enforce.php` — **out-of-box** (PHP ref, Phase C+ backlog).
+
+Установка timers: `sudo bash deploy/scripts/install-scheduler.sh`
 
 ## Personal data (152-ФЗ)
 

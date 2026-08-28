@@ -75,4 +75,24 @@ if [ "$fail" -ne 0 ]; then
   exit 1
 fi
 
+echo "==> preflight"
+if [ -x "${ROOT}/bin/maniforge-preflight" ]; then
+  if ! (cd "$ROOT" && systemd-run --quiet --wait --pipe --collect \
+    --property="EnvironmentFile=${ENV_FILE}" \
+    --working-directory="$ROOT" \
+    "${ROOT}/bin/maniforge-preflight"); then
+    echo "preflight failed (APP_ENV=production requires strict tokens/PII)" >&2
+    fail=1
+  else
+    echo "  ok preflight"
+  fi
+else
+  echo "  skip preflight (bin/maniforge-preflight missing — run server-build.sh)" >&2
+fi
+
+if [ "$fail" -ne 0 ]; then
+  echo "verify-production: FAILED" >&2
+  exit 1
+fi
+
 echo "verify-production: OK"

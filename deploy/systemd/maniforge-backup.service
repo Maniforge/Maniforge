@@ -1,0 +1,13 @@
+[Unit]
+Description=Maniforge PostgreSQL backup (pg_dump)
+After=docker.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/maniforge/platform-core
+EnvironmentFile=/opt/maniforge/platform-core/deploy/.env.platform
+ExecStart=/bin/bash /opt/maniforge/platform-core/deploy/scripts/backup-postgres.sh
+
+[Install]
+WantedBy=multi-user.target

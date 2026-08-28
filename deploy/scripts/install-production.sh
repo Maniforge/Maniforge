@@ -313,6 +313,12 @@ main() {
   log "verify"
   MANIFORGE_ROOT="$ROOT" bash "${DEPLOY}/scripts/verify-production.sh"
 
+  if [ -x "${ROOT}/bin/maniforge-tl-expire-licenses" ]; then
+    log "scheduler timers (optional — requires built scheduler binaries)"
+    MANIFORGE_ROOT="$ROOT" bash "${DEPLOY}/scripts/install-scheduler.sh" || \
+      echo "warning: install-scheduler skipped or failed (non-fatal on first install)" >&2
+  fi
+
   cat <<EOF
 
 install-production: complete
@@ -321,8 +327,13 @@ install-production: complete
 
 Next (recommended before buyer demo):
   cd ${ROOT} && make preflight
-  cd ${ROOT} && make manifest-journey
-  docs/PRODUCTION_BOX.md — backup/upgrade runbook
+  cd ${ROOT} && make server-journey GATEWAY=http://127.0.0.1:18090
+  docs/PRODUCTION_BOX.md — Phase C checklist, backup/upgrade runbook
+
+TLS / production domain (COO action required):
+  1. DNS A-record: YOUR_DOMAIN → this server
+  2. sudo bash ${DEPLOY}/scripts/install-production.sh --domain YOUR_DOMAIN --skip-apt --non-interactive
+  3. curl -sf https://YOUR_DOMAIN/rbac/health
 EOF
 }
 

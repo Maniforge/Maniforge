@@ -1,0 +1,14 @@
+[Unit]
+Description=Maniforge RBAC — forward SIEM outbox webhook
+After=docker.service maniforge-rbac.service
+Wants=docker.service
+ConditionPathExists=/opt/maniforge/platform-core/deploy/.env.platform
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/maniforge/platform-core
+EnvironmentFile=/opt/maniforge/platform-core/deploy/.env.platform
+ExecStart=/opt/maniforge/platform-core/bin/maniforge-siem-forward
+
+[Install]
+WantedBy=multi-user.target

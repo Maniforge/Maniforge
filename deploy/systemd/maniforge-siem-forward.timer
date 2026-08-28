@@ -1,0 +1,10 @@
+[Unit]
+Description=Maniforge SIEM forward (every 3 min, enable via RBAC_SIEM_WEBHOOK_ENABLED)
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=3min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

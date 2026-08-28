@@ -96,8 +96,8 @@ func (r *Repository) AccessStateForProject(tenantCode, projectCode, workspaceSub
 		Limits:        ent.Limits,
 		License:       ent.License,
 		CheckedAt:     time.Now().UTC().Format("2006-01-02 15:04:05"),
-		SubtenantCode: workspace,
-		SubtenantActive: projectActive,
+		SubtenantCode:   workspace,
+		SubtenantActive: subtenantActive,
 	}
 }
 

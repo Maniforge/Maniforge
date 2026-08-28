@@ -1,0 +1,13 @@
+[Unit]
+Description=Maniforge Tenant Licensing — dispatch lifecycle events to RBAC
+After=docker.service maniforge-rbac.service maniforge-tl.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/maniforge/platform-core
+EnvironmentFile=/opt/maniforge/platform-core/deploy/.env.platform
+ExecStart=/opt/maniforge/platform-core/bin/maniforge-tl-dispatch-events
+
+[Install]
+WantedBy=multi-user.target

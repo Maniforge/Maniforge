@@ -1,0 +1,13 @@
+[Unit]
+Description=Maniforge Tenant Licensing — expire due licenses
+After=docker.service maniforge-tl.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/maniforge/platform-core
+EnvironmentFile=/opt/maniforge/platform-core/deploy/.env.platform
+ExecStart=/opt/maniforge/platform-core/bin/maniforge-tl-expire-licenses
+
+[Install]
+WantedBy=multi-user.target

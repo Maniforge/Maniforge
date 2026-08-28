@@ -45,9 +45,9 @@ Read ownership from `kb/projects.md`. Never assume foreign layouts (`apps/web`, 
 | **C** | Hardening | TLS/domain, RBAC 50/50, preflight, backup drill, CI, scheduler |
 | **D** | Module packages | `.mfpack`, app store runtime |
 
-**Staging (2026-08-28):** Phase **A→sell done** — [`v0.1.1-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box), verified core (247 files), nzgapp git deploy, verify OK. **Next gate:** Phase **C** (TLS/domain, RBAC 50/50, scheduler).
+**Staging (2026-08-28):** Phase **A→sell done** — [`v0.1.1-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box). **Phase C in progress:** scheduler timers, preflight in verify, CI smoke, Go platform-ops journey. **Gate:** TLS/domain (COO DNS).
 
-**Open items (Phase C):** TLS by domain, RBAC journey 50/50, scheduler timers, full CI pipeline.
+**Open items (Phase C):** TLS by domain (COO), `APP_ENV=production` on domain, full restore drill RPO/RTO, PD retention timer (PHP ref).
 
 **Paused until A–C:** supply-chain modules (warehouses, WMS), `.mfpack` app store runtime.
 

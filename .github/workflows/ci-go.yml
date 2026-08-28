@@ -7,6 +7,7 @@ on:
       - 'cmd/**'
       - 'internal/**'
       - 'migrations/**'
+      - 'deploy/**'
       - 'go.mod'
       - 'go.sum'
       - 'Makefile'
@@ -17,6 +18,7 @@ on:
       - 'cmd/**'
       - 'internal/**'
       - 'migrations/**'
+      - 'deploy/**'
       - 'go.mod'
       - 'go.sum'
       - 'Makefile'
@@ -49,6 +51,10 @@ jobs:
       MANIFORGE_DB_PASS: maniforge
       MANIFORGE_DB_SSLMODE: disable
       APP_ENV: local
+      TENANT_LICENSING_INTERNAL_TOKEN: ci-internal-token
+      TENANT_LICENSING_ADMIN_TOKEN: ci-admin-token
+      RBAC_INTERNAL_TOKEN: ci-rbac-internal-token
+      RBAC_REGISTRATION_ENABLED: "true"
 
     steps:
       - uses: actions/checkout@v4
@@ -69,3 +75,11 @@ jobs:
 
       - name: Test
         run: make test
+
+      - name: Backup drill smoke
+        run: make backup-drill
+
+      - name: Scheduler smoke (no-op batch)
+        run: |
+          make tl-expire-licenses
+          ./bin/maniforge-tl-dispatch-events || test $? -eq 1

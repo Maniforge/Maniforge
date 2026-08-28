@@ -177,7 +177,53 @@ make manifest-journey   # опционально, перед переключе�
 
 ## Scheduler (production)
 
-Фоновые задачи (expire licenses, dispatch events, PD retention) — backlog фазы C; в v0.1 box не входят в install.
+Фоновые задачи включены в Phase C (systemd timers):
+
+| Timer | Интервал | Бинарник |
+|-------|----------|----------|
+| `maniforge-tl-expire.timer` | 10 min | `bin/maniforge-tl-expire-licenses` |
+| `maniforge-tl-dispatch.timer` | 2 min | `bin/maniforge-tl-dispatch-events` |
+| `maniforge-siem-forward.timer` | 3 min | `bin/maniforge-siem-forward` (если `RBAC_SIEM_WEBHOOK_ENABLED=true`) |
+| `maniforge-backup.timer` | daily 03:15 UTC | `deploy/scripts/backup-postgres.sh` |
+
+Установка после build:
+
+```bash
+sudo bash deploy/scripts/install-scheduler.sh
+systemctl list-timers 'maniforge-*'
+```
+
+Preflight + backup drill:
+
+```bash
+make preflight
+make backup-drill
+bash deploy/scripts/backup-postgres.sh   # ручной pg_dump
+```
+
+---
+
+## Phase C checklist (enterprise hardening)
+
+| # | Item | Status v0.1.1-box+ |
+|---|------|-------------------|
+| C1 | systemd scheduler (expire, dispatch, backup) | ✅ timers + install script |
+| C2 | `make preflight` в verify-production | ✅ |
+| C3 | CI: build + migrate + preflight + backup-drill | ✅ ci-go.yml |
+| C4 | Go platform-ops journey (access-state smoke) | ✅ `make platform-ops-journey` |
+| C5 | TLS + domain (`install-production.sh --domain`) | ⏳ **COO: DNS A-record + домен** |
+| C6 | `APP_ENV=production` на домене | ⏳ вместе с C5 |
+| C7 | Полный PHP rbac 50-step journey | ❌ out-of-box (PHP ref не в platform-core) |
+
+**TLS (COO):**
+
+```bash
+# 1. DNS A-record: platform.customer.ru → server IP
+# 2. На сервере:
+sudo bash deploy/scripts/install-production.sh --domain platform.customer.ru --skip-apt --non-interactive
+bash deploy/scripts/verify-production.sh
+curl -sf https://platform.customer.ru/rbac/health
+```
 
 ---
 
@@ -199,9 +245,9 @@ Restart policy: `Restart=always` на всех `maniforge-*.service`.
 
 Для internal releases рекомендуется:
 
-1. GitHub Actions: `make preflight`, `make test` (см. `ci-go.yml`)
+1. GitHub Actions: `make preflight`, `make test`, `make backup-drill` (см. `ci-go.yml`)
 2. Deploy job: rsync + `install-production.sh --skip-apt --non-interactive`
-3. Post-deploy: `verify-production.sh` + smoke journey
+3. Post-deploy: `verify-production.sh` + `make server-journey`
 
 ---
 
