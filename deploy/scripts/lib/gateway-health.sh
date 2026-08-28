@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # Gateway health helpers. Source after setting ENV to the live .env.platform path.
 # Does not print secret values.
 
