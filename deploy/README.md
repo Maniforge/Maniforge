@@ -23,17 +23,18 @@ sudo bash deploy/scripts/install-maniforge.sh --skip-apt --non-interactive
 bash deploy/scripts/verify-maniforge.sh
 ```
 
+**С HTTPS** (DNS A-record вашего FQDN указывает на **ваш** сервер):
+
+```bash
+sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com
+bash deploy/scripts/verify-maniforge.sh
+```
 
 **HTTPS when :443 is already used (edge reverse proxy):**
 
 ```bash
 sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com --edge-proxy --skip-apt --non-interactive
 # Append deploy/caddy/edge-platform.example.com.caddy to host edge Caddy — docs/DNS_PLATFORM.md
-```
-**С HTTPS** (DNS A-record вашего FQDN указывает на **ваш** сервер):
-
-```bash
-sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com
 bash deploy/scripts/verify-maniforge.sh
 ```
 

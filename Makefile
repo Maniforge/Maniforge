@@ -10,7 +10,7 @@ GO ?= $(shell command -v go 2>/dev/null || echo $(HOME)/.local/go/bin/go)
 	platform-init platform-up platform-down platform-logs platform-health platform-migrate platform-journey \
 	install-maniforge verify-maniforge
 
-# Server gateway (override: make server-journey GATEWAY=http://79.174.90.4:18090)
+# Server gateway (override: make server-journey GATEWAY=http://<customer-ip>:18090)
 GATEWAY ?= http://127.0.0.1:18090
 
 PLATFORM_COMPOSE = docker compose -f deploy/compose.platform.yml --env-file deploy/.env.platform

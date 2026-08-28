@@ -45,7 +45,7 @@ Read ownership from `kb/projects.md`. Never assume foreign layouts (`apps/web`, 
 | **C** | Hardening | TLS/domain, RBAC 50/50, preflight, backup drill, CI, scheduler |
 | **D** | Module packages | `.mfpack`, app store runtime |
 
-**Internal QA (2026-08-28):** [`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box). Reference install on `79.174.90.4` (`nzgapp`) — Phase **C** prod profile + scheduler + preflight + backup. **Not the buyer model.** Optional internal demo: DNS A `platform.maniforge.ru` → edge TLS (see `docs/DNS_PLATFORM.md`, `kb/PLATFORM_PRODUCTION.md` — internal only).
+**Internal QA (2026-08-28):** [`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box). Reference install on `79.174.90.4` (`nzgapp`) — Phase **C** prod profile + scheduler + preflight + backup. **Not the buyer model.** Optional internal demo: DNS A `platform.maniforge.ru` → edge TLS (see `kb/PLATFORM_PRODUCTION.md` — internal only).
 
 **Open items:** buyer docs on customer FQDN path; restore drill RPO/RTO doc; PD retention timer.
 

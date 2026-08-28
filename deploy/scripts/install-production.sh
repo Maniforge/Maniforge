@@ -16,11 +16,13 @@ EDGE_PROXY="${MANIFORGE_EDGE_PROXY:-0}"
 
 usage() {
   cat <<'EOF'
-Usage: install-production.sh [options]
+Usage: install-maniforge.sh [options]
+      (alias: install-production.sh — same script, internal name)
 
 Options:
   --root PATH          Install tree (default: /opt/maniforge/platform-core)
   --domain FQDN        Enable HTTPS via Caddyfile.production (requires DNS + :80/:443)
+  --edge-proxy         Production profile with gateway on :18090; TLS on shared edge
   --non-interactive    No prompts; fail if .env.platform missing
   --skip-apt           Skip apt/docker/go/caddy install (deps already present)
   -h, --help           Show help
@@ -29,10 +31,13 @@ Environment:
   MANIFORGE_ROOT, MANIFORGE_DOMAIN, MANIFORGE_EDGE_PROXY, MANIFORGE_NONINTERACTIVE, MANIFORGE_SKIP_APT
 
 Example (clean Ubuntu, source already at /opt/maniforge/platform-core):
-  sudo bash deploy/scripts/install-production.sh --domain platform.customer.ru
+  sudo bash deploy/scripts/install-maniforge.sh --domain platform.customer.ru
 
 Example (staging by IP, no TLS):
-  sudo bash deploy/scripts/install-production.sh
+  sudo bash deploy/scripts/install-maniforge.sh
+
+Example (edge reverse proxy already owns :443):
+  sudo bash deploy/scripts/install-maniforge.sh --domain platform.customer.ru --edge-proxy
 EOF
 }
 
@@ -328,7 +333,7 @@ main() {
   MANIFORGE_ROOT="$ROOT" bash "${DEPLOY}/scripts/verify-maniforge.sh"
 
   if [ -x "${ROOT}/bin/maniforge-tl-expire-licenses" ]; then
-    log "scheduler timers (optional вЂ” requires built scheduler binaries)"
+    log "scheduler timers (optional — requires built scheduler binaries)"
     MANIFORGE_ROOT="$ROOT" bash "${DEPLOY}/scripts/install-scheduler.sh" || \
       echo "warning: install-scheduler skipped or failed (non-fatal on first install)" >&2
   fi

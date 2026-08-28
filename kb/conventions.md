@@ -27,9 +27,9 @@
 | Versioning | `http://127.0.0.1:8096/versioning` |
 | Realtime WS | `ws://127.0.0.1:8097` |
 
-### Production staging (`79.174.90.4`)
+### Production staging (customer IP, no TLS)
 
-`APP_URL` is scheme+host only (`http://79.174.90.4`). Gateway port is `MANIFORGE_GATEWAY_PORT=18090`. Paths: `/rbac`, `/tenant-licensing`, `/versioning`, `/ws`.  
+`APP_URL` is scheme+host only (`http://<customer-ip>`). Gateway port is `MANIFORGE_GATEWAY_PORT=18090`. Paths: `/rbac`, `/tenant-licensing`, `/versioning`, `/ws`.  
 Postgres in Docker (host `127.0.0.1:18096` / `18097`). Go on host loopback `127.0.0.1:8093–8097`. Caddy on host **:18090** only.
 
 Env template: `deploy/.env.platform.server.example`

@@ -1,37 +1,67 @@
-﻿# Platform core public hostname (Maniforge reference box)
+﻿# DNS and TLS for Production Box
 
-**Chosen FQDN:** `platform.maniforge.ru`
+**Audience:** buyer DevOps — configure **your** FQDN on **your** server.
 
-**Pattern:** `platform.<brand>.<tld>` — dedicated API/gateway hostname (not bare IP in buyer docs). TLS terminates on the **shared edge Caddy** already bound to `:80`/`:443`; the platform stack keeps **host Caddy on `:18090`** → loopback Go services (`8093`–`8097`).
+**Pattern:** `platform.<your-brand>.<tld>` — dedicated API/gateway hostname (not bare IP in production docs). TLS terminates on Caddy (`:443` direct, or on a **shared edge** reverse proxy if `:443` is already in use). The platform stack keeps host Caddy on **`:18090`** → loopback Go services (`8093`–`8097`).
+
+> Internal Maniforge QA reference (not buyer path): [`kb/PLATFORM_PRODUCTION.md`](../kb/PLATFORM_PRODUCTION.md)
+
+---
 
 ## DNS (registrar / Cloudflare)
 
 | Type | Name | Value | TTL |
 |------|------|-------|-----|
-| A | `platform` | `79.174.90.4` | 300 (auto if Cloudflare) |
+| A | `platform` (or your chosen host) | `<your-server-public-IP>` | 300 (auto if Cloudflare) |
 
-1. Open DNS for **maniforge.ru** (same panel as `maniforge.ru` → `79.174.90.4`).
-2. Add **A** record: host `platform`, value `79.174.90.4`.
+1. Open DNS for **your** domain (e.g. `example.com`).
+2. Add **A** record: host `platform`, value **your server's public IPv4**.
 3. If using Cloudflare: start with **DNS only** (grey cloud) until HTTPS is verified, or enable proxy after cert works.
-4. Verify: `dig +short platform.maniforge.ru` → `79.174.90.4`.
+4. Verify: `dig +short platform.example.com` → your server IP.
 
-## Edge TLS (ports 80/443 already in use)
+---
 
-On reference host, edge Caddy owns public 80/443. Do **not** bind a second Caddy on 443 for platform.
+## Direct HTTPS (Caddy owns :443)
 
-1. Append `deploy/caddy/edge-platform.caddy` with `{domain}` replaced by `platform.maniforge.ru` to the edge Caddyfile.
-2. Reload edge Caddy (docker exec … caddy reload).
-3. Acceptance: `curl -sf https://platform.maniforge.ru/rbac/health`
-
-## Production env before DNS propagates
+When ports 80/443 are free on the install host:
 
 ```bash
 sudo bash deploy/scripts/install-maniforge.sh \
-  --domain platform.maniforge.ru --edge-proxy \
+  --domain platform.example.com --skip-apt --non-interactive
+bash deploy/scripts/verify-maniforge.sh
+curl -sf https://platform.example.com/rbac/health
+```
+
+`install-maniforge.sh` renders `deploy/Caddyfile.production` → `Caddyfile.active` and sets `MANIFORGE_CADDYFILE` in `.env.platform`.
+
+---
+
+## Edge TLS (ports 80/443 already in use)
+
+When another service (shared edge Caddy, nginx, etc.) already binds public `:80`/`:443`, do **not** start a second listener on `:443` for platform.
+
+1. Install platform with edge-proxy profile (gateway stays on host `:18090`):
+
+```bash
+sudo bash deploy/scripts/install-maniforge.sh \
+  --domain platform.example.com --edge-proxy \
   --skip-apt --non-interactive
 ```
 
-Staging acceptance until DNS/TLS: `http://79.174.90.4:18090/rbac/health`
+2. Append the rendered snippet to your edge config:
+
+```bash
+# Generated during install (domain substituted):
+cat deploy/caddy/edge-platform.example.com.caddy
+# Template source: deploy/caddy/edge-platform.caddy — replace {domain}
+```
+
+3. Reload edge Caddy (example: `docker exec <edge-container> caddy reload --config /etc/caddy/Caddyfile`).
+4. Acceptance: `curl -sf https://platform.example.com/rbac/health`
+
+**Staging until DNS/TLS:** `http://<your-server-ip>:18090/rbac/health`
+
+---
 
 ## Restore drill
 

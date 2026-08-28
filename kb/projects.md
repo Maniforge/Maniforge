@@ -14,7 +14,7 @@
 | Optional demo FQDN | `platform.maniforge.ru` (DNS pending) — internal demo, not buyer production |
 | Install root on reference | `/opt/maniforge/platform-core` |
 
-Details: `kb/PLATFORM_PRODUCTION.md`, `docs/DNS_PLATFORM.md`.
+Details: `kb/PLATFORM_PRODUCTION.md` (internal QA), `docs/DNS_PLATFORM.md` (buyer DNS/TLS).
 
 ## Layout profile
 

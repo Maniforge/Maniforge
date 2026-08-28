@@ -225,7 +225,8 @@ bash deploy/scripts/backup-postgres.sh   # ручной pg_dump
 ```bash
 # 1. DNS A-record: platform.example.com → IP вашего сервера
 # 2. На сервере:
-sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com --skip-apt --non-interactive
+sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com --edge-proxy --skip-apt --non-interactive
+# 3. Append deploy/caddy/edge-platform.example.com.caddy to host edge Caddy — docs/DNS_PLATFORM.md
 bash deploy/scripts/verify-maniforge.sh
 curl -sf https://platform.example.com/rbac/health
 ```

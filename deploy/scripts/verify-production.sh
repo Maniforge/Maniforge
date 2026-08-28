@@ -71,7 +71,7 @@ if ! docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" ps --status runnin
 fi
 
 if [ "$fail" -ne 0 ]; then
-  echo "verify-production: FAILED" >&2
+  echo "verify-maniforge: FAILED" >&2
   exit 1
 fi
 
@@ -91,8 +91,8 @@ else
 fi
 
 if [ "$fail" -ne 0 ]; then
-  echo "verify-production: FAILED" >&2
+  echo "verify-maniforge: FAILED" >&2
   exit 1
 fi
 
-echo "verify-production: OK"
+echo "verify-maniforge: OK"

@@ -35,7 +35,7 @@ public_origin() {
   gport="${gport:-18090}"
   if [ -z "$app_url" ]; then
     host="$(_env_get MANIFORGE_PUBLIC_HOST)"
-    host="${host:-79.174.90.4}"
+    host="${host:-127.0.0.1}"
     app_url="http://${host}"
   fi
   case "$app_url" in
@@ -53,7 +53,7 @@ normalize_app_url() {
   gport="${gport:-18090}"
   if [ -z "$app_url" ]; then
     host="$(_env_get MANIFORGE_PUBLIC_HOST)"
-    host="${host:-79.174.90.4}"
+    host="${host:-127.0.0.1}"
     app_url="http://${host}"
   fi
   case "$app_url" in
