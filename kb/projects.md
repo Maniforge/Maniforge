@@ -1,10 +1,10 @@
 # Projects map — Maniforge low-code platform
 
 **Canonical GitHub:** [`Maniforge/Maniforge`](https://github.com/Maniforge/Maniforge) — branch **`platform-core`**, tag **[`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box)** (public, default branch)  
-**Lab remote:** [`Maniforge/maniforge_low_code_platform`](https://github.com/Maniforge/maniforge_low_code_platform) `main` @ `8ded974` — sync with platform-core; archive when COO ready  
+**Lab remote:** [`Maniforge/maniforge_low_code_platform`](https://github.com/Maniforge/maniforge_low_code_platform) `main` @ `d7fafa8` — archive when COO ready  
 **Server staging:** `79.174.90.4` (nzgapp) — Caddy `:18090`, Go loopback `:8093–8097`, Postgres `:18096–18097`  
-**Server path:** `/opt/maniforge/platform-core` (systemd + `bin/`; **tarball today** — next: `git clone --branch platform-core`)  
-**Clone (buyers):** `git clone --branch platform-core https://github.com/Maniforge/Maniforge.git`  
+**Server path:** `/opt/maniforge/platform-core` — **git** `platform-core` @ `d7fafa8`, `verify-production: OK` (cutover 2026-08-28)  
+**Clone (buyers):** `git clone --branch platform-core https://github.com/Maniforge/Maniforge.git`
 **Not this repo:** `Maniforge-Enterprise`, `wms.svitex.online/platform/` (draft), `agent-crew` (orchestration pack only)
 
 ## Layout profile
@@ -61,12 +61,10 @@ Go services are **not** published as `18091–18095`; Caddy reverse-proxies to l
 | Gateway | host Caddy — `deploy/Caddyfile.server` (:18090) or `Caddyfile.production` (:443) |
 | Health | `http://79.174.90.4:18090/rbac/health` |
 
-**Status (2026-08-28):** **v0.1.0-box published** (public GitHub). Staging `verify-production: OK` on `:18090`. **Remaining:** server `git clone` cutover; TLS domain; RBAC journey 50/50.
+**Status (2026-08-28):** **v0.1.0-box live** — public GitHub + nzgapp on `git clone` @ `d7fafa8`, `verify-production: OK`. **Next:** TLS/domain, RBAC journey 50/50, archive lab repo.
 
-**Canonical one-command install:** `sudo bash deploy/scripts/install-production.sh` (see `docs/PRODUCTION_BOX.md`).  
+**Install:** `cp deploy/.env.platform.server.example deploy/.env.platform` → `sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive`  
 **Verify:** `bash deploy/scripts/verify-production.sh`
-
-**Next gap:** nzgapp host still on tarball — switch to `git clone --branch platform-core` + re-run install/verify (see `docs/REPO_STRATEGY.md`).
 
 ## Ownership defaults
 
@@ -93,7 +91,7 @@ Go services are **not** published as `18091–18095`; Caddy reverse-proxies to l
 
 **Next vertical slice (before enterprise sell):** **v0.1.0-box** — commit `deploy/` → push `Maniforge/Maniforge` `platform-core` → tag → server `git clone` + verify. Manifest: `docs/V0.1_BOX_MANIFEST.md`.
 
-1. **Phase A→sell** — ~~v0.1.0-box in GitHub~~ **done** (`8ded974`, public). Server git cutover **open**
+1. **Phase A→sell** — **done** (`v0.1.0-box`, public, nzgapp on git @ `d7fafa8`)
 2. **Phase C** — TLS/domain, RBAC journey 50/50, scheduler, CI, backup drill
 3. **Phase B** — supply chain (warehouses → products → inventory → wms)
 4. **Phase D** — `.mfpack` module packages

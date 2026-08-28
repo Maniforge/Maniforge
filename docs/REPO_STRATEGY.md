@@ -90,5 +90,5 @@ Archive `Maniforge/maniforge_low_code_platform` with README «Moved to Maniforge
 - [x] GitHub: visibility = **public**
 - [x] Tag **`v0.1.0-box`**
 - [ ] Archive `maniforge_low_code_platform`
-- [ ] Server: `git clone --branch platform-core` instead of tarball
-- [ ] `verify-production.sh` → OK after server git cutover
+- [x] Server: `git clone --branch platform-core` @ `d7fafa8` (backup: `platform-core.bak.2026-08-28-1058`)
+- [x] `verify-production.sh` → OK after server git cutover

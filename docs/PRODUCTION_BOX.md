@@ -15,7 +15,7 @@ sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive
 bash deploy/scripts/verify-production.sh
 ```
 
-Staging on `79.174.90.4:18090` remains demo-ready; **nzgapp server cutover to git clone** is the remaining ops step. See `docs/REPO_STRATEGY.md`.
+**Staging on `79.174.90.4:18090`:** git deploy @ `d7fafa8`, verify OK. **Next ops:** Phase C (TLS, RBAC 50/50).
 
 ---
 
