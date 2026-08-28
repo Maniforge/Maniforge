@@ -1,8 +1,8 @@
-# Conventions — Maniforge platform
+# Conventions — Maniforge Platform Core
 
 ## Language & style
 
-- **Go** is the production runtime; **PHP** is reference until journey parity, then regression only.
+- **Go** is the production runtime for all platform core services.
 - Small focused diffs; match existing patterns in `internal/` and `cmd/`.
 - Comments for non-obvious business rules only.
 - No secrets in git — use `.env.example`, `deploy/.env.platform.server.example`.
@@ -26,11 +26,10 @@
 | Manifest Engine | `http://127.0.0.1:8095` |
 | Versioning | `http://127.0.0.1:8096/versioning` |
 | Realtime WS | `ws://127.0.0.1:8097` |
-| PHP reference | `http://127.0.0.1:8092` |
 
-### nzgapp staging (`79.174.90.4`)
+### Production staging (`79.174.90.4`)
 
-`APP_URL` is scheme+host only (`http://79.174.90.4`). Gateway port is `MANIFORGE_GATEWAY_PORT=18090`. Click `http://HOST:18090`. Paths: `/rbac`, `/tenant-licensing`, `/versioning`, `/ws`.  
+`APP_URL` is scheme+host only (`http://79.174.90.4`). Gateway port is `MANIFORGE_GATEWAY_PORT=18090`. Paths: `/rbac`, `/tenant-licensing`, `/versioning`, `/ws`.  
 Postgres in Docker (host `127.0.0.1:18096` / `18097`). Go on host loopback `127.0.0.1:8093–8097`. Caddy on host **:18090** only.
 
 Env template: `deploy/.env.platform.server.example`
@@ -38,26 +37,18 @@ Env template: `deploy/.env.platform.server.example`
 ## Local start
 
 ```bash
-# Postgres only (or full platform locally)
 docker compose up -d postgres
 make deps build migrate
 
-# Manual services (two terminals)
+# Manual services (separate terminals)
 make run-tl
 make run-rbac
 
-# Journeys
-make rbac-journey
+# E2E smoke (Go)
 make manifest-journey
 ```
 
-```bash
-# Frontend
-make frontend-dev      # admin
-make scanner-dev       # scanner
-```
-
-## Server start (nzgapp)
+## Server start
 
 ```bash
 cd /opt/maniforge/platform-core
@@ -69,13 +60,12 @@ systemctl restart maniforge-rbac   # one service
 ## Verification checklist
 
 - `make health` or curl `/rbac/health` on active base URL
-- `make rbac-journey` (PHP CLI required on runner)
-- `make manifest-journey` (Go)
+- `make manifest-journey` (Go e2e)
+- `bash deploy/scripts/verify-production.sh` on server
 - Replication: `SELECT * FROM pg_stat_replication` on primary
-- Orchestration: `kb/ORCHESTRATION.md` is routing source of truth
 
 ## Git & deploy
 
-- Platform repo (canonical): `Maniforge/Maniforge` — legacy `Maniforge/maniforge_low_code_platform` until archived
+- Platform repo (canonical): `Maniforge/Maniforge` branch `platform-core`
+- Lab / R&D: `Maniforge/maniforge_low_code_platform`
 - Server path: `/opt/maniforge/platform-core`
-- Do not mix with KeyStore (`/opt/maniforge/keystore`, ports `8090/8091`)

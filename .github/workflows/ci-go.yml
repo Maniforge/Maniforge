@@ -12,7 +12,7 @@ on:
       - 'Makefile'
       - '.github/workflows/ci-go.yml'
   pull_request:
-    branches: [master, main]
+    branches: [master, main, platform-core]
     paths:
       - 'cmd/**'
       - 'internal/**'

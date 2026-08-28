@@ -1,98 +1,60 @@
 # Projects map — Maniforge Platform Core
 
 **Canonical GitHub:** [`Maniforge/Maniforge`](https://github.com/Maniforge/Maniforge) — branch **`platform-core`**, tag **[`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box)** (public, default branch)  
-**Lab remote:** [`Maniforge/maniforge_low_code_platform`](https://github.com/Maniforge/maniforge_low_code_platform) `main` @ `d7fafa8` — archive when COO ready  
-**Server staging:** `79.174.90.4` (nzgapp) — Caddy `:18090`, Go loopback `:8093–8097`, Postgres `:18096–18097`  
-**Server path:** `/opt/maniforge/platform-core` — **git** `platform-core` @ `d7fafa8`, `verify-production: OK` (cutover 2026-08-28)  
+**Lab remote:** [`Maniforge/maniforge_low_code_platform`](https://github.com/Maniforge/maniforge_low_code_platform) — R&D, PHP reference, frontends, supply chain  
+**Server staging:** `79.174.90.4` — Caddy `:18090`, Go loopback `:8093–8097`, Postgres `:18096–18097`  
+**Server path:** `/opt/maniforge/platform-core` — `verify-production: OK`  
 **Clone (buyers):** `git clone --branch platform-core https://github.com/Maniforge/Maniforge.git`
-**Not this repo:** `Maniforge-Enterprise`, `wms.svitex.online/platform/` (draft), `agent-crew` (orchestration pack only)
 
 ## Layout profile
 
-**Active profile:** `custom` (Go microservices + PHP reference + Vite frontends)
+**Active profile:** `platform-core` (Go microservices only — production box v0.1)
 
 ## Layout
 
 | Path | Role owner | Purpose |
 |------|------------|---------|
-| `cmd/` | backend | Go service entrypoints (rbac, tenant-licensing, manifest-engine, …) |
+| `cmd/rbac`, `cmd/tenant-licensing`, `cmd/manifest-engine`, `cmd/versioning`, `cmd/realtime` | backend | Platform core services |
+| `cmd/migrate`, `cmd/preflight`, `cmd/manifest-journey` | backend | Ops + e2e smoke |
 | `internal/` | backend | Shared Go libraries, handlers, domain logic |
-| `migrations/pg/` | backend | PostgreSQL schema (Go runtime) |
-| `maniforge/`, `app/Maniforge/` | backend | PHP reference + journey tests (contract) |
-| `frontend/apps/admin` | frontend | Admin UI (Vite/React) |
-| `frontend/apps/scanner` | frontend | WMS scanner UI (Vite) |
-| `public/`, `templates/` | frontend | Static / PHP-rendered pages |
-| `deploy/` | devops | Docker compose, Caddy, server profiles |
-| `docs/` | tech-lead | Architecture, ADR, production plan |
-| `kb/` | tech-lead | Orchestration, conventions, ADRs |
-| `.cursor/agents/` | — | Maniforge crew roles |
-| `.cursor/commands/` | — | `/maniforge` |
+| `migrations/pg/` | backend | PostgreSQL schema |
+| `deploy/` | devops | Production box: compose, Caddy, systemd, install/verify |
+| `docs/` | tech-lead | Production box, architecture, OpenAPI |
+| `kb/` | tech-lead | Conventions, orchestration (internal crew) |
+
+**Not in this repo:** PHP reference (`maniforge/`), frontends (`frontend/`), WMS/supply chain, examples, marketing site — see lab repo.
 
 ## Current stack
 
-- **Runtime (prod path):** Go 1.25, Fiber, PostgreSQL 16
-- **Reference:** PHP 8.x + MySQL journeys
-- **Web:** Vite + React (admin), Vite (scanner)
-- **Deploy:** Docker Compose (`deploy/compose.platform.server.yml` on nzgapp)
+- **Runtime:** Go 1.25, Fiber, PostgreSQL 16
+- **Deploy:** Docker Compose (Postgres) + systemd (Go) + Caddy gateway
 
 ## Platform services (Go)
 
-| Service | Local Docker | nzgapp (fast path: Go on host) |
-|---------|--------------|--------------------------------|
+| Service | Local Docker | Production (host) |
+|---------|--------------|-------------------|
 | Gateway (Caddy) | `:8080` | **`:18090`** (staging) or **`:443`** (+ `:80` ACME) |
-| RBAC | `:8093` | **`127.0.0.1:8093`** loopback — Caddy only |
+| RBAC | `:8093` | **`127.0.0.1:8093`** loopback |
 | Tenant Licensing | `:8094` | **`127.0.0.1:8094`** loopback |
 | Manifest Engine | `:8095` | **`127.0.0.1:8095`** loopback |
 | Versioning | `:8096` | **`127.0.0.1:8096`** loopback |
 | Realtime | `:8097` | **`127.0.0.1:8097`** loopback |
-| PostgreSQL primary | **`:5435`** (host → container `:5432`) | **`127.0.0.1:18096`** (Docker publish) |
-| PostgreSQL replica | **N/A** (local compose — single DB) | **`127.0.0.1:18097`** (Docker publish) |
+| PostgreSQL primary | **`:5435`** | **`127.0.0.1:18096`** |
+| PostgreSQL replica | N/A (local) | **`127.0.0.1:18097`** |
 
-Go services are **not** published as `18091–18095`; Caddy reverse-proxies to loopback `8093–8097`.
-
-## Server deploy (nzgapp)
+## Server deploy
 
 | Item | Value |
 |------|--------|
 | Install root | `/opt/maniforge/platform-core` |
 | Env | `deploy/.env.platform` (from `.env.platform.server.example`) |
-| Postgres | Docker — `deploy/compose.platform.server.yml` |
-| Go services | systemd — `deploy/systemd/maniforge-*.service` |
-| Gateway | host Caddy — `deploy/Caddyfile.server` (:18090) or `Caddyfile.production` (:443) |
-| Health | `http://79.174.90.4:18090/rbac/health` |
-
-**Status (2026-08-28):** **v0.1.0-box live** — public GitHub + nzgapp on `git clone` @ `d7fafa8`, `verify-production: OK`. **Next:** TLS/domain, RBAC journey 50/50, archive lab repo.
-
-**Install:** `cp deploy/.env.platform.server.example deploy/.env.platform` → `sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive`  
-**Verify:** `bash deploy/scripts/verify-production.sh`
+| Install | `sudo bash deploy/scripts/install-production.sh` |
+| Verify | `bash deploy/scripts/verify-production.sh` |
 
 ## Ownership defaults
 
-- Go services, migrations, internal packages → **backend** (`cmd/`, `internal/`, `migrations/pg/`)
-- Admin/scanner UI, `public/` assets → **frontend** (`frontend/`, `public/`)
-- Compose, Dockerfiles, env examples, server scripts → **devops** (`deploy/`)
-- ADRs, architecture docs, ORCHESTRATION → **tech-lead** (`docs/`, `kb/`)
-- PHP journeys — backend owns; change only for contract parity with Go
-- Product briefs / landing copy → product-manager / designer (docs only)
-
-## Agent roles
-
-| Role | When | Default paths |
-|------|------|---------------|
-| backend | Go/PHP API, migrations | `cmd/`, `internal/`, `migrations/`, `maniforge/` |
-| frontend | UI | `frontend/`, `public/`, `templates/` |
-| devops | Compose, CI, server | `deploy/`, `docker-compose.yml`, `.github/` |
-| qa | After implementers | `make *-journey`, health checks |
-| product-manager | Positioning, UX briefs | `docs/`, `kb/` (no `cmd/`) |
+- Go services, migrations → **backend** (`cmd/`, `internal/`, `migrations/pg/`)
+- Compose, systemd, install scripts → **devops** (`deploy/`, `.github/`)
+- Architecture docs → **tech-lead** (`docs/`, `kb/`)
 
 **Collision rule:** one agent — one path-set per iteration. See `kb/ORCHESTRATION.md`.
-
-## Priority (2026-08)
-
-**Next vertical slice (before enterprise sell):** **v0.1.0-box** — commit `deploy/` → push `Maniforge/Maniforge` `platform-core` → tag → server `git clone` + verify. Manifest: `docs/V0.1_BOX_MANIFEST.md`.
-
-1. **Phase A→sell** — **done** (`v0.1.0-box`, public, nzgapp on git @ `d7fafa8`)
-2. **Phase C** — TLS/domain, RBAC journey 50/50, scheduler, CI, backup drill
-3. **Phase B** — supply chain (warehouses → products → inventory → wms)
-4. **Phase D** — `.mfpack` module packages
-5. **Then** — avtosbor / devent as modules (not in this repo's prod path yet)

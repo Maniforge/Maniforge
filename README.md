@@ -1,10 +1,9 @@
 # Maniforge Platform Core
 
 [![CI — Go](https://github.com/Maniforge/Maniforge/actions/workflows/ci-go.yml/badge.svg)](https://github.com/Maniforge/Maniforge/actions/workflows/ci-go.yml)
-[![CI — RBAC](https://github.com/Maniforge/Maniforge/actions/workflows/rbac-checks.yml/badge.svg)](https://github.com/Maniforge/Maniforge/actions/workflows/rbac-checks.yml)
 [![Go 1.25](https://img.shields.io/badge/Go-1.25-00ADD8?logo=go&logoColor=white)](https://go.dev/)
 [![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Release](https://img.shields.io/github/v/tag/Maniforge/Maniforge?label=v0.1.0-box&color=blue)](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box)
+[![Release](https://img.shields.io/github/v/tag/Maniforge/Maniforge?label=v0.1.1-box&color=blue)](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 **Production deployment package** for the Maniforge platform: API-first backend with multi-tenant RBAC, tenant licensing, Manifest Engine (entity → REST + OpenAPI), versioning, and realtime services. Delivered as reproducible source, install scripts, and operational runbooks — ready for on-premise deployment on your infrastructure.
@@ -102,7 +101,7 @@ curl -sf https://platform.customer.ru/rbac/health
 curl -sf http://203.0.113.10:18090/rbac/health
 ```
 
-Дополнительно: `make preflight`, `make rbac-journey` — см. [`deploy/README.md`](deploy/README.md).
+Дополнительно: `make preflight`, `make manifest-journey` — см. [`deploy/README.md`](deploy/README.md).
 
 ---
 
@@ -164,7 +163,7 @@ flowchart LR
 
 **Лицензия:** Apache License 2.0 — см. [`LICENSE`](LICENSE).
 
-**Версия:** [`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box) · ветка `platform-core`
+**Версия:** [`v0.1.1-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box) · ветка `platform-core`
 
 ---
 

@@ -11,7 +11,7 @@
 
 Пожалуйста, **не** создавайте публичные GitHub Issues для уязвимостей.
 
-1. Напишите на **support@maniforge.ru** с пометкой `[security]` в теме (или используйте [GitHub Security Advisories](https://github.com/Maniforge/maniforge_low_code_platform/security/advisories/new), если доступно).
+1. Напишите на **support@maniforge.ru** с пометкой `[security]` в теме (или используйте [GitHub Security Advisories](https://github.com/Maniforge/Maniforge/security/advisories/new), если доступно).
 2. Укажите: описание, шаги воспроизведения, затронутые модули (RBAC / TL / Manifest / …), версию / commit.
 3. Мы подтвердим получение в течение **72 часов** и согласуем timeline disclosure.
 

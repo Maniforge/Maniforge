@@ -19,7 +19,7 @@
 - [ ] Supply chain (products / warehouses / inventory / WMS)
 - [ ] Versioning / Realtime
 - [ ] Docs / OpenAPI
-- [ ] PHP reference
+- [ ] Go services build (`make build`)
 
 ## Test plan
 

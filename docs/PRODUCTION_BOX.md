@@ -129,7 +129,6 @@ bash deploy/scripts/verify-production.sh
 cd /opt/maniforge/platform-core && make preflight
 
 # 3. E2E smoke (рекомендуется перед приёмкой)
-make rbac-journey
 make manifest-journey
 
 # 4. HTTPS в браузере
@@ -146,7 +145,6 @@ curl -sf https://platform.customer.ru/rbac/health
 
 ```bash
 cd /opt/maniforge/platform-core
-make backup-drill   # snapshot counters before dump
 pg_dump -Fc -h 127.0.0.1 -p 18096 -U maniforge maniforge > /var/backups/maniforge-$(date +%F).dump
 ```
 
@@ -172,21 +170,14 @@ git pull   # или rsync нового релиза
 bash deploy/scripts/server-build.sh
 bash deploy/scripts/server-up.sh
 bash deploy/scripts/verify-production.sh
-make rbac-journey   # опционально, перед переключением трафика
+make manifest-journey   # опционально, перед переключением трафика
 ```
 
 ---
 
 ## Scheduler (production)
 
-Настроить **systemd timers** или cron на хосте (не входит в install v1):
-
-| Job | Интервал | Команда |
-|-----|----------|---------|
-| TL expire licenses | 5–15 min | `php maniforge/tenant-licensing/tools/expire_licenses.php` |
-| TL dispatch events | 1–5 min | `php maniforge/tenant-licensing/tools/dispatch_events.php` |
-| SIEM forward | 1–5 min | `make siem-forward` |
-| PD retention (152-ФЗ) | по регламенту | `php maniforge/rbac/tools/pd_retention_enforce.php` |
+Фоновые задачи (expire licenses, dispatch events, PD retention) — backlog фазы C; в v0.1 box не входят в install.
 
 ---
 
@@ -208,7 +199,7 @@ Restart policy: `Restart=always` на всех `maniforge-*.service`.
 
 Для internal releases рекомендуется:
 
-1. GitHub Actions: `make preflight`, `make test`, `make rbac-journey` (уже частично в `ci-go.yml`)
+1. GitHub Actions: `make preflight`, `make test` (см. `ci-go.yml`)
 2. Deploy job: rsync + `install-production.sh --skip-apt --non-interactive`
 3. Post-deploy: `verify-production.sh` + smoke journey
 

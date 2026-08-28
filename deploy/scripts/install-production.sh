@@ -321,8 +321,8 @@ install-production: complete
 
 Next (recommended before buyer demo):
   cd ${ROOT} && make preflight
-  cd ${ROOT} && make rbac-journey
-  docs/PRODUCTION_BOX.md вЂ” backup/upgrade runbook
+  cd ${ROOT} && make manifest-journey
+  docs/PRODUCTION_BOX.md — backup/upgrade runbook
 EOF
 }
 

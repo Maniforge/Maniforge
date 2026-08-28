@@ -130,7 +130,7 @@ make platform-migrate   # повторно прогнать миграции (on
 
 **migrate failed** — `journalctl -u maniforge-rbac`; запустите `./bin/maniforge-migrate` из `/opt/maniforge/platform-core` с sourced `.env.platform`. Проверьте `127.0.0.1:18096`.
 
-**rbac-journey fails** — `curl http://127.0.0.1:18090/rbac/health` (server) или `http://127.0.0.1:8093/rbac/health` (local).
+**manifest-journey fails** — `curl http://127.0.0.1:18090/rbac/health` (server) или `http://127.0.0.1:8093/rbac/health` (local); затем `make server-journey`.
 
 **Server journeys:**
 
