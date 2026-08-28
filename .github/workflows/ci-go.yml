@@ -2,7 +2,7 @@ name: CI — Go
 
 on:
   push:
-    branches: [master, main]
+    branches: [master, main, platform-core]
     paths:
       - 'cmd/**'
       - 'internal/**'
