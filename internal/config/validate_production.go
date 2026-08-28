@@ -1,6 +1,6 @@
-// Файл: validate_production.go
-// Назначение: обязательные проверки перед production rollout Go-сервисов.
-// См. также: docs/MANIFORGE_ENTERPRISE_HARDENING.md, maniforge/rbac/tools/preflight.php
+﻿// Р¤Р°Р№Р»: validate_production.go
+// РќР°Р·РЅР°С‡РµРЅРёРµ: РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рµ РїСЂРѕРІРµСЂРєРё РїРµСЂРµРґ production rollout Go-СЃРµСЂРІРёСЃРѕРІ.
+// РЎРј. С‚Р°РєР¶Рµ: docs/MANIFORGE_ENTERPRISE_HARDENING.md, maniforge/rbac/tools/preflight.php
 package config
 
 import (
@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// ValidateProduction возвращает ошибку, если production profile не соблюдён.
+// ValidateProduction РІРѕР·РІСЂР°С‰Р°РµС‚ РѕС€РёР±РєСѓ, РµСЃР»Рё production profile РЅРµ СЃРѕР±Р»СЋРґС‘РЅ.
 func (c Config) ValidateProduction() error {
 	if !c.IsProductionEnv() {
 		return nil
@@ -49,6 +49,16 @@ func (c Config) ValidateProduction() error {
 	return fmt.Errorf("production guard failed:\n- %s", strings.Join(failures, "\n- "))
 }
 
+
+func (c Config) isLoopbackDBHost() bool {
+	h := strings.ToLower(strings.TrimSpace(c.GoDBHost))
+	switch h {
+	case "127.0.0.1", "localhost", "::1":
+		return true
+	default:
+		return false
+	}
+}
 func (c Config) IsProductionEnv() bool {
 	switch strings.ToLower(strings.TrimSpace(c.AppEnv)) {
 	case "prod", "production":
@@ -67,6 +77,7 @@ func (c Config) HasValidPIIKey() bool {
 	if key == "" {
 		return false
 	}
-	// base64 decode check omitted — non-empty is enough for startup gate; preflight does full check
+	// base64 decode check omitted вЂ” non-empty is enough for startup gate; preflight does full check
 	return len(key) >= 32
 }
+

@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # Idempotent production install for Ubuntu 22.04 / 24.04.
 # Fast path: Postgres in Docker, Go native systemd, Caddy gateway (HTTPS domain or IP:18090).
 # Never prints generated secrets.
@@ -217,7 +217,13 @@ configure_env() {
     _env_upsert TENANT_LICENSING_ENFORCEMENT "strict"
     _env_upsert RBAC_REGISTRATION_ENABLED "false"
     _env_upsert RBAC_PII_ENCRYPTION_ENABLED "true"
-    _env_upsert MANIFORGE_CADDYFILE "${DEPLOY}/Caddyfile.active"
+    if [ "$EDGE_PROXY" = "1" ]; then
+      log "edge-proxy mode: production env + Caddyfile.server (:18090); TLS on host edge"
+      _env_upsert MANIFORGE_CADDYFILE "${DEPLOY}/Caddyfile.server"
+      _env_upsert MANIFORGE_GATEWAY_HEALTH_URL "http://127.0.0.1:18090"
+    else
+      _env_upsert MANIFORGE_CADDYFILE "${DEPLOY}/Caddyfile.active"
+    fi
   else
     log "staging profile (IP:18090, no TLS)"
     _env_upsert MANIFORGE_GATEWAY_PORT "18090"

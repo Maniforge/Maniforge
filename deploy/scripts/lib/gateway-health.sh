@@ -1,8 +1,14 @@
-#!/bin/bash
+﻿#!/bin/bash
 # Gateway health helpers. Source after setting ENV to the live .env.platform path.
 # Does not print secret values.
 
 gateway_base_url() {
+  local override
+  override="$(grep -E '^MANIFORGE_GATEWAY_HEALTH_URL=' "$ENV" 2>/dev/null | head -1 | cut -d= -f2-)"
+  if [ -n "$override" ]; then
+    printf '%s\n' "${override%/}"
+    return 0
+  fi
   # shellcheck disable=SC1091
   . "$(dirname "${BASH_SOURCE[0]}")/../server-public-urls.sh"
   public_origin
@@ -40,3 +46,4 @@ gateway_health_check() {
   fi
   echo "gateway health ok (${base})"
 }
+
