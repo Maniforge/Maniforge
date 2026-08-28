@@ -2,7 +2,7 @@
 
 **Цель:** довести low-code платформу до уровня, когда на её «лего» можно спокойно собирать продукты (avtosbor, devent — позже).
 
-**Репозиторий:** [github.com/Maniforge/Maniforge](https://github.com/Maniforge/Maniforge) — ветка `platform-core`, релиз [`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box).
+**Репозиторий:** [github.com/Maniforge/Maniforge](https://github.com/Maniforge/Maniforge) — ветка `platform-core`, релиз [`v0.1.1-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box).
 
 ---
 

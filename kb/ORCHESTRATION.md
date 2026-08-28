@@ -40,14 +40,14 @@ Read ownership from `kb/projects.md`. Never assume foreign layouts (`apps/web`, 
 | Phase | Goal | Done when |
 |-------|------|-----------|
 | **A** | One-command platform core | nzgapp Caddy `:18090` + Go loopback `:8093–8097`, journeys green |
-| **A→sell** | **v0.1.0-box** — reproducible artifact | `deploy/` in git → `Maniforge/Maniforge` branch `platform-core` → tag → server `git clone` + install + verify (see `docs/V0.1_BOX_MANIFEST.md`) |
+| **A→sell** | **v0.1.1-box** — verified core only | `Maniforge/Maniforge` `platform-core` → tag → server `git clone` + install + verify |
 | **B** | Supply chain Go | warehouses → products → inventory → wms |
 | **C** | Hardening | TLS/domain, RBAC 50/50, preflight, backup drill, CI, scheduler |
 | **D** | Module packages | `.mfpack`, app store runtime |
 
-**Staging (2026-08-28):** Phase **A→sell done** — GitHub public + nzgapp `git clone` @ `d7fafa8`, verify OK. **Next gate:** Phase **C** (TLS/domain, RBAC 50/50, scheduler).
+**Staging (2026-08-28):** Phase **A→sell done** — [`v0.1.1-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box), verified core (247 files), nzgapp git deploy, verify OK. **Next gate:** Phase **C** (TLS/domain, RBAC 50/50, scheduler).
 
-**Open items (not blocked for v0.1.0-box):** TLS by domain, RBAC journey 50/50, scheduler timers, full CI pipeline.
+**Open items (Phase C):** TLS by domain, RBAC journey 50/50, scheduler timers, full CI pipeline.
 
 **Paused until A–C:** supply-chain modules (warehouses, WMS), `.mfpack` app store runtime.
 

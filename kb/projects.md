@@ -1,6 +1,6 @@
 # Projects map — Maniforge Platform Core
 
-**GitHub:** [`Maniforge/Maniforge`](https://github.com/Maniforge/Maniforge) — branch **`platform-core`**, tag **[`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box)** (public, default branch)  
+**GitHub:** [`Maniforge/Maniforge`](https://github.com/Maniforge/Maniforge) — branch **`platform-core`**, tag **[`v0.1.1-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box)**
 **Server staging:** `79.174.90.4` — Caddy `:18090`, Go loopback `:8093–8097`, Postgres `:18096–18097`  
 **Server path:** `/opt/maniforge/platform-core` — `verify-production: OK`  
 **Clone (buyers):** `git clone --branch platform-core https://github.com/Maniforge/Maniforge.git`

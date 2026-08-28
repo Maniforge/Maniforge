@@ -15,7 +15,7 @@
 | Обзор платформы | [`docs/MANIFORGE_PLATFORM_OVERVIEW.md`](docs/MANIFORGE_PLATFORM_OVERVIEW.md) |
 | OpenAPI | [`docs/openapi/`](docs/openapi/) |
 
-**Репозиторий:** [github.com/Maniforge/Maniforge](https://github.com/Maniforge/Maniforge) · ветка **`platform-core`** · релиз **[`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box)**
+**Репозиторий:** [github.com/Maniforge/Maniforge](https://github.com/Maniforge/Maniforge) · ветка **`platform-core`** · релиз **[`v0.1.1-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box)**
 
 ---
 
@@ -23,13 +23,13 @@
 
 **Production Box** — это готовый к установке комплект платформенного ядра Maniforge для развёртывания на сервере заказчика (on-premise). Покупатель получает исходный код, скрипты установки и проверки, конфигурацию шлюза и базы данных, а также документацию по эксплуатации. Установка выполняется на чистой Ubuntu 22.04/24.04 LTS за один проход: клонирование репозитория, настройка секретов, автоматическая сборка сервисов, миграции и запуск через systemd.
 
-Комплект **не** является облачным SaaS и **не** включает прикладные модули (WMS, supply chain, `.mfpack`) — они поставляются отдельными фазами. Версия **v0.1.0-box** — первый коммерчески воспроизводимый релиз: проверен на staging, публичен на GitHub, готов к передаче DevOps-команде покупателя.
+Комплект **не** является облачным SaaS и **не** включает прикладные модули (WMS, supply chain, `.mfpack`) — они поставляются отдельными фазами. Версия **v0.1.1-box** — коммерчески воспроизводимый релиз platform core: проверен на production staging, публичен на GitHub, готов к передаче DevOps-команде покупателя.
 
 ---
 
 ## Состав комплекта
 
-| Включено | Не включено (v0.1.0-box) |
+| Включено | Не включено (v0.1.1-box) |
 |----------|--------------------------|
 | 5 Go-сервисов platform core (RBAC, Tenant Licensing, Manifest Engine, Versioning, Realtime) | App Store / runtime `.mfpack` |
 | PostgreSQL 16 — primary + streaming replica | Модули supply chain (warehouses, WMS, inventory) |

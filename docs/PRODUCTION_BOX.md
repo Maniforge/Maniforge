@@ -4,7 +4,7 @@
 
 **Аудитория:** sales engineering, DevOps покупателя, согласование COO.
 
-**Релиз v0.1.0-box:** опубликован — [github.com/Maniforge/Maniforge](https://github.com/Maniforge/Maniforge/tree/platform-core) · тег [`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box) · публичный репозиторий · ветка по умолчанию `platform-core`.
+**Релиз v0.1.1-box:** [github.com/Maniforge/Maniforge](https://github.com/Maniforge/Maniforge/tree/platform-core) · тег [`v0.1.1-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box) · публичный репозиторий · ветка по умолчанию `platform-core`.
 
 ---
 
@@ -29,7 +29,7 @@ bash deploy/scripts/verify-production.sh
 
 ## Что получает покупатель
 
-| Включено | Не включено (v0.1.0-box) |
+| Включено | Не включено (v0.1.1-box) |
 |----------|--------------------------|
 | 5 Go-сервисов platform core | App Store / `.mfpack` runtime |
 | PostgreSQL 16 primary + streaming replica | Supply-chain modules (warehouses, WMS) |

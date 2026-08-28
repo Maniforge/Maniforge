@@ -2,7 +2,7 @@
 
 Операционная документация по развёртыванию платформы. Два контура: **production server** (покупатель / on-premise) и **local dev** (разработка).
 
-**Спецификация Production Box:** [docs/PRODUCTION_BOX.md](../docs/PRODUCTION_BOX.md) · релиз [`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box)
+**Спецификация Production Box:** [docs/PRODUCTION_BOX.md](../docs/PRODUCTION_BOX.md) · релиз [`v0.1.1-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box)
 
 ---
 
