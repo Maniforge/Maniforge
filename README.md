@@ -51,6 +51,19 @@ flowchart LR
 | Frontend | React / Refine (admin + WMS scanner) |
 | Контракты | OpenAPI YAML / автоген Manifest |
 
+## Production box (v0.1.0-box)
+
+Продаваемый деплой — репозиторий **[Maniforge/Maniforge](https://github.com/Maniforge/Maniforge)** (platform-core, tag [0.1.0-box](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box)). Подробности: [docs/PRODUCTION_BOX.md](docs/PRODUCTION_BOX.md).
+
+`ash
+git clone --branch platform-core https://github.com/Maniforge/Maniforge.git
+cd Maniforge   # или сразу: git clone ... /opt/maniforge/platform-core
+cp deploy/.env.platform.server.example deploy/.env.platform
+# отредактируйте секреты в deploy/.env.platform — не коммитьте файл
+sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive
+bash deploy/scripts/verify-production.sh
+`
+
 ## Быстрый старт
 
 Требования: Docker (или `docker-compose`), Go 1.25+, PHP 8.2+ (для web/journeys), Make.

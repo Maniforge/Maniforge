@@ -45,7 +45,7 @@ Read ownership from `kb/projects.md`. Never assume foreign layouts (`apps/web`, 
 | **C** | Hardening | TLS/domain, RBAC 50/50, preflight, backup drill, CI, scheduler |
 | **D** | Module packages | `.mfpack`, app store runtime |
 
-**Staging (2026-08-28):** Phase **A operational** on `79.174.90.4:18090` (verify OK). **Next gate before enterprise sell:** Phase **A→sell** (not another service).
+**Staging (2026-08-28):** Phase **A operational** on `79.174.90.4:18090`. **A→sell GitHub artifact:** **done** — [`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box), public. **Next gate:** server `git clone` cutover + Phase **C** hardening.
 
 **Demo today (not blocked):** IP `:18090`, TLS, git on server, RBAC 48/50 internal steps, scheduler, public repo.
 

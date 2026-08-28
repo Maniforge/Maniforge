@@ -83,12 +83,12 @@ Archive `Maniforge/maniforge_low_code_platform` with README «Moved to Maniforge
 
 ## Cutover checklist
 
-- [ ] Commit + push deploy/kb/docs in lab repo
-- [ ] `docs/ORG_PROFILE.md` + `docs/V0.1_BOX_MANIFEST.md` in tree
-- [ ] `git push maniforge-platform main:platform-core`
-- [ ] GitHub: default branch = `platform-core`
-- [ ] GitHub: visibility = **public** (currently private)
-- [ ] Tag `v0.1.0-box`
+- [x] Commit + push deploy/kb/docs in lab repo (`8ded974`)
+- [x] `docs/ORG_PROFILE.md` + `docs/V0.1_BOX_MANIFEST.md` in tree
+- [x] Push `platform-core` → **Maniforge/Maniforge**
+- [x] GitHub: default branch = `platform-core`
+- [x] GitHub: visibility = **public**
+- [x] Tag **`v0.1.0-box`**
 - [ ] Archive `maniforge_low_code_platform`
 - [ ] Server: `git clone --branch platform-core` instead of tarball
-- [ ] `verify-production.sh` → OK
+- [ ] `verify-production.sh` → OK after server git cutover

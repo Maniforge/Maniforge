@@ -4,7 +4,18 @@
 
 **Audience:** sales engineering, buyer DevOps, COO sign-off.
 
-**Gate to sell (next milestone):** tag **`v0.1.0-box`** on [`Maniforge/Maniforge`](https://github.com/Maniforge/Maniforge) branch `platform-core` — buyer can `git clone → install-production.sh → verify-production.sh`. Staging on `79.174.90.4:18090` is **demo-ready today**; this gate closes the gap between «works on our IP» and «sellable box». See `docs/V0.1_BOX_MANIFEST.md`, `docs/REPO_STRATEGY.md`.
+**Gate to sell (v0.1.0-box):** **published** — https://github.com/Maniforge/Maniforge/tree/platform-core · tag [`v0.1.0-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.0-box) · **public** · default branch `platform-core`.
+
+```bash
+git clone --branch platform-core https://github.com/Maniforge/Maniforge.git
+cd Maniforge   # или: git clone ... /opt/maniforge/platform-core
+cp deploy/.env.platform.server.example deploy/.env.platform
+# отредактируйте секреты в deploy/.env.platform — не коммитьте файл
+sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive
+bash deploy/scripts/verify-production.sh
+```
+
+Staging on `79.174.90.4:18090` remains demo-ready; **nzgapp server cutover to git clone** is the remaining ops step. See `docs/REPO_STRATEGY.md`.
 
 ---
 
@@ -41,7 +52,9 @@
 ```bash
 # 1. Исходники (пример)
 sudo mkdir -p /opt/maniforge
-sudo git clone <repo-url> /opt/maniforge/platform-core
+sudo git clone --branch platform-core https://github.com/Maniforge/Maniforge.git /opt/maniforge/platform-core
+cp deploy/.env.platform.server.example deploy/.env.platform
+# отредактируйте секреты в deploy/.env.platform — не коммитьте файл
 # или: rsync -a ./ /opt/maniforge/platform-core/
 
 # 2. Production с HTTPS (домен уже указывает на сервер)

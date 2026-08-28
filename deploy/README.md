@@ -27,6 +27,14 @@ Compose: `deploy/compose.platform.yml`. Journeys from the host use `8093–8097`
 
 ## Server / prod (nzgapp, `79.174.90.4`)
 
+**Canonical repo:** https://github.com/Maniforge/Maniforge — branch `platform-core`, tag `v0.1.0-box` (public).
+
+```bash
+git clone --branch platform-core https://github.com/Maniforge/Maniforge.git /opt/maniforge/platform-core
+cp deploy/.env.platform.server.example deploy/.env.platform
+# edit secrets in deploy/.env.platform — do NOT commit
+```
+
 **Fast path:** Postgres stays in Docker; **Go runs on the host** (systemd); **Caddy on the host** listens **:18090 only** (not 80/443).
 
 | What | Where |
