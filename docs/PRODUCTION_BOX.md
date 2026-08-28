@@ -4,7 +4,7 @@
 
 **Аудитория:** sales engineering, DevOps покупателя, согласование COO.
 
-**Релиз v0.1.1-box:** [github.com/Maniforge/Maniforge](https://github.com/Maniforge/Maniforge/tree/platform-core) · тег [`v0.1.1-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box) · публичный репозиторий · ветка по умолчанию `platform-core`.
+**Релиз v0.1.2-box:** [github.com/Maniforge/Maniforge](https://github.com/Maniforge/Maniforge/tree/platform-core) · тег [`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box) · публичный репозиторий · ветка по умолчанию `platform-core`.
 
 ---
 
@@ -23,17 +23,22 @@ sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive
 bash deploy/scripts/verify-production.sh
 ```
 
-**Reference deployment:** staging `79.174.90.4:18090` — git deploy, `verify-production.sh` OK. Следующий этап эксплуатации: TLS по домену, RBAC journey 50/50.
+**Production с HTTPS** — после того как DNS A-record вашего FQDN указывает на сервер:
+
+```bash
+sudo bash deploy/scripts/install-production.sh --domain platform.example.com
+bash deploy/scripts/verify-production.sh
+```
 
 ---
 
 ## Что получает покупатель
 
-| Включено | Не включено (v0.1.1-box) |
+| Включено | Не включено (v0.1.2-box) |
 |----------|--------------------------|
 | 5 Go-сервисов platform core | App Store / `.mfpack` runtime |
 | PostgreSQL 16 primary + streaming replica | Supply-chain modules (warehouses, WMS) |
-| Caddy gateway (HTTPS по домену или IP:18090 staging) | Полный CI/CD pipeline заказчика |
+| Caddy gateway (HTTPS по вашему FQDN или IP:18090 staging на вашем сервере) | Полный CI/CD pipeline заказчика |
 | systemd restart policies | Managed SaaS multi-tenant hosting |
 | Скрипты install / verify / upgrade | PHP reference stack |
 
@@ -49,7 +54,7 @@ bash deploy/scripts/verify-production.sh
 | RAM | 4 GB | 8 GB |
 | Disk | 40 GB SSD | 80 GB SSD (WAL archive + backups) |
 | OS | Ubuntu 22.04 или 24.04 LTS | то же |
-| Сеть | 80, 443 (HTTPS) или 18090 (staging) | статический IP, DNS A-record |
+| Сеть | 80, 443 (HTTPS) или 18090 (staging без TLS на IP заказчика) | статический IP, DNS A-record на ваш FQDN |
 
 ---
 
@@ -66,10 +71,10 @@ cd /opt/maniforge/platform-core
 cp deploy/.env.platform.server.example deploy/.env.platform
 # отредактируйте секреты в deploy/.env.platform — не коммитьте файл
 
-# 2a. Production с HTTPS (домен уже указывает на сервер)
-sudo bash deploy/scripts/install-production.sh --domain platform.customer.ru
+# 2a. Production с HTTPS (ваш FQDN уже указывает на сервер)
+sudo bash deploy/scripts/install-production.sh --domain platform.example.com
 
-# 2b. Staging по IP (без TLS, порт 18090)
+# 2b. Staging на вашем IP (без TLS, порт 18090) — до выдачи домена
 # sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive
 ```
 
@@ -87,7 +92,7 @@ sudo bash deploy/scripts/install-production.sh --domain platform.customer.ru
 
 **Модель URL (обязательно):**
 
-- `APP_URL` — только `scheme://host` (`https://platform.customer.ru`)
+- `APP_URL` — только `scheme://host` (`https://platform.example.com`)
 - `MANIFORGE_GATEWAY_PORT` — `443` (HTTPS) или `18090` (staging)
 - `MANIFORGE_PUBLIC_HOST` — FQDN или IP для скриптов
 - Публичный origin для journeys: `public_origin()` в `deploy/scripts/server-public-urls.sh`
@@ -101,16 +106,16 @@ sudo bash deploy/scripts/install-production.sh --domain platform.customer.ru
 
 | Профиль | Файл | Порт |
 |---------|------|------|
-| Staging (IP) | `deploy/Caddyfile.server` | `:18090` |
+| Staging на IP заказчика | `deploy/Caddyfile.server` | `:18090` |
 | Production (domain) | `deploy/Caddyfile.production` → `Caddyfile.active` | `:443` auto HTTPS |
 
 Ручной рендер:
 
 ```bash
-sed 's/{domain}/platform.customer.ru/g' deploy/Caddyfile.production > deploy/Caddyfile.active
+sed 's/{domain}/platform.example.com/g' deploy/Caddyfile.production > deploy/Caddyfile.active
 # В .env.platform:
 # MANIFORGE_CADDYFILE=/opt/maniforge/platform-core/deploy/Caddyfile.active
-# APP_URL=https://platform.customer.ru
+# APP_URL=https://platform.example.com
 # MANIFORGE_GATEWAY_PORT=443
 systemctl restart maniforge-caddy
 ```
@@ -131,8 +136,8 @@ cd /opt/maniforge/platform-core && make preflight
 # 3. E2E smoke (рекомендуется перед приёмкой)
 make manifest-journey
 
-# 4. HTTPS в браузере
-curl -sf https://platform.customer.ru/rbac/health
+# 4. HTTPS acceptance
+curl -sf https://platform.example.com/rbac/health
 ```
 
 Ожидаемый результат verify: 6/6 systemd active, 4 health через gateway + realtime loopback, replica `streaming`.
@@ -148,7 +153,7 @@ cd /opt/maniforge/platform-core
 pg_dump -Fc -h 127.0.0.1 -p 18096 -U maniforge maniforge > /var/backups/maniforge-$(date +%F).dump
 ```
 
-**Restore (runbook, тест на staging):**
+**Restore (runbook, тест на staging IP заказчика):**
 
 ```bash
 systemctl stop maniforge-{rbac,tl,manifest,versioning,realtime,caddy}
@@ -205,24 +210,24 @@ bash deploy/scripts/backup-postgres.sh   # ручной pg_dump
 
 ## Phase C checklist (enterprise hardening)
 
-| # | Item | Status v0.1.1-box+ |
+| # | Item | Status v0.1.2-box+ |
 |---|------|-------------------|
 | C1 | systemd scheduler (expire, dispatch, backup) | ✅ timers + install script |
 | C2 | `make preflight` в verify-production | ✅ |
 | C3 | CI: build + migrate + preflight + backup-drill | ✅ ci-go.yml |
 | C4 | Go platform-ops journey (access-state smoke) | ✅ `make platform-ops-journey` |
-| C5 | TLS + domain (edge or direct Caddy) | ⚠️ DNS A `platform` → server; edge snippet in `deploy/caddy/` — see [DNS_PLATFORM.md](DNS_PLATFORM.md) |
-| C6 | `APP_ENV=production` on reference box | ✅ `--domain` + `--edge-proxy` (gateway :18090) |
+| C5 | TLS + domain (edge or direct Caddy) | ✅ `--domain` + опционально `--edge-proxy` |
+| C6 | `APP_ENV=production` на сервере заказчика | ✅ `--domain` + `--edge-proxy` (gateway :18090) |
 | C7 | Полный PHP rbac 50-step journey | ❌ out-of-box (PHP ref не в platform-core) |
 
-**TLS (edge-proxy on reference host):**
+**TLS с edge reverse proxy** (если :443 уже занят на сервере заказчика):
 
 ```bash
-# 1. DNS A-record: platform.customer.ru → server IP
+# 1. DNS A-record: platform.example.com → IP вашего сервера
 # 2. На сервере:
-sudo bash deploy/scripts/install-production.sh --domain platform.customer.ru --skip-apt --non-interactive
+sudo bash deploy/scripts/install-production.sh --domain platform.example.com --skip-apt --non-interactive
 bash deploy/scripts/verify-production.sh
-curl -sf https://platform.customer.ru/rbac/health
+curl -sf https://platform.example.com/rbac/health
 ```
 
 ---
@@ -255,7 +260,7 @@ Restart policy: `Restart=always` на всех `maniforge-*.service`.
 
 **Deploy Maniforge Platform Core**
 
-1. Ubuntu 22.04/24.04, 4 GB RAM, DNS на ваш домен  
+1. Ubuntu 22.04/24.04, 4 GB RAM, DNS на **ваш** FQDN  
 2. `git clone --branch platform-core` → `/opt/maniforge/platform-core`  
 3. `cp deploy/.env.platform.server.example deploy/.env.platform` → отредактировать секреты  
 4. `sudo bash deploy/scripts/install-production.sh --domain YOUR_DOMAIN`  

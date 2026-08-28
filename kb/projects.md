@@ -1,9 +1,20 @@
 # Projects map — Maniforge Platform Core
 
 **GitHub:** [`Maniforge/Maniforge`](https://github.com/Maniforge/Maniforge) — branch **`platform-core`**, tag **[`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box)**  
-**Production FQDN:** `platform.maniforge.ru` (edge TLS via host Caddy :443 → backend :18090) — **DNS A-record pending** — see `docs/DNS_PLATFORM.md`  
-**Server:** `79.174.90.4` — `APP_ENV=production`, gateway `:18090`, verify OK @ `905e518`  
-**Health (now):** `http://79.174.90.4:18090/rbac/health` · **target:** `https://platform.maniforge.ru/rbac/health`
+**Buyer model:** customer clones repo → `install-production.sh --domain <customer-fqdn>` on **their** Ubuntu server. See `README.md`, `docs/PRODUCTION_BOX.md`.
+
+## Internal — reference install / QA (not buyer path)
+
+> **Internal — not part of Production Box buyer path.**
+
+| Item | Value |
+|------|--------|
+| Reference server | `79.174.90.4` (`nzgapp`) — Maniforge QA only |
+| Staging health | `http://79.174.90.4:18090/rbac/health` |
+| Optional demo FQDN | `platform.maniforge.ru` (DNS pending) — internal demo, not buyer production |
+| Install root on reference | `/opt/maniforge/platform-core` |
+
+Details: `kb/PLATFORM_PRODUCTION.md`, `docs/DNS_PLATFORM.md`.
 
 ## Layout profile
 
@@ -31,7 +42,7 @@
 
 | Service | Local Docker | Production (host) |
 |---------|--------------|-------------------|
-| Gateway (Caddy) | `:8080` | **`:18090`** (staging) or **`:443`** (+ `:80` ACME) |
+| Gateway (Caddy) | `:8080` | **`:18090`** (customer staging) or **`:443`** (+ `:80` ACME) |
 | RBAC | `:8093` | **`127.0.0.1:8093`** loopback |
 | Tenant Licensing | `:8094` | **`127.0.0.1:8094`** loopback |
 | Manifest Engine | `:8095` | **`127.0.0.1:8095`** loopback |
@@ -40,17 +51,19 @@
 | PostgreSQL primary | **`:5435`** | **`127.0.0.1:18096`** |
 | PostgreSQL replica | N/A (local) | **`127.0.0.1:18097`** |
 
-## Server deploy
+## Server deploy (buyer path)
 
 | Item | Value |
 |------|--------|
-| Install root | `/opt/maniforge/platform-core` |
+| Install root | `/opt/maniforge/platform-core` (or customer-chosen path) |
 | Env | `deploy/.env.platform` (from `.env.platform.server.example`) |
-| Install | `sudo bash deploy/scripts/install-production.sh` |
+| Install | `sudo bash deploy/scripts/install-production.sh --domain <customer-fqdn>` |
+| Staging (no TLS) | `install-production.sh` without `--domain` → `http://<customer-ip>:18090` |
 | Verify | `bash deploy/scripts/verify-production.sh` (includes preflight) |
+| Acceptance | `https://<customer-fqdn>/rbac/health` |
 | Scheduler | `sudo bash deploy/scripts/install-scheduler.sh` (Phase C) |
 
-**Status (2026-08-28):** Phase **C ~done** @ [`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box) — prod env, timers, preflight, backup-drill, edge-proxy install. **Last gate:** DNS `platform` → `79.174.90.4` + edge Caddy snippet → public HTTPS.
+**Status (2026-08-28):** Phase **C ~done** @ [`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box). Reference QA on `79.174.90.4` — verify OK. Internal gate: DNS `platform.maniforge.ru` → edge TLS (optional demo FQDN only).
 
 ## Ownership defaults
 

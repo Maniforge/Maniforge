@@ -2,7 +2,7 @@
 
 Операционная документация по развёртыванию платформы. Два контура: **production server** (покупатель / on-premise) и **local dev** (разработка).
 
-**Спецификация Production Box:** [docs/PRODUCTION_BOX.md](../docs/PRODUCTION_BOX.md) · релиз [`v0.1.1-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.1-box)
+**Спецификация Production Box:** [docs/PRODUCTION_BOX.md](../docs/PRODUCTION_BOX.md) · релиз [`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box)
 
 ---
 
@@ -27,17 +27,17 @@ bash deploy/scripts/verify-production.sh
 **HTTPS when :443 is already used (edge reverse proxy):**
 
 ```bash
-sudo bash deploy/scripts/install-production.sh --domain platform.customer.ru --edge-proxy --skip-apt --non-interactive
-# Append deploy/caddy/edge-platform.customer.ru.caddy to host edge Caddy — docs/DNS_PLATFORM.md
+sudo bash deploy/scripts/install-production.sh --domain platform.example.com --edge-proxy --skip-apt --non-interactive
+# Append deploy/caddy/edge-platform.example.com.caddy to host edge Caddy — docs/DNS_PLATFORM.md
 ```
-**С HTTPS** (DNS A-record указывает на сервер):
+**С HTTPS** (DNS A-record вашего FQDN указывает на **ваш** сервер):
 
 ```bash
-sudo bash deploy/scripts/install-production.sh --domain platform.customer.ru
+sudo bash deploy/scripts/install-production.sh --domain platform.example.com
 bash deploy/scripts/verify-production.sh
 ```
 
-**Staging по IP** (без TLS, порт 18090):
+**Staging на вашем сервере** (без TLS, порт 18090 — опция до выдачи домена):
 
 ```bash
 sudo bash deploy/scripts/install-production.sh
@@ -49,14 +49,14 @@ sudo bash deploy/scripts/install-production.sh
 |-----------|--------------|
 | PostgreSQL primary + replica | Docker (`compose.platform.server.yml`) |
 | rbac, tenant-licensing, manifest-engine, versioning, realtime | systemd + бинарники в `/opt/maniforge/platform-core/bin/` |
-| Gateway | host Caddy `:443` (production) или `:18090` (staging) → `127.0.0.1:8093–8097` |
+| Gateway | host Caddy `:443` (production) или `:18090` (staging на IP заказчика) → `127.0.0.1:8093–8097` |
 
 Env: `/opt/maniforge/platform-core/deploy/.env.platform` (из `.env.platform.server.example`).
 
 **Модель URL:**
 
-- `APP_URL` — только `scheme://host` (`https://platform.customer.ru` или `http://203.0.113.10`)
-- `MANIFORGE_GATEWAY_PORT` — `443` (HTTPS) или `18090` (staging)
+- `APP_URL` — только `scheme://host` (`https://platform.example.com` или `http://203.0.113.10`)
+- `MANIFORGE_GATEWAY_PORT` — `443` (HTTPS) или `18090` (staging без TLS)
 - Go собирает публичный origin при старте (`joinPublicOrigin`) — не добавляйте порт в `APP_URL`
 - Postgres на хосте: `MANIFORGE_DB_HOST=127.0.0.1`, `MANIFORGE_DB_PORT=18096`
 
@@ -64,8 +64,8 @@ Env: `/opt/maniforge/platform-core/deploy/.env.platform` (из `.env.platform.se
 
 | Профиль | URL |
 |---------|-----|
-| Production (HTTPS) | `https://<домен>/rbac/health` |
-| Staging (IP) | `http://<IP>:18090/rbac/health` |
+| Production (HTTPS) | `https://<customer-fqdn>/rbac/health` |
+| Staging на IP заказчика | `http://<ваш-IP>:18090/rbac/health` |
 
 ### Обслуживание
 
@@ -133,7 +133,7 @@ make platform-migrate   # повторно прогнать миграции (on
 
 ## Troubleshooting
 
-**Port busy** — local: измените mapping в `compose.platform.yml`. Server: Caddy владеет `443` (production) или `18090` (staging).
+**Port busy** — local: измените mapping в `compose.platform.yml`. Server: Caddy владеет `443` (production) или `18090` (staging без TLS на вашем IP).
 
 **migrate failed** — `journalctl -u maniforge-rbac`; запустите `./bin/maniforge-migrate` из `/opt/maniforge/platform-core` с sourced `.env.platform`. Проверьте `127.0.0.1:18096`.
 

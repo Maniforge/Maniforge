@@ -39,15 +39,15 @@ Read ownership from `kb/projects.md`. Never assume foreign layouts (`apps/web`, 
 
 | Phase | Goal | Done when |
 |-------|------|-----------|
-| **A** | One-command platform core | nzgapp Caddy `:18090` + Go loopback `:8093–8097`, journeys green |
-| **A→sell** | **v0.1.1-box** — verified core only | `Maniforge/Maniforge` `platform-core` → tag → server `git clone` + install + verify |
+| **A** | One-command platform core | Customer server: Caddy `:18090` or `:443` + Go loopback `:8093–8097`, journeys green |
+| **A→sell** | **v0.1.2-box** — verified core only | `Maniforge/Maniforge` `platform-core` → tag → customer `git clone` + install + verify |
 | **B** | Supply chain Go | warehouses → products → inventory → wms |
 | **C** | Hardening | TLS/domain, RBAC 50/50, preflight, backup drill, CI, scheduler |
 | **D** | Module packages | `.mfpack`, app store runtime |
 
-**Staging (2026-08-28):** [`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box) @ `905e518`. Phase **C:** prod profile + scheduler + preflight + backup on nzgapp. **Remaining:** DNS A `platform.maniforge.ru` → edge TLS (see `docs/DNS_PLATFORM.md`, `kb/PLATFORM_PRODUCTION.md`).
+**Internal QA (2026-08-28):** [`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box). Reference install on `79.174.90.4` (`nzgapp`) — Phase **C** prod profile + scheduler + preflight + backup. **Not the buyer model.** Optional internal demo: DNS A `platform.maniforge.ru` → edge TLS (see `docs/DNS_PLATFORM.md`, `kb/PLATFORM_PRODUCTION.md` — internal only).
 
-**Open items:** public HTTPS acceptance URL; restore drill RPO/RTO doc; PD retention timer.
+**Open items:** buyer docs on customer FQDN path; restore drill RPO/RTO doc; PD retention timer.
 
 **Paused until A–C:** supply-chain modules (warehouses, WMS), `.mfpack` app store runtime.
 

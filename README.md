@@ -6,7 +6,7 @@
 [![Release](https://img.shields.io/github/v/tag/Maniforge/Maniforge?label=v0.1.2-box&color=blue)](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-**Production deployment package** for the Maniforge platform: API-first backend with multi-tenant RBAC, tenant licensing, Manifest Engine (entity → REST + OpenAPI), versioning, and realtime services. Delivered as reproducible source, install scripts, and operational runbooks — ready for on-premise deployment on your infrastructure.
+**Production Box** — комплект для развёртывания платформы Maniforge **на инфраструктуре заказчика** (on-premise, local-first): API-first backend с multi-tenant RBAC, tenant licensing, Manifest Engine (сущность → REST + OpenAPI), versioning и realtime. Вы клонируете репозиторий на **свой** Ubuntu-сервер, настраиваете секреты и FQDN, запускаете `install-production.sh` — Maniforge **не** хостит ваш production.
 
 | | |
 |---|---|
@@ -21,9 +21,9 @@
 
 ## Что такое продаваемый деплой (Production Box)
 
-**Production Box** — это готовый к установке комплект платформенного ядра Maniforge для развёртывания на сервере заказчика (on-premise). Покупатель получает исходный код, скрипты установки и проверки, конфигурацию шлюза и базы данных, а также документацию по эксплуатации. Установка выполняется на чистой Ubuntu 22.04/24.04 LTS за один проход: клонирование репозитория, настройка секретов, автоматическая сборка сервисов, миграции и запуск через systemd.
+**Production Box** — это готовый к установке комплект платформенного ядра Maniforge для **самостоятельного** развёртывания на сервере заказчика. Покупатель получает исходный код, скрипты установки и проверки, конфигурацию шлюза и базы данных, а также документацию по эксплуатации. Установка на **вашей** Ubuntu 22.04/24.04 LTS: `git clone` → `cp deploy/.env.platform.server.example deploy/.env.platform` → правка секретов → `install-production.sh --domain <ваш-fqdn>`.
 
-Комплект **не** является облачным SaaS и **не** включает прикладные модули (WMS, supply chain, `.mfpack`) — они поставляются отдельными фазами. Версия **v0.1.2-box** — коммерчески воспроизводимый релиз platform core: проверен на production staging, публичен на GitHub, готов к передаче DevOps-команде покупателя.
+Комплект **не** является облачным SaaS, **не** предполагает хостинг у Maniforge и **не** включает прикладные модули (WMS, supply chain, `.mfpack`) — они поставляются отдельными фазами. Версия **v0.1.2-box** — коммерчески воспроизводимый релиз platform core, публичен на GitHub, готов к передаче DevOps-команде заказчика.
 
 ---
 
@@ -33,7 +33,7 @@
 |----------|--------------------------|
 | 5 Go-сервисов platform core (RBAC, Tenant Licensing, Manifest Engine, Versioning, Realtime) | App Store / runtime `.mfpack` |
 | PostgreSQL 16 — primary + streaming replica | Модули supply chain (warehouses, WMS, inventory) |
-| Caddy gateway (HTTPS по домену или staging по IP) | Managed SaaS / мульти-тенант хостинг |
+| Caddy gateway (HTTPS по вашему FQDN или staging по IP:18090 на вашем сервере) | Managed SaaS / мульти-тенант хостинг |
 | systemd unit-файлы с политикой перезапуска | Полный CI/CD pipeline заказчика |
 | Скрипты `install-production.sh`, `verify-production.sh`, upgrade path | PHP reference stack |
 
@@ -49,18 +49,11 @@
 | RAM | 4 GB | 8 GB |
 | Disk | 40 GB SSD | 80 GB SSD |
 | OS | Ubuntu 22.04 или 24.04 LTS | то же |
-| Сеть | 80, 443 (production) или 18090 (staging) | статический IP, DNS A-record |
+| Сеть | 80, 443 (production) или 18090 (staging без TLS на вашем IP) | статический IP, DNS A-record на ваш FQDN |
 
 Дополнительно на сервере: `git`, `sudo`, доступ в интернет для apt/docker при первой установке.
 
 ---
-
-## Production URL (reference box)
-
-| Profile | Health check |
-|---------|----------------|
-| Target (HTTPS) | `https://platform.maniforge.ru/rbac/health` — requires [DNS + edge TLS](docs/DNS_PLATFORM.md) |
-| Staging gateway | `http://79.174.90.4:18090/rbac/health` |
 
 ## Установка (greenfield)
 
@@ -76,14 +69,15 @@ cd Maniforge
 cp deploy/.env.platform.server.example deploy/.env.platform
 # отредактируйте секреты в deploy/.env.platform — не коммитьте этот файл
 
+# Staging без TLS на вашем IP (порт 18090) — опционально до выдачи домена:
 sudo bash deploy/scripts/install-production.sh --skip-apt --non-interactive
 bash deploy/scripts/verify-production.sh
 ```
 
-**Production с HTTPS** (DNS A-record уже указывает на сервер):
+**Production с HTTPS** (DNS A-record вашего FQDN уже указывает на сервер):
 
 ```bash
-sudo bash deploy/scripts/install-production.sh --domain platform.customer.ru
+sudo bash deploy/scripts/install-production.sh --domain platform.example.com
 bash deploy/scripts/verify-production.sh
 ```
 
@@ -97,14 +91,14 @@ bash deploy/scripts/verify-production.sh
 
 | Профиль | URL health-check |
 |---------|------------------|
-| Production (HTTPS) | `https://<ваш-домен>/rbac/health` |
-| Staging (IP, без TLS) | `http://<IP>:18090/rbac/health` |
+| Production (HTTPS) | `https://<customer-fqdn>/rbac/health` |
+| Staging на вашем сервере (IP, без TLS) | `http://<ваш-IP>:18090/rbac/health` |
 
 Пример:
 
 ```bash
-curl -sf https://platform.customer.ru/rbac/health
-# или для staging:
+curl -sf https://platform.example.com/rbac/health
+# или staging на вашем IP до выдачи TLS:
 curl -sf http://203.0.113.10:18090/rbac/health
 ```
 
