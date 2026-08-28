@@ -29,6 +29,8 @@ go build -trimpath -ldflags="-s -w" -o bin/maniforge-rbac ./cmd/rbac
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-tenant-licensing ./cmd/tenant-licensing
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-manifest-engine ./cmd/manifest-engine
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-versioning ./cmd/versioning
+go build -trimpath -ldflags="-s -w" -o bin/maniforge-manifest-journey ./cmd/manifest-journey
+go build -trimpath -ldflags="-s -w" -o bin/maniforge-platform-ops-journey ./cmd/platform-ops-journey
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-realtime ./cmd/realtime
 
 echo "build ok"
