@@ -1,0 +1,149 @@
+:root{--page-max:72rem}
+header.top{
+  padding-left:max(1.6rem, calc(50% - var(--page-max) / 2));
+  padding-right:max(1.6rem, calc(50% - var(--page-max) / 2));
+}
+.split{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 24rem;
+  column-gap:2.2rem;
+  width:min(var(--page-max), calc(100% - 3rem));
+  margin-inline:auto;
+  min-height:calc(100dvh - 64px);
+}
+.pane-greet{
+  position:relative;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:2.6rem 0 3.2rem;
+  overflow:hidden;
+}
+.pane-greet::before{
+  content:"";
+  position:absolute;
+  width:34rem;height:22rem;
+  left:-8rem;top:18%;
+  background:radial-gradient(closest-side,rgb(122 162 255/.22),transparent 72%);
+  pointer-events:none;
+}
+.pane-greet > *{position:relative;z-index:1}
+.pane-greet h1{
+  margin:.15rem 0 .55rem;
+  font-size:clamp(2.15rem,5vw,3.35rem);
+  letter-spacing:-.05em;line-height:1.05;
+  max-width:18ch;
+}
+.pane-greet .lead{font-size:1.08rem;max-width:34rem}
+.pane-greet .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));margin-top:.4rem}
+.pane-greet .tile span{display:block;color:var(--muted);font-size:.88rem;font-weight:400}
+.pane-login{
+  display:flex;align-items:center;justify-content:flex-end;
+  padding:2rem 0;
+}
+.pane-login .login-card{width:min(22rem,100%)}
+.login-card .btn{width:100%;margin-top:.35rem}
+.pane-login h2{margin:.2rem 0 .6rem;font-size:1.45rem;letter-spacing:-.03em}
+.pane-greet .cta,
+.about .cta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.55rem;
+  margin:1.1rem 0 0;
+}
+.pane-greet .status{
+  margin-top:1.4rem;
+  font-size:.8rem;
+  color:var(--muted);
+  letter-spacing:.04em;
+}
+.forge{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  gap:.7rem;
+  align-items:stretch;
+  margin-top:1.25rem;
+  max-width:40rem;
+}
+.forge-arrow{
+  align-self:center;
+  color:var(--accent);
+  font-size:1.35rem;
+  font-weight:600;
+  letter-spacing:-.04em;
+}
+.proof{
+  margin:0;
+  overflow-x:auto;
+  background:#0f1218;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:.85rem 1rem 1rem;
+  font-size:.8rem;
+  line-height:1.55;
+  color:#d7e2f0;
+}
+.proof-out{border-color:rgb(122 162 255/.35);box-shadow:0 0 0 1px rgb(122 162 255/.08) inset}
+.proof-label{
+  display:block;
+  margin:0 0 .45rem;
+  font-size:.68rem;
+  font-weight:600;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.proof code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.about{max-width:52rem;margin:0 auto}
+.about h1{font-size:clamp(1.85rem,4.2vw,2.55rem);letter-spacing:-.04em;line-height:1.12}
+.about section{margin:2.2rem 0}
+.about h2{margin:.2rem 0 .7rem;font-size:1.2rem;letter-spacing:-.02em}
+.about .prose{color:var(--muted)}
+.about .prose p{margin:0 0 .85rem}
+.about .facts{display:flex;flex-wrap:wrap;gap:.4rem;margin:1rem 0 0}
+.about .facts span{
+  font-size:.78rem;
+  color:var(--muted);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:.25rem .7rem;
+}
+.about .tag{display:block;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.35rem}
+.about .card h3{margin:0 0 .3rem;font-size:1rem}
+.about .card p{margin:0;color:var(--muted);font-size:.9rem}
+.about pre{
+  overflow-x:auto;
+  background:#0f1218;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:1rem 1.1rem;
+  font-size:.8rem;
+  line-height:1.55;
+  color:#d7e2f0;
+}
+.about pre code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.about .foot{
+  margin-top:2.4rem;
+  padding-top:1.1rem;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:.88rem;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  gap:.8rem;
+}
+@media(max-width:860px){
+  .split{grid-template-columns:1fr;width:min(var(--page-max), calc(100% - 2.4rem));column-gap:0}
+  .pane-greet{padding:2rem 0 1.4rem}
+  .pane-login{justify-content:stretch;padding:0 0 2.4rem}
+  .pane-login .login-card{width:100%}
+  .forge{grid-template-columns:1fr;max-width:28rem}
+  .forge-arrow{display:none}
+}
+
+.mf-desk-actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:.45rem;
+  margin-left:.35rem;
+}
