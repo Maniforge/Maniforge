@@ -6,6 +6,7 @@ package repository
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 )
 
 const (
@@ -155,6 +156,65 @@ func (r *ProjectRepository) FindByIDInScope(id int64, tenantID, subtenantID stri
 		 WHERE p.id = $1 AND p.tenant_id = $2 AND p.subtenant_id = $3 LIMIT 1`,
 		id, tenantID, subtenantID)
 	return scanProjectRow(row)
+}
+
+func (r *ProjectRepository) FindByID(id int64) (*ProjectRow, error) {
+	row := r.db.QueryRow(
+		`SELECT p.id, p.tenant_id, p.subtenant_id, p.code, p.name, p.status, p.is_default, p.metadata_json,
+		        p.warehouse_id, w.code, w.name, w.type
+		 FROM maniforge_projects p
+		 LEFT JOIN maniforge_wh_stocks w ON w.id = p.warehouse_id
+		 WHERE p.id = $1 LIMIT 1`, id)
+	return scanProjectRow(row)
+}
+
+func (r *ProjectRepository) FindByCodeInScope(tenantID, subtenantID, code string, includeTenantLevel bool) (*ProjectRow, error) {
+	query := `SELECT p.id, p.tenant_id, p.subtenant_id, p.code, p.name, p.status, p.is_default, p.metadata_json,
+		        p.warehouse_id, w.code, w.name, w.type
+		 FROM maniforge_projects p
+		 LEFT JOIN maniforge_wh_stocks w ON w.id = p.warehouse_id
+		 WHERE p.tenant_id = $1 AND p.code = $2 AND p.status = 'active' AND (p.subtenant_id = $3`
+	if includeTenantLevel {
+		query += ` OR p.subtenant_id = ''`
+	}
+	query += `) ORDER BY p.is_default DESC LIMIT 1`
+	return scanProjectRow(r.db.QueryRow(query, tenantID, code, subtenantID))
+}
+
+func (r *ProjectRepository) UpdateByID(p *ProjectRow) (*ProjectRow, error) {
+	if p == nil {
+		return nil, fmt.Errorf("project is nil")
+	}
+	meta := p.Metadata
+	if len(meta) == 0 {
+		meta = []byte("{}")
+	}
+	_, err := r.db.Exec(
+		`UPDATE maniforge_projects
+		 SET name = $2, status = $3, metadata_json = $4::jsonb, warehouse_id = $5
+		 WHERE id = $1`,
+		p.ID, p.Name, p.Status, string(meta), p.WarehouseID)
+	if err != nil {
+		return nil, err
+	}
+	return r.FindByID(p.ID)
+}
+
+func (r *ProjectRepository) AssignUser(userID, projectID int64, tenantID, subtenantID string) error {
+	_, err := r.db.Exec(
+		`INSERT INTO maniforge_user_project_memberships (user_id, project_id, tenant_id, subtenant_id)
+		 VALUES ($1, $2, $3, $4)
+		 ON CONFLICT (user_id, project_id) DO NOTHING`,
+		userID, projectID, tenantID, subtenantID)
+	return err
+}
+
+func (r *ProjectRepository) UserHasMembership(userID, projectID int64) (bool, error) {
+	var exists bool
+	err := r.db.QueryRow(
+		`SELECT EXISTS(SELECT 1 FROM maniforge_user_project_memberships WHERE user_id = $1 AND project_id = $2)`,
+		userID, projectID).Scan(&exists)
+	return exists, err
 }
 
 func (r *ProjectRepository) LookupWarehouseNode(tenantID string, warehouseID int64) (stockType, status string, err error) {

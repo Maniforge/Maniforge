@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WB — Остатки на складах</title>
+  <script src="js/base.js?v=1"></script>
+  <script src="js/theme.js?v=2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css?v=8" />
+</head>
+<body>
+  <div class="layout">
+    <header class="header">
+      <div>
+        <p class="eyebrow">Wildberries</p>
+        <h1>Остатки на складах</h1>
+      </div>
+      <div class="header-actions">
+        <span id="status-badge" class="badge">…</span>
+        <span id="sync-time" class="sync-time"></span>
+        <button type="button" class="btn btn-primary" id="btn-sync">Обновить с WB</button>
+        <button type="button" class="btn" id="btn-refresh">Обновить</button>
+        <a class="btn btn-link" href="/app/store">Склад Свит</a>
+        <a class="btn btn-link" href="/app/wms">Склад Свит (компакт)</a>
+        <a class="btn btn-link" href="/app/palette">Палитра</a>
+        <a class="btn btn-link" href="/app/settings">Настройки</a>
+        <a class="btn btn-link" href="https://svitHim.ru" target="_blank" rel="noopener noreferrer" title="СвитХимУчет">
+          <img
+            src="logo_SvitHim.svg"
+            alt="СвитХимУчет"
+            style="width:18px;height:18px;object-fit:contain;margin-right:8px;vertical-align:middle;"
+          />
+          СвитХимУчет
+        </a>
+        <a class="btn btn-link" href="/app/store?view=docs">Документация</a>
+      </div>
+    </header>
+
+    <section class="help card">
+      <strong>Как пользоваться</strong>
+      <ol>
+        <li><em>Обновить с WB</em> — подтягивает актуальные остатки (это не «новые» товары, а полная перезапись базы).</li>
+        <li>Если цифры не изменились — на Wildberries данные те же самые.</li>
+        <li>Включите <em>только с остатком</em>, чтобы скрыть нулевые строки. Артикул подтягивается из statistics API по nmId.</li>
+      </ol>
+    </section>
+
+    <section class="card toolbar">
+      <div class="filters">
+        <label class="field">
+          <span>Поиск</span>
+          <input type="search" id="q" placeholder="Артикул, nmId, штрихкод…" />
+        </label>
+        <label class="field">
+          <span>Склад WB</span>
+          <select id="warehouse"><option value="">Все склады</option></select>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="only-stock" checked />
+          Только с остатком
+        </label>
+      </div>
+      <p class="table-meta" id="table-meta">Загрузка…</p>
+    </section>
+
+    <section class="card table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Артикул</th>
+            <th>nmId</th>
+            <th>Штрихкод</th>
+            <th>Склад WB</th>
+            <th class="num">Остаток</th>
+            <th class="num">К клиенту</th>
+            <th class="num">От клиента</th>
+            <th>Категория</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="8" class="empty">Загрузка данных…</td></tr>
+        </tbody>
+      </table>
+      <div class="pager">
+        <button type="button" class="btn" id="btn-prev" disabled>← Назад</button>
+        <span id="pager-info">Стр. 1</span>
+        <button type="button" class="btn" id="btn-next">Вперёд →</button>
+      </div>
+    </section>
+
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="js/app.js?v=8"></script>
+</body>
+</html>

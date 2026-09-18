@@ -195,6 +195,120 @@ func (s *AdminService) CreateUser(session *repository.SessionRecord, input map[s
 	return map[string]any{"ok": true, "user": repository.AdminUser(*user)}, fiber.StatusCreated
 }
 
+func (s *AdminService) UpdateUser(session *repository.SessionRecord, input map[string]any) (map[string]any, int) {
+	targetUserID := int64Val(input["user_id"])
+	reason := strings.TrimSpace(stringVal(input["reason"]))
+	current, err := s.users.FindByIDInScope(targetUserID, session.TenantID, session.SubtenantID)
+	if err != nil {
+		return map[string]any{"ok": false, "error": err.Error()}, fiber.StatusInternalServerError
+	}
+	if targetUserID <= 0 || reason == "" || current == nil {
+		return map[string]any{"ok": false, "error": "user_id/reason обязательны, пользователь должен быть в scope"}, fiber.StatusUnprocessableEntity
+	}
+	upd := repository.IdentityUpdateInput{}
+	changedFields := []string{}
+	if _, ok := input["login"]; ok {
+		login := normalizeLogin(stringVal(input["login"]))
+		if login == "" {
+			return map[string]any{"ok": false, "error": "login не может быть пустым"}, fiber.StatusUnprocessableEntity
+		}
+		upd.Login = &login
+		changedFields = append(changedFields, "login")
+	}
+	if _, ok := input["email"]; ok {
+		email := strings.TrimSpace(stringVal(input["email"]))
+		if email != "" {
+			if _, err := mail.ParseAddress(email); err != nil {
+				return map[string]any{"ok": false, "error": "Некорректный email"}, fiber.StatusUnprocessableEntity
+			}
+		}
+		upd.Email = &email
+		changedFields = append(changedFields, "email")
+	}
+	if raw, ok := input["mfa_required"]; ok {
+		flag := false
+		switch t := raw.(type) {
+		case bool:
+			flag = t
+		case string:
+			flag = t == "1" || strings.EqualFold(t, "true")
+		}
+		upd.MFARequired = &flag
+		changedFields = append(changedFields, "mfa_required")
+	}
+	if raw, ok := input["password"]; ok && strings.TrimSpace(stringVal(raw)) != "" {
+		hash, err := security.HashPassword(stringVal(raw))
+		if err != nil {
+			return map[string]any{"ok": false, "error": err.Error()}, fiber.StatusInternalServerError
+		}
+		upd.PasswordHash = &hash
+		changedFields = append(changedFields, "password")
+	}
+	if _, ok := input["status"]; ok {
+		status := strings.TrimSpace(stringVal(input["status"]))
+		if !s.userAdmin.IsAllowedStatus(status) {
+			return map[string]any{"ok": false, "error": "Некорректный status"}, fiber.StatusUnprocessableEntity
+		}
+		if status == "active" && current.Status != "active" {
+			if payload, statusCode := s.guardUserActivationQuota(session.TenantID, session.SubtenantID); statusCode != 0 {
+				return payload, statusCode
+			}
+		}
+		upd.Status = &status
+		changedFields = append(changedFields, "status")
+	}
+	if len(changedFields) == 0 {
+		return map[string]any{"ok": true, "user": repository.AdminUser(*current), "revoked_sessions": 0}, fiber.StatusOK
+	}
+	user, err := s.users.ApplyIdentityUpdate(targetUserID, session.TenantID, session.SubtenantID, upd)
+	if err != nil {
+		if isUniqueViolation(err) {
+			return map[string]any{"ok": false, "error": "login/email уже занят в scope"}, fiber.StatusConflict
+		}
+		return map[string]any{"ok": false, "error": "Ошибка обновления пользователя"}, fiber.StatusInternalServerError
+	}
+	revoked := 0
+	if upd.Status != nil && (*upd.Status == "locked" || *upd.Status == "disabled") {
+		revoked, _ = s.sessions.RevokeAllForUser(targetUserID, "user_status_changed:"+*upd.Status)
+	}
+	actor := session.UserID
+	_ = s.audit.Write("admin.users.update", &actor, session.TenantID, session.SubtenantID, map[string]any{
+		"target_user_id": targetUserID, "changed_fields": changedFields, "revoked_sessions": revoked, "reason": reason,
+	})
+	if user != nil {
+		s.recordVersion(session, "maniforge_users", fmt.Sprint(targetUserID), "update", repository.AdminUser(*current), repository.AdminUser(*user), user.Login)
+	}
+	return map[string]any{"ok": true, "user": repository.AdminUser(*user), "revoked_sessions": revoked}, fiber.StatusOK
+}
+
+func (s *AdminService) DeleteUser(session *repository.SessionRecord, input map[string]any) (map[string]any, int) {
+	targetUserID := int64Val(input["user_id"])
+	reason := strings.TrimSpace(stringVal(input["reason"]))
+	if targetUserID <= 0 || reason == "" {
+		return map[string]any{"ok": false, "error": "user_id и reason обязательны"}, fiber.StatusUnprocessableEntity
+	}
+	if targetUserID == session.UserID {
+		return map[string]any{"ok": false, "error": "Нельзя удалить текущего администратора"}, fiber.StatusForbidden
+	}
+	if !s.targetUserExistsInScope(targetUserID, session) {
+		return map[string]any{"ok": false, "error": "Пользователь не найден в текущем контуре"}, fiber.StatusNotFound
+	}
+	before, _ := s.users.FindByIDInScope(targetUserID, session.TenantID, session.SubtenantID)
+	revoked, _ := s.sessions.RevokeAllForUser(targetUserID, "user_deleted")
+	deleted, err := s.users.DeleteInScope(targetUserID, session.TenantID, session.SubtenantID)
+	if err != nil {
+		return map[string]any{"ok": false, "error": err.Error()}, fiber.StatusInternalServerError
+	}
+	actor := session.UserID
+	_ = s.audit.Write("admin.users.delete", &actor, session.TenantID, session.SubtenantID, map[string]any{
+		"target_user_id": targetUserID, "revoked_sessions": revoked, "reason": reason,
+	})
+	if deleted && before != nil {
+		s.recordVersion(session, "maniforge_users", fmt.Sprint(targetUserID), "delete", repository.AdminUser(*before), nil, before.Login)
+	}
+	return map[string]any{"ok": true, "deleted": deleted, "revoked_sessions": revoked}, fiber.StatusOK
+}
+
 func (s *AdminService) AssignUserRole(session *repository.SessionRecord, input map[string]any) (map[string]any, int) {
 	targetUserID := int64Val(input["user_id"])
 	roleCode := strings.TrimSpace(stringVal(input["role_code"]))
@@ -222,6 +336,100 @@ func (s *AdminService) AssignUserRole(session *repository.SessionRecord, input m
 		"target_user_id": targetUserID, "role_code": roleCode, "reason": reason,
 	})
 	return map[string]any{"ok": true, "assigned": true}, fiber.StatusOK
+}
+
+func (s *AdminService) RevokeUserRole(session *repository.SessionRecord, input map[string]any) (map[string]any, int) {
+	targetUserID := int64Val(input["user_id"])
+	roleCode := strings.TrimSpace(stringVal(input["role_code"]))
+	reason := strings.TrimSpace(stringVal(input["reason"]))
+	if targetUserID <= 0 || roleCode == "" || reason == "" {
+		return map[string]any{"ok": false, "error": "user_id, role_code и reason обязательны"}, fiber.StatusUnprocessableEntity
+	}
+	if !s.targetUserExistsInScope(targetUserID, session) {
+		return map[string]any{"ok": false, "error": "Пользователь не найден в текущем контуре"}, fiber.StatusNotFound
+	}
+	guard := s.roleAdmin.GuardRoleMutation(session.UserID, targetUserID, roleCode, "revoke", session.TenantID, session.SubtenantID)
+	if guard["ok"] == false {
+		return map[string]any{"ok": false, "error": guard["error"]}, fiber.StatusForbidden
+	}
+	if !s.roles.RevokeRoleByCode(targetUserID, session.TenantID, session.SubtenantID, roleCode) {
+		return map[string]any{"ok": false, "error": "Роль не найдена или не назначена"}, fiber.StatusNotFound
+	}
+	actor := session.UserID
+	_ = s.audit.Write("admin.user_roles.revoke", &actor, session.TenantID, session.SubtenantID, map[string]any{
+		"target_user_id": targetUserID, "role_code": roleCode, "reason": reason,
+	})
+	s.recordVersion(session, "maniforge_user_roles", fmt.Sprintf("%d:%s", targetUserID, roleCode), "delete",
+		map[string]any{"user_id": targetUserID, "role_code": roleCode}, nil, roleCode)
+	_ = s.security.Write("admin.user_role.revoked", &actor, session.TenantID, session.SubtenantID, "warning", map[string]any{
+		"target_user_id": targetUserID, "role_code": roleCode, "reason": reason,
+	})
+	return map[string]any{"ok": true, "revoked": true}, fiber.StatusOK
+}
+
+func (s *AdminService) BatchUserRoles(session *repository.SessionRecord, input map[string]any) (map[string]any, int) {
+	reason := strings.TrimSpace(stringVal(input["reason"]))
+	rawItems := asAnySlice(input["items"])
+	dryRun := boolValDefault(input["dry_run"], false)
+	if reason == "" || len(rawItems) == 0 {
+		return map[string]any{"ok": false, "error": "reason и непустой items[] обязательны"}, fiber.StatusUnprocessableEntity
+	}
+	maxItems := envInt("RBAC_BATCH_MAX_ITEMS", 100)
+	if len(rawItems) > maxItems {
+		return map[string]any{"ok": false, "error": fmt.Sprintf("Слишком большой batch, максимум %d", maxItems)}, fiber.StatusUnprocessableEntity
+	}
+	ops := make([]repository.RoleMutation, 0, len(rawItems))
+	for index, entry := range rawItems {
+		m, ok := entry.(map[string]any)
+		if !ok {
+			return map[string]any{"ok": false, "error": "Неверный элемент batch", "item_index": index}, fiber.StatusUnprocessableEntity
+		}
+		targetUserID := int64Val(m["user_id"])
+		roleCode := strings.TrimSpace(stringVal(m["role_code"]))
+		action := strings.TrimSpace(stringVal(m["action"]))
+		if targetUserID <= 0 || roleCode == "" || (action != "assign" && action != "revoke") {
+			return map[string]any{"ok": false, "error": "Неверный элемент batch", "item_index": index}, fiber.StatusUnprocessableEntity
+		}
+		if !s.targetUserExistsInScope(targetUserID, session) {
+			return map[string]any{"ok": false, "error": "Пользователь не найден в текущем контуре", "item_index": index}, fiber.StatusNotFound
+		}
+		guard := s.roleAdmin.GuardRoleMutation(session.UserID, targetUserID, roleCode, action, session.TenantID, session.SubtenantID)
+		if guard["ok"] == false {
+			return map[string]any{"ok": false, "error": guard["error"], "item_index": index}, fiber.StatusForbidden
+		}
+		ops = append(ops, repository.RoleMutation{UserID: targetUserID, RoleCode: roleCode, Action: action})
+	}
+
+	if dryRun {
+		summary := s.roleAdmin.SimulateBatchSummary(session.TenantID, session.SubtenantID, ops)
+		actor := session.UserID
+		_ = s.audit.Write("admin.user_roles.batch.dry_run", &actor, session.TenantID, session.SubtenantID, map[string]any{
+			"reason": reason, "summary": summary.ToMap(),
+		})
+		return map[string]any{"ok": true, "dry_run": true, "summary": summary.ToMap()}, fiber.StatusOK
+	}
+
+	summary, err := s.roles.ApplyRoleMutationsBatch(session.TenantID, session.SubtenantID, session.UserID, ops)
+	if err != nil {
+		return map[string]any{"ok": false, "error": "Ошибка batch role update"}, fiber.StatusInternalServerError
+	}
+	for _, op := range ops {
+		if op.Action == "revoke" {
+			s.recordVersion(session, "maniforge_user_roles", fmt.Sprintf("%d:%s", op.UserID, op.RoleCode), "delete",
+				map[string]any{"user_id": op.UserID, "role_code": op.RoleCode}, nil, op.RoleCode)
+		} else {
+			s.recordVersion(session, "maniforge_user_roles", fmt.Sprintf("%d:%s", op.UserID, op.RoleCode), "insert",
+				nil, map[string]any{"user_id": op.UserID, "role_code": op.RoleCode}, op.RoleCode)
+		}
+	}
+	actor := session.UserID
+	_ = s.audit.Write("admin.user_roles.batch", &actor, session.TenantID, session.SubtenantID, map[string]any{
+		"reason": reason, "summary": summary.ToMap(),
+	})
+	_ = s.security.Write("admin.user_roles.batch", &actor, session.TenantID, session.SubtenantID, "warning", map[string]any{
+		"reason": reason, "summary": summary.ToMap(),
+	})
+	return map[string]any{"ok": true, "summary": summary.ToMap()}, fiber.StatusOK
 }
 
 func (s *AdminService) ListUserRoles(session *repository.SessionRecord, targetUserID int64) (map[string]any, int) {
@@ -546,6 +754,21 @@ func parseStringSlice(v any) ([]string, bool) {
 		out = append(out, stringVal(item))
 	}
 	return out, true
+}
+
+func asAnySlice(v any) []any {
+	switch t := v.(type) {
+	case []any:
+		return t
+	case []map[string]any:
+		out := make([]any, 0, len(t))
+		for _, item := range t {
+			out = append(out, item)
+		}
+		return out
+	default:
+		return nil
+	}
 }
 
 type batchItemError struct {

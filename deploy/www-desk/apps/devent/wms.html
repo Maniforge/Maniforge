@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Склад Свит</title>
+  <script src="js/base.js?v=1"></script>
+  <script src="js/theme.js?v=2"></script>
+  <link rel="stylesheet" href="css/app.css?v=8" />
+  <link rel="stylesheet" href="css/wms.css?v=7" />
+</head>
+<body class="wms-body">
+  <header class="wms-header">
+    <div class="wms-header-top">
+      <a href="/app/store" class="wms-back">← Склад Свит</a>
+      <h1>Склад Свит</h1>
+      <button type="button" class="btn btn-sm btn-primary" id="btn-refresh-wms" title="Обновить данные WMS">↻</button>
+    </div>
+    <p class="wms-status" id="wms-status">WMS</p>
+    <label class="wms-wh-select">
+      <span>Склад</span>
+      <select id="warehouse-id"></select>
+    </label>
+  </header>
+
+  <main class="wms-main" id="wms-main"></main>
+
+  <nav class="wms-nav" id="wms-nav">
+    <button type="button" data-tab="stock" class="active">Остатки</button>
+    <button type="button" data-tab="products">Товары</button>
+    <button type="button" data-tab="receipt">Приход</button>
+    <button type="button" data-tab="expense">Расход</button>
+    <button type="button" data-tab="orders">Заявки</button>
+  </nav>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="js/wms.js?v=8"></script>
+</body>
+</html>

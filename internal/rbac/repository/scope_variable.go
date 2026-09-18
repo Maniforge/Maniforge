@@ -49,6 +49,47 @@ func (r *ScopeVariableRepository) FindByKey(tenantID, subtenantID string, projec
 	return &item, err
 }
 
+func (r *ScopeVariableRepository) ListVisible(tenantID, subtenantID string, projectID sql.NullInt64) ([]ScopeVariable, error) {
+	var (
+		rows *sql.Rows
+		err  error
+	)
+	if projectID.Valid {
+		rows, err = r.db.Query(
+			`SELECT id, tenant_id, subtenant_id, project_id, var_key, var_value, value_type, scope_level
+			 FROM maniforge_scope_variables
+			 WHERE tenant_id = $1 AND (
+				(scope_level = 'tenant' AND subtenant_id = '' AND project_id IS NULL)
+				OR (scope_level = 'subtenant' AND subtenant_id = $2 AND project_id IS NULL)
+				OR (scope_level = 'project' AND project_id = $3)
+			 )
+			 ORDER BY scope_level ASC, var_key ASC`, tenantID, subtenantID, projectID.Int64)
+	} else {
+		rows, err = r.db.Query(
+			`SELECT id, tenant_id, subtenant_id, project_id, var_key, var_value, value_type, scope_level
+			 FROM maniforge_scope_variables
+			 WHERE tenant_id = $1 AND (
+				(scope_level = 'tenant' AND subtenant_id = '' AND project_id IS NULL)
+				OR (scope_level = 'subtenant' AND subtenant_id = $2 AND project_id IS NULL)
+			 )
+			 ORDER BY scope_level ASC, var_key ASC`, tenantID, subtenantID)
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ScopeVariable
+	for rows.Next() {
+		var item ScopeVariable
+		if err := rows.Scan(&item.ID, &item.TenantID, &item.SubtenantID, &item.ProjectID,
+			&item.Key, &item.Value, &item.ValueType, &item.ScopeLevel); err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
 func (r *ScopeVariableRepository) Upsert(
 	tenantID, subtenantID string, projectID sql.NullInt64, scopeLevel, key, value, valueType string,
 ) (*ScopeVariable, error) {

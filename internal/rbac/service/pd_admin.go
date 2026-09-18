@@ -5,6 +5,7 @@ package service
 
 import (
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"maniforge/internal/rbac/repository"
@@ -112,4 +113,28 @@ func (s *PDAdminService) ResolveSubjectRequest(session *repository.SessionRecord
 		"request_id": requestID, "status": status,
 	})
 	return map[string]any{"ok": true, "request": row}, fiber.StatusOK
+}
+
+func (s *PDAdminService) AcknowledgeDPA(session *repository.SessionRecord) (map[string]any, int) {
+	profile, err := s.pd.FindOperatorProfile(session.TenantID)
+	if err != nil {
+		return map[string]any{"ok": false, "error": err.Error()}, fiber.StatusInternalServerError
+	}
+	if profile == nil {
+		return map[string]any{"ok": false, "error": "Профиль оператора не найден"}, fiber.StatusNotFound
+	}
+	meta, _ := profile["metadata"].(map[string]any)
+	if meta == nil {
+		meta = map[string]any{}
+	}
+	meta["dpa_accepted_at"] = time.Now().UTC().Format("2006-01-02 15:04:05")
+	meta["dpa_accepted_by_user_id"] = session.UserID
+	profile["metadata"] = meta
+	updated, err := s.pd.UpsertOperatorProfile(session.TenantID, profile)
+	if err != nil {
+		return map[string]any{"ok": false, "error": err.Error()}, fiber.StatusInternalServerError
+	}
+	actor := session.UserID
+	_ = s.audit.Write("pd.dpa.acknowledged", &actor, session.TenantID, session.SubtenantID, map[string]any{})
+	return map[string]any{"ok": true, "profile": updated}, fiber.StatusOK
 }

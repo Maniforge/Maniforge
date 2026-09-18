@@ -61,6 +61,27 @@ func (r *Repository) ListInScope(tenantID, subtenantID string, f ChangeFilters) 
 	return scanChangeRows(rows)
 }
 
+func (r *Repository) FindByIDInScope(id int64, tenantID, subtenantID string) (map[string]any, error) {
+	rows, err := r.db.Query(
+		`SELECT id, tenant_id, subtenant_id, project_id, entity_table, entity_id, entity_label,
+			operation, actor_user_id, correlation_id, before_json, after_json, changed_at
+		 FROM maniforge_ver_changes
+		 WHERE id = $1 AND tenant_id = $2 AND subtenant_id = $3
+		 LIMIT 1`, id, tenantID, subtenantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items, err := scanChangeRows(rows)
+	if err != nil {
+		return nil, err
+	}
+	if len(items) == 0 {
+		return nil, nil
+	}
+	return items[0], nil
+}
+
 func (r *Repository) CountInScope(tenantID, subtenantID string, f ChangeFilters) (int, error) {
 	where := []string{"tenant_id = $1", "subtenant_id = $2"}
 	args := []any{tenantID, subtenantID}

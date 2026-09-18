@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Склад Свит — учёт остатков</title>
+  <script src="js/base.js?v=1"></script>
+  <script src="js/theme.js?v=2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css?v=8" />
+  <link rel="stylesheet" href="css/store.css?v=28" />
+  <link rel="stylesheet" href="css/docs.css?v=3" />
+</head>
+<body class="store-app" data-store-view="stock">
+  <div class="store-loading hidden" id="store-loading" aria-hidden="true"></div>
+  <aside class="store-sidebar" id="sidebar">
+    <div class="store-brand">
+      <div class="store-brand-mark">СВ</div>
+      <div>
+        <strong>Склад Свит</strong>
+        <span class="store-brand-sub">учёт остатков</span>
+      </div>
+    </div>
+
+    <nav class="store-menu" id="store-menu" aria-label="Разделы">
+      <button type="button" data-view="stock" class="active">
+        <span class="menu-icon" aria-hidden="true">▣</span>
+        <span class="menu-text">Каталог</span>
+        <span class="menu-badge" id="badge-stock"></span>
+      </button>
+      <button type="button" data-view="movements">
+        <span class="menu-icon" aria-hidden="true">⇄</span>
+        <span class="menu-text">Движения</span>
+      </button>
+      <button type="button" data-view="orders">
+        <span class="menu-icon" aria-hidden="true">📋</span>
+        <span class="menu-text">Заявки</span>
+      </button>
+      <button type="button" data-view="docs">
+        <span class="menu-icon" aria-hidden="true">📖</span>
+        <span class="menu-text">Документация</span>
+      </button>
+    </nav>
+
+    <div class="store-sidebar-foot">
+      <div class="store-sidebar-links">
+        <button type="button" class="store-sidebar-linkbtn" data-view="docs">Справка</button>
+        <a href="/swagger" target="_blank" rel="noopener">Swagger</a>
+        <a href="/sandbox/swagger" target="_blank" rel="noopener">Sandbox</a>
+      </div>
+      <div class="store-phone" id="store-phone">
+        <p class="store-phone-label">С телефона</p>
+        <p class="store-phone-hint">Та же Wi‑Fi сеть</p>
+        <img class="store-phone-qr hidden" id="phone-qr" alt="QR-код" width="120" height="120" />
+        <a class="store-phone-link" id="phone-url" href="#" target="_blank" rel="noopener">Загрузка…</a>
+        <button type="button" class="btn btn-sm store-phone-copy" id="phone-copy">Копировать ссылку</button>
+        <details class="store-phone-help">
+          <summary>Не открывается?</summary>
+          <ol>
+            <li>Телефон в той же Wi‑Fi, не мобильный интернет</li>
+            <li>Запустите от администратора: <code>scripts\open-phone-access.bat</code></li>
+            <li>Или в PowerShell (админ):<br><code>netsh advfirewall firewall add rule name="WB API 8090" dir=in action=allow protocol=TCP localport=8090</code></li>
+          </ol>
+        </details>
+      </div>
+    </div>
+  </aside>
+
+  <div class="store-main">
+    <header class="store-toolbar">
+      <button type="button" class="store-menu-toggle" id="menu-toggle" aria-label="Меню">☰</button>
+      <div class="store-toolbar-fields">
+        <label class="store-field store-field-wh">
+          <span>Склад</span>
+          <button type="button" class="warehouse-picker" id="warehouse-picker" aria-haspopup="dialog" aria-controls="warehouse-modal">
+            <span class="warehouse-picker-label" id="warehouse-label">Загрузка…</span>
+            <span class="warehouse-picker-chevron" aria-hidden="true">▾</span>
+          </button>
+        </label>
+        <label class="store-field store-field-search">
+          <span>Поиск <kbd class="kbd-hint">/</kbd></span>
+          <div class="search-wrap">
+            <input type="search" id="global-search" placeholder="Артикул, название, штрихкод…" autocomplete="off" />
+            <button type="button" class="search-clear hidden" id="search-clear" aria-label="Очистить">×</button>
+          </div>
+        </label>
+      </div>
+      <div class="store-toolbar-actions store-toolbar-stock-only">
+        <label class="store-stock-filter" title="Показывать только позиции с остатком">
+          <input type="checkbox" id="only-stock" checked />
+          <span>С остатком</span>
+        </label>
+        <button type="button" class="btn" id="btn-export" title="Скачать CSV">↓ CSV</button>
+        <button type="button" class="btn btn-primary store-sync-btn" id="btn-refresh-stock" title="Обновить остатки">
+          <span class="sync-icon" id="sync-icon">↻</span> Обновить
+        </button>
+      </div>
+    </header>
+
+    <div class="store-content">
+      <section class="store-view active" id="view-stock" data-view="stock">
+        <div class="store-table-wrap card" id="stock-table-wrap">
+          <div class="store-table-scroll">
+            <table class="store-table" id="table-stock">
+              <thead>
+                <tr>
+                  <th><button type="button" class="th-sort" data-sort="article">Артикул</button></th>
+                  <th><button type="button" class="th-sort" data-sort="name">Наименование</button></th>
+                  <th><button type="button" class="th-sort" data-sort="barcode">Штрихкод</button></th>
+                  <th class="num"><button type="button" class="th-sort" data-sort="stock">Остаток</button></th>
+                  <th class="num"><button type="button" class="th-sort" data-sort="assembly">Наборка</button></th>
+                  <th class="num"><button type="button" class="th-sort active desc" data-sort="free">Свободно</button></th>
+                </tr>
+              </thead>
+              <tbody id="list-stock"></tbody>
+              <tfoot id="foot-stock" class="hidden">
+                <tr>
+                  <td colspan="3">
+                    <strong>Итого</strong>
+                    <span class="foot-note hidden" id="foot-stock-note"></span>
+                  </td>
+                  <td class="num cell-qty" id="foot-stock-qty">0</td>
+                  <td class="num cell-qty" id="foot-assembly-sum">0</td>
+                  <td class="num cell-qty" id="foot-stock-sum">0</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div class="store-empty hidden" id="empty-stock">
+            <div class="empty-icon">📦</div>
+            <p id="empty-stock-text">Нет остатков на этом складе</p>
+            <p class="empty-hint" id="empty-stock-hint">Найдите товар через поиск и укажите количество в «Свободно»</p>
+            <div class="empty-actions">
+              <button type="button" class="btn btn-secondary hidden" id="empty-refresh-btn">Обновить</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-grid card hidden" id="stock-cards"></div>
+      </section>
+
+      <section class="store-view" id="view-movements" data-view="movements">
+        <div class="movements-tabs" role="tablist" aria-label="Раздел движений">
+          <button type="button" class="movements-tab active" data-movement="receipt" role="tab" aria-selected="true">Приход</button>
+          <button type="button" class="movements-tab" data-movement="expense" role="tab" aria-selected="false">Расход</button>
+          <button type="button" class="movements-tab" data-movement="transfers" role="tab" aria-selected="false">Перемещения</button>
+          <button type="button" class="movements-tab" data-movement="logs" role="tab" aria-selected="false">Логи</button>
+        </div>
+
+        <div class="movement-panel active" id="panel-receipt" data-movement="receipt" role="tabpanel">
+          <div class="ops-grid ops-grid-single ops-grid-fill">
+            <div class="ops-form-col ops-form-wide">
+              <h2 class="ops-title">Приход на склад</h2>
+              <p class="ops-desc">Оприходование в выбранное помещение · можно загрузить CSV/XLSX</p>
+              <form class="store-form card" id="form-receipt" data-mov-type="receipt">
+                <div class="ops-product-field">
+                  <span class="ops-product-label">Товар</span>
+                  <button type="button" class="product-picker" id="product-picker-receipt" data-picker-for="receipt" aria-haspopup="dialog">
+                    <span class="product-picker-label is-empty" id="product-picker-label-receipt">Выберите товар…</span>
+                    <span class="product-picker-chevron" aria-hidden="true">▾</span>
+                  </button>
+                  <input type="hidden" name="product_id" id="receipt-product-id" value="" />
+                  <input type="hidden" name="supplier_article" id="receipt-article" value="" />
+                  <input type="hidden" name="barcode" id="receipt-barcode" value="" />
+                </div>
+                <label>Количество<input name="quantity" type="number" min="1" value="1" required /></label>
+                <label>№ документа<input name="doc_number" placeholder="ПН-0001" /></label>
+                <label>Комментарий<textarea name="comment" rows="2"></textarea></label>
+                <button type="submit" class="btn btn-primary btn-block">Провести приход</button>
+              </form>
+              <div class="ops-import card">
+                <h3 class="view-subtitle">Импорт из файла</h3>
+                <p class="ops-desc">Колонки: supplier_article / barcode / quantity · <a href="/api/v1/wms/movements/import-template.csv" download>скачать шаблон CSV</a></p>
+                <input type="file" id="import-receipt" accept=".csv,.xlsx,.xlsm,text/csv" />
+                <button type="button" class="btn btn-sm" id="btn-import-receipt" data-import="receipt">Загрузить приход</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="movement-panel" id="panel-expense" data-movement="expense" role="tabpanel">
+          <div class="ops-grid ops-grid-single ops-grid-fill">
+            <div class="ops-form-col ops-form-wide">
+              <h2 class="ops-title">Расход со склада</h2>
+              <p class="ops-desc">Списание из выбранного помещения · можно загрузить CSV/XLSX</p>
+              <form class="store-form card" id="form-expense" data-mov-type="expense">
+                <div class="ops-product-field">
+                  <span class="ops-product-label">Товар</span>
+                  <button type="button" class="product-picker" id="product-picker-expense" data-picker-for="expense" aria-haspopup="dialog">
+                    <span class="product-picker-label is-empty" id="product-picker-label-expense">Выберите товар…</span>
+                    <span class="product-picker-chevron" aria-hidden="true">▾</span>
+                  </button>
+                  <input type="hidden" name="product_id" id="expense-product-id" value="" />
+                  <input type="hidden" name="supplier_article" id="expense-article" value="" />
+                  <input type="hidden" name="barcode" id="expense-barcode" value="" />
+                </div>
+                <label>Количество<input name="quantity" type="number" min="1" value="1" required /></label>
+                <label>№ документа<input name="doc_number" placeholder="РН-0001" /></label>
+                <label>Комментарий<textarea name="comment" rows="2"></textarea></label>
+                <button type="submit" class="btn btn-primary btn-block">Провести расход</button>
+              </form>
+              <div class="ops-import card">
+                <h3 class="view-subtitle">Импорт из файла</h3>
+                <p class="ops-desc">Колонки: supplier_article / barcode / quantity · <a href="/api/v1/wms/movements/import-template.csv" download>шаблон CSV</a></p>
+                <input type="file" id="import-expense" accept=".csv,.xlsx,.xlsm,text/csv" />
+                <button type="button" class="btn btn-sm" id="btn-import-expense" data-import="expense">Загрузить расход</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="movement-panel" id="panel-transfers" data-movement="transfers" role="tabpanel">
+          <div class="ops-grid ops-grid-fill transfers-layout">
+            <div class="ops-form-col">
+              <div class="transfers-list-head">
+                <h2 class="ops-title">Перемещения</h2>
+                <button type="button" class="btn btn-primary btn-sm" id="btn-new-transfer" title="Новое перемещение">+</button>
+              </div>
+              <p class="ops-desc">Со склада на склад. Нажмите строку — состав.</p>
+              <ul class="store-journal store-journal-fill" id="list-transfers"></ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="movement-panel" id="panel-logs" data-movement="logs" role="tabpanel">
+          <div class="ops-grid ops-grid-single ops-grid-fill">
+            <div class="ops-history-col ops-history-full">
+              <h2 class="ops-title">Логи изменений</h2>
+              <p class="ops-desc">Журнал приходов, расходов, инвентаризаций и автоматики</p>
+              <div class="logs-toolbar">
+                <div class="search-wrap logs-search-wrap">
+                  <input type="search" id="logs-search" placeholder="Поиск по артикулу, названию, штрихкоду…" autocomplete="off" />
+                  <button type="button" class="search-clear hidden" id="logs-search-clear" aria-label="Очистить">×</button>
+                </div>
+              </div>
+              <ul class="store-journal store-journal-fill" id="list-logs"></ul>
+              <div class="logs-loading hidden" id="logs-loading">Загрузка…</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="store-modal hidden" id="transfer-modal" role="dialog" aria-modal="true">
+        <div class="store-modal-backdrop" id="transfer-modal-backdrop"></div>
+        <div class="store-modal-panel">
+          <div class="store-modal-header">
+            <h2 id="transfer-modal-title">Перемещение</h2>
+            <button type="button" class="store-modal-close" id="transfer-modal-close" aria-label="Закрыть">×</button>
+          </div>
+          <div class="product-modal-body" id="transfer-modal-body"></div>
+        </div>
+      </div>
+
+      <div class="store-modal hidden" id="transfer-create-modal" role="dialog" aria-modal="true">
+        <div class="store-modal-backdrop" data-transfer-create-close></div>
+        <div class="store-modal-panel">
+          <div class="store-modal-header">
+            <h2>Новое перемещение</h2>
+            <button type="button" class="store-modal-close" data-transfer-create-close aria-label="Закрыть">×</button>
+          </div>
+          <div class="product-modal-body">
+            <form class="store-form" id="form-transfer">
+              <label>Откуда
+                <select name="from_warehouse_id" id="transfer-from" required></select>
+              </label>
+              <label>Куда
+                <select name="to_warehouse_id" id="transfer-to" required></select>
+              </label>
+              <div class="ops-product-field">
+                <span class="ops-product-label">Товар</span>
+                <button type="button" class="product-picker" id="product-picker-transfer" data-picker-for="transfer" aria-haspopup="dialog">
+                  <span class="product-picker-label is-empty" id="product-picker-label-transfer">Выберите товар…</span>
+                  <span class="product-picker-chevron" aria-hidden="true">▾</span>
+                </button>
+                <input type="hidden" name="product_id" id="transfer-product-id" value="" />
+                <input type="hidden" name="supplier_article" id="transfer-article" value="" />
+                <input type="hidden" name="barcode" id="transfer-barcode" value="" />
+              </div>
+              <label>Количество<input name="quantity" type="number" min="1" value="1" required /></label>
+              <label>№ документа<input name="doc_number" placeholder="ПМ-0001" /></label>
+              <label>Комментарий<textarea name="comment" rows="2"></textarea></label>
+              <div class="wms-order-actions" style="display:flex;gap:8px;margin-top:8px">
+                <button type="submit" class="btn btn-primary">Переместить</button>
+                <button type="button" class="btn" data-transfer-create-close>Отмена</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <section class="store-view" id="view-orders" data-view="orders">
+        <iframe
+          class="store-embed-frame"
+          id="orders-frame"
+          title="Заявки клиентов"
+          src="about:blank"
+          loading="lazy"
+        ></iframe>
+      </section>
+
+      <section class="store-view store-docs-view" id="view-docs" data-view="docs">
+        <div class="docs-in-store">
+          <header class="docs-in-store-head">
+            <div>
+              <h2 class="section-title">Документация</h2>
+              <p class="docs-lead">Один API. Меняется только base URL и способ входа.</p>
+            </div>
+            <a class="btn btn-sm btn-primary" href="/swagger" target="_blank" rel="noopener">Swagger</a>
+          </header>
+          <nav class="docs-toc" aria-label="Разделы">
+            <a href="#doc-base">Base URL</a>
+            <a href="#doc-auth">Auth</a>
+            <a href="#doc-scanner">Сканер</a>
+            <a href="#doc-orders">Заявки</a>
+            <a href="#doc-auto-inv">AUTO_INVENTORY</a>
+          </nav>
+          <div class="docs-main">
+            <section class="docs-card" id="doc-base">
+              <h3 class="section-title">Base URL</h3>
+              <p class="docs-lead">Пути ручек одинаковые. Отличается только префикс хоста.</p>
+              <div class="docs-table-wrap">
+                <table class="docs-table">
+                  <thead><tr><th></th><th>Base</th><th>Пример warehouses</th></tr></thead>
+                  <tbody>
+                    <tr>
+                      <td>Prod</td>
+                      <td><code>https://devent.svitex.ru</code></td>
+                      <td><code>GET /api/v1/wms/warehouses</code></td>
+                    </tr>
+                    <tr>
+                      <td>Sandbox</td>
+                      <td><code>https://devent.svitex.ru/sandbox</code></td>
+                      <td><code>GET /sandbox/api/v1/wms/warehouses</code></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="docs-note">Ниже — путь после base. Для песочницы добавьте префикс <code>/sandbox</code>.</p>
+              <p class="docs-meta">Интерактив: <a href="/swagger" target="_blank" rel="noopener">/swagger</a> · sandbox: <a href="/sandbox/swagger" target="_blank" rel="noopener">/sandbox/swagger</a></p>
+            </section>
+            <section class="docs-card" id="doc-auth">
+              <h3 class="section-title">Auth</h3>
+              <ul class="docs-list">
+                <li><strong>Prod · сотрудник</strong> — cookie <code>wb_admin_session</code> после <code>POST /api/admin/login</code></li>
+                <li><strong>Prod · админ</strong> — <code>POST /api/admin/login-key</code> + <code>ADMIN_ACCESS_KEY</code></li>
+                <li><strong>Sandbox</strong> — <code>X-API-Key: &lt;SANDBOX_API_KEY&gt;</code></li>
+              </ul>
+            </section>
+            <section class="docs-card" id="doc-scanner">
+              <h3 class="section-title">Сканер · пик → набрано</h3>
+              <pre class="docs-code"><code>POST /api/v1/wms/{order_id}/pick/{warehouse_id}
+Content-Type: application/json
+
+{
+  "items": [
+    { "barcode": "4600000000001", "quantity": 1 },
+    { "product_id": 42, "quantity": 2 }
+  ]
+}</code></pre>
+              <p class="docs-note">Пик увеличивает наборку, физический остаток не меняет. Id: product_id / barcode / артикул.</p>
+            </section>
+            <section class="docs-card" id="doc-orders">
+              <h3 class="section-title">Заявки · клиенты</h3>
+              <ul class="docs-list">
+                <li><code>GET/POST /clients</code> · в заявке только <code>client_id</code></li>
+                <li><code>GET/POST /orders</code> · <code>DELETE|PATCH …/items/{id}</code></li>
+                <li><code>POST /orders/{id}/complete</code> · <code>/cancel</code></li>
+              </ul>
+            </section>
+            <section class="docs-card" id="doc-auto-inv">
+              <h3 class="section-title">AUTO_INVENTORY</h3>
+              <p class="docs-lead">Env: <code>WMS_AUTO_INVENTORY=1</code> (по умолчанию вкл.)</p>
+              <p class="docs-note">При расходе/пике, если свободно &lt; нужно — выравнивание, затем операция.</p>
+            </section>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <nav class="store-mobile-nav" id="mobile-nav" aria-label="Навигация">
+    <button type="button" data-view="stock" class="active"><span>▣</span>Каталог</button>
+    <button type="button" data-view="movements"><span>⇄</span>Движения</button>
+    <button type="button" data-view="orders"><span>📋</span>Заявки</button>
+    <button type="button" id="mobile-refresh"><span>↻</span>Обновить</button>
+  </nav>
+
+  <div class="store-modal hidden" id="product-modal" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+    <div class="store-modal-backdrop" id="product-modal-backdrop"></div>
+    <div class="store-modal-panel product-modal-panel">
+      <div class="store-modal-header">
+        <h2 id="product-modal-title">Товар</h2>
+        <button type="button" class="store-modal-close" id="product-modal-close" aria-label="Закрыть">×</button>
+      </div>
+      <div class="product-modal-body">
+        <div class="product-dash-stats" id="product-dash-stats"></div>
+        <dl class="product-detail-list" id="product-detail-list"></dl>
+        <section class="product-branches">
+          <h3 class="product-branches-title">Остатки по филиалам</h3>
+          <div class="product-branches-loading hidden" id="product-branches-loading">Загрузка…</div>
+          <div class="product-branches-table-wrap">
+            <table class="product-branches-table" id="product-branches-table">
+              <thead>
+                <tr>
+                  <th>Филиал</th>
+                  <th class="num">Остаток</th>
+                  <th class="num">Наборка</th>
+                  <th class="num">Свободно</th>
+                </tr>
+              </thead>
+              <tbody id="product-branches-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="store-modal hidden" id="warehouse-modal" role="dialog" aria-modal="true" aria-labelledby="warehouse-modal-title">
+    <div class="store-modal-backdrop" id="warehouse-modal-backdrop"></div>
+    <div class="store-modal-panel">
+      <div class="store-modal-header">
+        <h2 id="warehouse-modal-title">Выбор склада</h2>
+        <button type="button" class="store-modal-close" id="warehouse-modal-close" aria-label="Закрыть">×</button>
+      </div>
+      <div class="warehouse-modal-search">
+        <div class="search-wrap">
+          <input type="search" id="warehouse-search" placeholder="Поиск склада…" autocomplete="off" />
+          <button type="button" class="search-clear hidden" id="warehouse-search-clear" aria-label="Очистить">×</button>
+        </div>
+      </div>
+      <ul class="warehouse-list" id="warehouse-list"></ul>
+      <div class="warehouse-modal-add hidden" id="warehouse-modal-add">
+        <form id="warehouse-add-form" class="warehouse-add-form">
+          <label class="warehouse-add-label">
+            <span>Новый филиал</span>
+            <input type="text" id="warehouse-add-name" name="name" placeholder="Название города" maxlength="64" autocomplete="off" required />
+          </label>
+          <button type="submit" class="btn btn-primary btn-block" id="warehouse-add-btn">Добавить склад</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="store-modal hidden" id="product-picker-modal" role="dialog" aria-modal="true" aria-labelledby="product-picker-modal-title">
+    <div class="store-modal-backdrop" id="product-picker-modal-backdrop"></div>
+    <div class="store-modal-panel picker-modal-panel">
+      <div class="store-modal-header">
+        <h2 id="product-picker-modal-title">Выбор товара</h2>
+        <button type="button" class="store-modal-close" id="product-picker-modal-close" aria-label="Закрыть">×</button>
+      </div>
+      <div class="warehouse-modal-search">
+        <div class="search-wrap">
+          <input type="search" id="product-picker-search" placeholder="Артикул, название, штрихкод…" autocomplete="off" />
+          <button type="button" class="search-clear hidden" id="product-picker-search-clear" aria-label="Очистить">×</button>
+        </div>
+      </div>
+      <ul class="warehouse-list product-picker-list" id="product-picker-list"></ul>
+      <div class="picker-modal-footer hidden" id="product-picker-loading">Загрузка…</div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="js/store.js?v=45"></script>
+</body>
+</html>

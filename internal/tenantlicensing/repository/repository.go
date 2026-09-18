@@ -192,6 +192,18 @@ func (r *Repository) ListTenants(limit int) ([]map[string]any, error) {
 	return scanRows(rows)
 }
 
+func (r *Repository) ListSubtenants(tenantCode string) ([]map[string]any, error) {
+	tenantCode = code.Normalize(tenantCode)
+	rows, err := r.db.Query(
+		`SELECT code, name, status, metadata_json, created_at, updated_at
+		 FROM maniforge_tl_subtenants WHERE tenant_code = $1 ORDER BY code ASC`, tenantCode)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanRows(rows)
+}
+
 func (r *Repository) ListPlans() ([]map[string]any, error) {
 	rows, err := r.db.Query(
 		`SELECT code, name, status, features_json, limits_json, created_at, updated_at

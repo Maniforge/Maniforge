@@ -18,6 +18,7 @@ import (
 type AdminHandler struct {
 	admin *service.AdminService
 	guard *service.RequestGuard
+	org   *service.OrganizationService
 }
 
 func NewAdminHandler(cfg config.Config, db *sql.DB) *AdminHandler {
@@ -46,7 +47,7 @@ func NewAdminHandler(cfg config.Config, db *sql.DB) *AdminHandler {
 		service.NewUserAdminService(users),
 		service.NewRoleAdminService(roles, repository.NewSecurityEventRepository(db, cfg)),
 	)
-	return &AdminHandler{admin: admin, guard: guard}
+	return &AdminHandler{admin: admin, guard: guard, org: service.NewOrganizationService(cfg, db)}
 }
 
 func (h *AdminHandler) CreateRegistrationInvite(c *fiber.Ctx) error {
@@ -94,6 +95,59 @@ func (h *AdminHandler) CreateUser(c *fiber.Ctx) error {
 	return httpx.JSON(c, status, payload)
 }
 
+func (h *AdminHandler) UpdateUser(c *fiber.Ctx) error {
+	session, ok := c.Locals("maniforge_session").(*repository.SessionRecord)
+	if !ok || session == nil {
+		return httpx.Fail(c, fiber.StatusUnauthorized, "Не авторизован")
+	}
+	if payload, status := h.guard.GuardAdmin(session, "admin.users.status.bulk", c); status != 0 {
+		return httpx.JSON(c, status, payload)
+	}
+	var input map[string]any
+	if err := c.BodyParser(&input); err != nil {
+		return httpx.Fail(c, fiber.StatusBadRequest, "invalid json")
+	}
+	payload, status := h.admin.UpdateUser(session, input)
+	return httpx.JSON(c, status, payload)
+}
+
+func (h *AdminHandler) DeleteUser(c *fiber.Ctx) error {
+	session, ok := c.Locals("maniforge_session").(*repository.SessionRecord)
+	if !ok || session == nil {
+		return httpx.Fail(c, fiber.StatusUnauthorized, "Не авторизован")
+	}
+	if payload, status := h.guard.GuardAdmin(session, "admin.users.status.bulk", c); status != 0 {
+		return httpx.JSON(c, status, payload)
+	}
+	var input map[string]any
+	if err := c.BodyParser(&input); err != nil {
+		return httpx.Fail(c, fiber.StatusBadRequest, "invalid json")
+	}
+	payload, status := h.admin.DeleteUser(session, input)
+	return httpx.JSON(c, status, payload)
+}
+
+func (h *AdminHandler) AttachOrganizationMember(c *fiber.Ctx) error {
+	session, ok := c.Locals("maniforge_session").(*repository.SessionRecord)
+	if !ok || session == nil {
+		return httpx.Fail(c, fiber.StatusUnauthorized, "Не авторизован")
+	}
+	if payload, status := h.guard.GuardAdmin(session, "admin.user_roles.assign", c); status != 0 {
+		return httpx.JSON(c, status, payload)
+	}
+	var input map[string]any
+	if err := c.BodyParser(&input); err != nil {
+		return httpx.Fail(c, fiber.StatusBadRequest, "invalid json")
+	}
+	payload, status := h.org.AttachByPhone(
+		session,
+		stringVal(input["phone"]),
+		stringVal(input["role_code"]),
+		stringVal(input["reason"]),
+	)
+	return httpx.JSON(c, status, payload)
+}
+
 func (h *AdminHandler) BatchUserStatus(c *fiber.Ctx) error {
 	session, ok := c.Locals("maniforge_session").(*repository.SessionRecord)
 	if !ok || session == nil {
@@ -123,6 +177,38 @@ func (h *AdminHandler) AssignUserRole(c *fiber.Ctx) error {
 		return httpx.Fail(c, fiber.StatusBadRequest, "invalid json")
 	}
 	payload, status := h.admin.AssignUserRole(session, input)
+	return httpx.JSON(c, status, payload)
+}
+
+func (h *AdminHandler) RevokeUserRole(c *fiber.Ctx) error {
+	session, ok := c.Locals("maniforge_session").(*repository.SessionRecord)
+	if !ok || session == nil {
+		return httpx.Fail(c, fiber.StatusUnauthorized, "Не авторизован")
+	}
+	if payload, status := h.guard.GuardAdmin(session, "admin.user_roles.revoke", c); status != 0 {
+		return httpx.JSON(c, status, payload)
+	}
+	var input map[string]any
+	if err := c.BodyParser(&input); err != nil {
+		return httpx.Fail(c, fiber.StatusBadRequest, "invalid json")
+	}
+	payload, status := h.admin.RevokeUserRole(session, input)
+	return httpx.JSON(c, status, payload)
+}
+
+func (h *AdminHandler) BatchUserRoles(c *fiber.Ctx) error {
+	session, ok := c.Locals("maniforge_session").(*repository.SessionRecord)
+	if !ok || session == nil {
+		return httpx.Fail(c, fiber.StatusUnauthorized, "Не авторизован")
+	}
+	if payload, status := h.guard.GuardAdmin(session, "admin.user_roles.bulk", c); status != 0 {
+		return httpx.JSON(c, status, payload)
+	}
+	var input map[string]any
+	if err := c.BodyParser(&input); err != nil {
+		return httpx.Fail(c, fiber.StatusBadRequest, "invalid json")
+	}
+	payload, status := h.admin.BatchUserRoles(session, input)
 	return httpx.JSON(c, status, payload)
 }
 

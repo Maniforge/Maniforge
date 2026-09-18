@@ -92,6 +92,24 @@ func (r *AuditRepository) ListByScope(tenantID, subtenantID string, limit int) (
 	return scanAuditRows(rows)
 }
 
+func (r *AuditRepository) ListForActor(userID int64, tenantID, subtenantID string, limit int) ([]map[string]any, error) {
+	if limit < 1 {
+		limit = 30
+	}
+	rows, err := r.db.Query(
+		`SELECT id, event_type, actor_user_id, tenant_id, subtenant_id, payload_json,
+		        correlation_id, integrity_hash, created_at
+		 FROM maniforge_audit_log
+		 WHERE tenant_id = $1 AND subtenant_id = $2 AND actor_user_id = $3
+		 ORDER BY id DESC LIMIT $4`,
+		tenantID, subtenantID, userID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanAuditRows(rows)
+}
+
 func scanAuditRows(rows *sql.Rows) ([]map[string]any, error) {
 	var items []map[string]any
 	for rows.Next() {

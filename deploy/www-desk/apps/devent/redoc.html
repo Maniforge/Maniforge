@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API · ReDoc · Склад Свит</title>
+  <script src="/app/js/theme.js?v=2"></script>
+  <link rel="stylesheet" href="/app/css/palette.css?v=8" />
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .redoc-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .redoc-top a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 13px;
+    }
+    .redoc-top a:hover { text-decoration: underline; }
+    .redoc-top-links { display: flex; gap: 14px; flex-wrap: wrap; }
+    .redoc-top-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    #redoc-container { min-height: calc(100vh - 48px); }
+    /* Soft overrides while ReDoc theme applies */
+    .menu-content, .api-content { background: transparent !important; }
+  </style>
+</head>
+<body>
+  <div class="redoc-top">
+    <span class="redoc-top-title">ReDoc · API</span>
+    <nav class="redoc-top-links" aria-label="Документация">
+      <a href="/docs">Справка WMS</a>
+      <a href="/swagger">Swagger</a>
+      <a href="/app/store">Склад</a>
+    </nav>
+  </div>
+  <div id="redoc-container">Загрузка…</div>
+  <script src="https://cdn.jsdelivr.net/npm/redoc@2.1.5/bundles/redoc.standalone.min.js"></script>
+  <script>
+    (function () {
+      function cssVar(name, fallback) {
+        const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        return v || fallback;
+      }
+
+      function buildTheme() {
+        const primary = cssVar("--primary", "#7b2cbf");
+        const text = cssVar("--text", "#1a2332");
+        const muted = cssVar("--muted", "#5c6b7a");
+        const bg = cssVar("--bg", "#f1f5f9");
+        const card = cssVar("--card", "#ffffff");
+        const border = cssVar("--border", "#e2e8f0");
+        const subtle = cssVar("--bg-subtle", "#f8fafc");
+        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+
+        return {
+          colors: {
+            primary: { main: primary },
+            success: { main: cssVar("--color-success", "#15803d") },
+            warning: { main: cssVar("--color-warning", "#b45309") },
+            error: { main: cssVar("--color-error", "#dc2626") },
+            text: {
+              primary: text,
+              secondary: muted,
+            },
+            border: { dark: border, light: border },
+            http: {
+              get: cssVar("--color-sky-600", "#0284c7"),
+              post: cssVar("--color-emerald-600", "#059669"),
+              put: cssVar("--color-tertiary-600", "#d97706"),
+              patch: cssVar("--color-secondary-600", "#0d9488"),
+              delete: cssVar("--color-error", "#dc2626"),
+            },
+          },
+          typography: {
+            fontFamily: "Inter, system-ui, sans-serif",
+            fontSize: "15px",
+            headings: {
+              fontFamily: "Inter, system-ui, sans-serif",
+              fontWeight: "700",
+            },
+            code: {
+              fontFamily: '"JetBrains Mono", ui-monospace, monospace',
+              backgroundColor: subtle,
+              color: text,
+            },
+            links: { color: primary },
+          },
+          sidebar: {
+            backgroundColor: isDark ? "#121820" : card,
+            textColor: text,
+            activeTextColor: primary,
+            width: "280px",
+          },
+          rightPanel: {
+            backgroundColor: isDark ? "#0b1014" : "#1a2332",
+            textColor: "#f8fafc",
+          },
+          schema: {
+            nestedBackground: subtle,
+            typeNameColor: muted,
+            typeTitleColor: text,
+          },
+        };
+      }
+
+      const sandbox = location.pathname.indexOf("/sandbox") === 0;
+      const openapiUrl = (sandbox ? "/sandbox" : "") + "/openapi.json";
+      const theme = buildTheme();
+
+      Redoc.init(
+        openapiUrl,
+        {
+          theme: theme,
+          scrollYOffset: 48,
+          hideDownloadButton: false,
+          expandSingleSchemaField: true,
+          pathInMiddlePanel: true,
+        },
+        document.getElementById("redoc-container")
+      );
+    })();
+  </script>
+</body>
+</html>

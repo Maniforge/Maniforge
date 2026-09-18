@@ -1,0 +1,45 @@
+@import url("fonts.css");
+:root{
+  --bg:#0c0d10;--bg-2:#14161c;--bg-3:#1c1f28;--line:#2a2e38;--text:#f2f3f5;--muted:#8b90a0;
+  --accent:#7aa2ff;--accent-2:#3ee0c5;--radius:16px;--font:"IBM Plex Sans",system-ui,sans-serif;
+}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(1200px 500px at 70% -10%,rgb(122 162 255/.16),transparent 55%),var(--bg);color:var(--text);font-family:var(--font);line-height:1.55}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.top{position:sticky;top:0;z-index:20;display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:1rem;min-height:64px;padding:.85rem 1.6rem;border-bottom:1px solid rgb(255 255 255/.06);background:rgb(12 13 16/.78);backdrop-filter:blur(16px)}
+.brand{flex:0 0 auto;font-weight:700;letter-spacing:-.04em;color:var(--text)!important;text-decoration:none!important;font-size:1.05rem;font-family:var(--font)}
+.brand i{font-style:normal;color:var(--accent)}
+.nav{display:flex;flex-wrap:nowrap;flex-shrink:0;gap:.2rem;align-items:center;font-size:.9rem}
+.nav[hidden]{display:none!important}
+.nav a,.nav button{color:var(--muted);background:transparent;border:0;padding:.45rem .75rem;border-radius:999px;cursor:pointer;font:inherit;white-space:nowrap}
+.nav a:hover,.nav a[aria-current=page],.nav button:hover{color:var(--text);background:rgb(255 255 255/.05);text-decoration:none}
+.nav .nav-cta{background:var(--accent)!important;color:#0c0d10!important;font-weight:600;padding:.45rem 1rem}
+.nav .nav-cta:hover,.nav .nav-cta[aria-current=page]{background:#8eb0ff!important;color:#0c0d10!important}
+.shell{display:grid;grid-template-columns:240px 1fr;min-height:calc(100dvh - 58px)}
+@media(max-width:860px){.shell{grid-template-columns:1fr}}
+.side{border-right:1px solid var(--line);background:var(--bg-2);padding:1rem .85rem}
+.side h2{margin:.2rem .55rem .8rem;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.entity-btn{display:block;width:100%;text-align:left;border:0;background:transparent;color:#c5c8d0;padding:.55rem .7rem;border-radius:10px;cursor:pointer;font:inherit;margin-bottom:.15rem}
+.entity-btn:hover,.entity-btn.active{background:rgb(122 162 255/.12);color:var(--text)}
+.main{padding:1.4rem 1.6rem 2rem}
+.kicker{color:var(--muted);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase}
+h1{margin:.35rem 0 .5rem;font-size:1.55rem;letter-spacing:-.03em}
+.lead{color:var(--muted);margin:0 0 1.2rem}
+.card{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius);padding:1rem 1.1rem}
+.grid{display:grid;gap:.75rem;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.tile{display:block;padding:1rem;border:1px solid var(--line);border-radius:14px;background:var(--bg-3);color:var(--text);text-decoration:none}
+.tile:hover{border-color:var(--accent);text-decoration:none}
+.tile strong{display:block;margin-bottom:.25rem}
+.muted{color:var(--muted);font-size:.88rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:2.6rem;padding:.55rem 1rem;border-radius:999px;border:0;background:var(--accent);color:#0c0d10;font-weight:600;cursor:pointer;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.table{width:100%;border-collapse:collapse;font-size:.92rem}
+.table th,.table td{padding:.55rem .45rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.table th{color:var(--muted);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+.msg{margin-top:.8rem;color:#e35d6a}.msg.ok{color:var(--accent-2)}
+.login-wrap{min-height:calc(100dvh - 58px);display:grid;place-items:center;padding:1.5rem}
+.login-card{width:min(24rem,100%)}
+label{display:block;margin:.75rem 0 .35rem;font-size:.9rem}
+input{width:100%;min-height:2.7rem;border-radius:12px;border:1px solid var(--line);background:#0f1218;color:var(--text);padding:.65rem .85rem;font:inherit}
+.empty{padding:1.2rem;color:var(--muted)}
+.badge{display:inline-block;padding:.15rem .45rem;border-radius:999px;background:rgb(122 162 255/.14);color:var(--accent);font-size:.75rem;margin-left:.35rem}
+code{font-size:.85em}

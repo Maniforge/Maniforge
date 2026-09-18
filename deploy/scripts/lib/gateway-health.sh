@@ -31,6 +31,10 @@ gateway_health_check() {
   check "/tenant-licensing/health" "tenant-licensing"
   check "/health" "manifest-engine"
   check "/versioning/health" "versioning"
+  check "/warehouses/health" "warehouses"
+  check "/products/health" "products"
+  check "/inventory/health" "inventory"
+  check "/wms/health" "wms"
 
   # Realtime is not routed on /health (manifest owns that path on the gateway).
   local rt_addr

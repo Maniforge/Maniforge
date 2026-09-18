@@ -15,6 +15,10 @@ UNITS=(
   maniforge-manifest.service
   maniforge-versioning.service
   maniforge-realtime.service
+  maniforge-warehouses.service
+  maniforge-products.service
+  maniforge-inventory.service
+  maniforge-wms.service
   maniforge-caddy.service
 )
 

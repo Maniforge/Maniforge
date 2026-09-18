@@ -37,6 +37,10 @@ Thumbs.db
 deploy/.env.platform
 **/*.apk
 
+# Generated at bootstrap (tenant_id + phone, no password)
+deploy/www-desk/assets/bootstrap.json
+public/assets/bootstrap.json
+
 # Marketing / large local trees (lab only — not in v0.1-box)
 site-maniforge-ru/
 web/dist/

@@ -49,8 +49,8 @@ sudo bash deploy/scripts/install-maniforge.sh
 | Компонент | Где работает |
 |-----------|--------------|
 | PostgreSQL primary + replica | Docker (`compose.platform.server.yml`) |
-| rbac, tenant-licensing, manifest-engine, versioning, realtime | systemd + бинарники в `/opt/maniforge/platform-core/bin/` |
-| Gateway | host Caddy `:443` (production) или `:18090` (staging на IP заказчика) → `127.0.0.1:8093–8097` |
+| rbac, tenant-licensing, manifest-engine, versioning, realtime, warehouses, products, inventory, wms | systemd + бинарники в `/opt/maniforge/platform-core/bin/` |
+| Gateway | host Caddy `:443` (production) или `:18090` (staging на IP заказчика) → `127.0.0.1:8093–8101` |
 
 Env: `/opt/maniforge/platform-core/deploy/.env.platform` (из `.env.platform.server.example`).
 
@@ -75,6 +75,7 @@ cd /opt/maniforge/platform-core
 bash deploy/scripts/server-build.sh      # пересборка Go
 bash deploy/scripts/server-up.sh         # postgres + migrate + restart
 systemctl restart maniforge-rbac         # один сервис
+systemctl restart maniforge-warehouses maniforge-products maniforge-inventory maniforge-wms
 bash deploy/scripts/verify-maniforge.sh
 ```
 
@@ -107,9 +108,13 @@ make platform-health
 | Manifest Engine | `8095` | `/health` |
 | Versioning | `8096` | `/versioning/health` |
 | Realtime | `8097` | `/health` |
+| Warehouses | `8098` | `/warehouses/health` |
+| Products | `8099` | `/products/health` |
+| Inventory | `8100` | `/inventory/health` |
+| WMS | `8101` | `/wms/health` |
 | PostgreSQL | `5435` | `pg_isready` |
 
-Compose: `deploy/compose.platform.yml`. Journeys с хоста — напрямую на `8093–8097`.
+Compose: `deploy/compose.platform.yml`. Journeys с хоста — напрямую на `8093–8101`. Через gateway: `/warehouses/health`, `/products/health`, `/inventory/health`, `/wms/health`.
 
 ### Makefile (local)
 

@@ -1,0 +1,425 @@
+openapi: 3.0.3
+info:
+  title: Maniforge Tenant/Licensing API
+  version: 0.2.0
+  description: |
+    Contract for tenant lifecycle, licensing, managed-tenant grants, entitlements, quota,
+    lifecycle events, and internal access-state / event delivery.
+servers:
+  - url: /tenant-licensing
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [ok, error]
+      properties:
+        ok: { type: boolean, enum: [false] }
+        error: { type: string }
+    Tenant:
+      type: object
+      properties:
+        code: { type: string }
+        name: { type: string }
+        status: { type: string, enum: [active, suspended, disabled] }
+        suspended_at: { type: string, nullable: true }
+        metadata_json: { type: string, nullable: true }
+    Subtenant:
+      type: object
+      properties:
+        tenant_code: { type: string }
+        code: { type: string }
+        name: { type: string }
+        status: { type: string, enum: [active, suspended, disabled] }
+    LicensePlan:
+      type: object
+      properties:
+        code: { type: string }
+        name: { type: string }
+        status: { type: string }
+        features_json: { type: string }
+        limits_json: { type: string }
+    AccessState:
+      type: object
+      required: [ok, tenant_code, subtenant_code, tenant_active, subtenant_active, license_active]
+      properties:
+        ok: { type: boolean, enum: [true] }
+        tenant_code: { type: string }
+        subtenant_code: { type: string }
+        tenant_active: { type: boolean }
+        subtenant_active: { type: boolean }
+        license_active: { type: boolean }
+        features:
+          type: object
+          additionalProperties: true
+        limits:
+          type: object
+          additionalProperties: true
+        checked_at: { type: string }
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      security: []
+      responses:
+        '200':
+          description: Service health.
+  /api/v1/tenants:
+    get:
+      responses:
+        '200':
+          description: Tenant list.
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, name]
+              properties:
+                code: { type: string }
+                name: { type: string }
+                metadata:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '201':
+          description: Tenant created.
+  /api/v1/tenants/{tenantCode}:
+    patch:
+      parameters:
+        - name: tenantCode
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                status: { type: string, enum: [active, suspended, disabled] }
+      responses:
+        '200':
+          description: Tenant updated.
+  /api/v1/tenants/{agencyCode}/managed-tenants:
+    get:
+      summary: List active principal to managed tenant grants
+      parameters:
+        - name: agencyCode
+          in: path
+          required: true
+          schema: { type: string }
+          description: Principal tenant code (historical path name agencyCode).
+      responses:
+        '200':
+          description: Managed tenant grants for principal.
+    post:
+      summary: Create or reactivate managed tenant grant
+      parameters:
+        - name: agencyCode
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [managed_tenant_code, grant_level]
+              properties:
+                managed_tenant_code: { type: string }
+                grant_level:
+                  type: string
+                  enum: [operator, admin, read_only]
+                metadata:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '201':
+          description: Grant created.
+        '403':
+          description: max_tenants plan limit exceeded.
+  /api/v1/tenants/{agencyCode}/managed-tenants/{managedCode}:
+    delete:
+      summary: Revoke managed tenant grant
+      parameters:
+        - name: agencyCode
+          in: path
+          required: true
+          schema: { type: string }
+        - name: managedCode
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Grant revoked.
+  /api/v1/tenants/{agencyCode}/managed-tenants/{managedCode}/revoke:
+    post:
+      summary: Revoke managed tenant grant (POST alias of DELETE)
+      parameters:
+        - name: agencyCode
+          in: path
+          required: true
+          schema: { type: string }
+        - name: managedCode
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Grant revoked.
+  /api/v1/tenants/{tenantCode}/subtenants:
+    get:
+      parameters:
+        - name: tenantCode
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Subtenant list.
+    post:
+      parameters:
+        - name: tenantCode
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, name]
+              properties:
+                code: { type: string }
+                name: { type: string }
+      responses:
+        '201':
+          description: Subtenant created.
+  /api/v1/tenants/{tenantCode}/subtenants/{subtenantCode}:
+    patch:
+      parameters:
+        - name: tenantCode
+          in: path
+          required: true
+          schema: { type: string }
+        - name: subtenantCode
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                status: { type: string, enum: [active, suspended, disabled] }
+      responses:
+        '200':
+          description: Subtenant updated.
+  /api/v1/plans:
+    get:
+      responses:
+        '200':
+          description: License plans.
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, name]
+              properties:
+                code: { type: string }
+                name: { type: string }
+                status: { type: string, enum: [active, disabled] }
+                features:
+                  type: object
+                  additionalProperties: true
+                limits:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '201':
+          description: License plan created or updated.
+  /api/v1/plans/{planCode}:
+    patch:
+      parameters:
+        - name: planCode
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                status: { type: string, enum: [active, disabled] }
+                features:
+                  type: object
+                  additionalProperties: true
+                limits:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '200':
+          description: License plan updated.
+  /api/v1/licenses:
+    get:
+      responses:
+        '200':
+          description: Tenant licenses.
+  /api/v1/licenses/assign:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tenant_code, plan_code]
+              properties:
+                tenant_code: { type: string }
+                plan_code: { type: string }
+                expires_at: { type: string, nullable: true }
+                seats_max: { type: integer, nullable: true }
+      responses:
+        '200':
+          description: License assigned.
+  /api/v1/licenses/{licenseId}:
+    patch:
+      parameters:
+        - name: licenseId
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, enum: [active, suspended, revoked, expired] }
+                expires_at: { type: string, nullable: true }
+                seats_max: { type: integer, nullable: true }
+      responses:
+        '200':
+          description: License updated.
+  /api/v1/licenses/revoke:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tenant_code]
+              properties:
+                tenant_code: { type: string }
+                reason: { type: string }
+      responses:
+        '200':
+          description: License revoked.
+  /api/v1/tenants/{tenantCode}/entitlements:
+    get:
+      parameters:
+        - name: tenantCode
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Tenant entitlements.
+  /api/v1/tenants/{tenantCode}/quota:
+    get:
+      parameters:
+        - name: tenantCode
+          in: path
+          required: true
+          schema: { type: string }
+        - name: metric
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: Quota usage.
+  /api/v1/audit:
+    get:
+      parameters:
+        - name: tenant_code
+          in: query
+          required: false
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Tenant Licensing audit log.
+  /api/v1/events:
+    get:
+      parameters:
+        - name: tenant_code
+          in: query
+          required: false
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Tenant lifecycle events.
+  /internal/v1/tenants/{tenantCode}/subtenants/{subtenantCode}/access-state:
+    get:
+      parameters:
+        - name: tenantCode
+          in: path
+          required: true
+          schema: { type: string }
+        - name: subtenantCode
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Runtime access state for RBAC.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessState'
+  /internal/v1/events/pending:
+    get:
+      responses:
+        '200':
+          description: Pending lifecycle events.
+  /internal/v1/events/{eventId}/ack:
+    post:
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Event acknowledged.

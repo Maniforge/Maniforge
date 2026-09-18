@@ -26,6 +26,26 @@
 		reverse_proxy 127.0.0.1:8097
 	}
 
+	@warehouses path /warehouses /warehouses/*
+	handle @warehouses {
+		reverse_proxy 127.0.0.1:8098
+	}
+
+	@products path /products /products/*
+	handle @products {
+		reverse_proxy 127.0.0.1:8099
+	}
+
+	@inventory path /inventory /inventory/*
+	handle @inventory {
+		reverse_proxy 127.0.0.1:8100
+	}
+
+	@wms path /wms /wms/*
+	handle @wms {
+		reverse_proxy 127.0.0.1:8101
+	}
+
 	handle {
 		respond "Maniforge platform (nzgapp)" 200
 	}

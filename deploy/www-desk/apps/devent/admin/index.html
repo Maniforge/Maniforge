@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Склад Свит — вход</title>
+  <style>
+    :root {
+      --bg: #f3f0f8;
+      --bg-glow-a: #f3e8ff;
+      --bg-glow-b: #e0f2fe;
+      --card: #ffffff;
+      --text: #1e1230;
+      --muted: #6b6280;
+      --border: #e4dced;
+      --primary: #7b2cbf;
+      --primary-hover: #6a1fb0;
+      --primary-soft: #f3e8ff;
+      --danger: #dc2626;
+      --ok: #059669;
+      --shadow: 0 1px 2px rgba(30, 18, 48, .06), 0 12px 40px rgba(123, 44, 191, .08);
+      --radius: 28px;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(900px 480px at 12% -10%, var(--bg-glow-a), transparent 60%),
+        radial-gradient(700px 420px at 100% 0%, var(--bg-glow-b), transparent 55%),
+        linear-gradient(180deg, #faf8fc 0%, var(--bg) 100%);
+    }
+
+    .shell {
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 24px 16px 40px;
+    }
+
+    .auth-board {
+      width: min(450px, 100%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 40px 40px 28px;
+      animation: rise .35s ease;
+    }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #7b2cbf, #cb11ab);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 8px 20px rgba(123, 44, 191, .28);
+    }
+    .brand-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .01em;
+    }
+
+    .auth-title {
+      margin: 0 0 8px;
+      font-size: 28px;
+      font-weight: 500;
+      letter-spacing: -.02em;
+      text-align: center;
+    }
+    .auth-sub {
+      margin: 0 0 28px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .field {
+      position: relative;
+      margin-bottom: 18px;
+    }
+    .field input {
+      width: 100%;
+      padding: 16px 14px 14px;
+      border: 1px solid #c9bfd8;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      font-size: 16px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .field input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+    .field label {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 0 4px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 16px;
+      pointer-events: none;
+      transition: .15s ease;
+    }
+    .field input:focus + label,
+    .field input:not(:placeholder-shown) + label {
+      top: 0;
+      font-size: 12px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .auth-error {
+      min-height: 20px;
+      margin: -6px 0 14px;
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .auth-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .link-btn {
+      border: none;
+      background: none;
+      color: var(--primary);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 8px 4px;
+      border-radius: 6px;
+    }
+    .link-btn:hover { background: var(--primary-soft); }
+
+    .btn-primary {
+      border: none;
+      border-radius: 24px;
+      padding: 11px 26px;
+      background: var(--primary);
+      color: #fff;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      min-width: 110px;
+      box-shadow: 0 6px 16px rgba(123, 44, 191, .25);
+      transition: background .15s, transform .1s;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:active { transform: scale(.98); }
+    .btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+    .auth-foot {
+      margin-top: 28px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .auth-foot a {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .auth-foot a:hover { color: var(--primary); }
+
+    /* Logged-in dashboard */
+    .dash {
+      width: min(960px, 100%);
+      display: none;
+      gap: 16px;
+      flex-direction: column;
+      animation: rise .35s ease;
+    }
+    .dash.is-open { display: flex; }
+    .auth-board.is-hidden { display: none; }
+
+    .dash-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+    }
+    .dash-top h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+    }
+    .dash-top p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .dash-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 9px 16px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+    .btn:hover { background: var(--primary-soft); }
+    .btn.danger { color: var(--danger); border-color: #fecaca; }
+
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 16px;
+    }
+    @media (max-width: 820px) {
+      .dash-grid { grid-template-columns: 1fr; }
+      .auth-board { padding: 32px 22px 22px; border-radius: 22px; }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+    }
+    .card h2 {
+      margin: 0 0 6px;
+      font-size: 17px;
+      font-weight: 600;
+    }
+    .card .hint {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+    .danger-link {
+      border: none;
+      background: none;
+      color: var(--danger);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 0;
+    }
+    .role-pick {
+      display: block;
+      margin-bottom: 14px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .role-pick select {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      padding: 12px 14px;
+      border: 1px solid #c9bfd8;
+      border-radius: 8px;
+      font: inherit;
+      font-size: 15px;
+      color: var(--text);
+      background: #fff;
+    }
+    .create-user-form .field { margin-bottom: 14px; }
+    .role-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+    .role-badge.user { background: #ecfdf5; color: #047857; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      max-width: min(420px, calc(100vw - 32px));
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: #1e1230;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 14px 28px rgba(15, 23, 42, .22);
+      z-index: 50;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="auth-board" id="auth-board" aria-live="polite">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">СВ</div>
+        <div class="brand-name">Склад Свит</div>
+      </div>
+
+      <h1 class="auth-title" id="auth-title">Вход</h1>
+      <p class="auth-sub" id="auth-sub">Сотрудник склада — логин и пароль</p>
+
+      <form id="login-form" autocomplete="on">
+        <div class="field">
+          <input id="login-username" name="username" type="text" autocomplete="username" required minlength="3" placeholder=" " />
+          <label for="login-username">Логин</label>
+        </div>
+        <div class="field">
+          <input id="login-password" name="password" type="password" autocomplete="current-password" required minlength="1" placeholder=" " />
+          <label for="login-password">Пароль</label>
+        </div>
+        <div class="auth-error" id="login-error"></div>
+        <div class="auth-actions">
+          <button type="button" class="link-btn" id="to-admin-key">Вход администратора</button>
+          <button class="btn-primary" type="submit" id="login-submit">Далее</button>
+        </div>
+      </form>
+
+      <form id="admin-key-form" class="hidden" autocomplete="off">
+        <div class="field">
+          <input id="admin-key" name="access_key" type="password" autocomplete="off" required placeholder=" " />
+          <label for="admin-key">ADMIN_ACCESS_KEY</label>
+        </div>
+        <p class="auth-sub" style="margin: -8px 0 16px; font-size: 13px;">Один админ · ключ из .env</p>
+        <div class="auth-error" id="admin-key-error"></div>
+        <div class="auth-actions">
+          <button type="button" class="link-btn" id="to-login">Вход сотрудника</button>
+          <button class="btn-primary" type="submit" id="admin-key-submit">Войти</button>
+        </div>
+      </form>
+
+      <div class="auth-foot">
+        <span>Склад Свит · девент</span>
+        <span>Гость видит только вход</span>
+      </div>
+    </section>
+
+    <section class="dash" id="panel">
+      <div class="dash-top">
+        <div>
+          <h1>Админ-панель</h1>
+          <p id="me"></p>
+        </div>
+        <div class="dash-actions">
+          <button type="button" class="btn danger" id="logout">Выйти</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <h2>Добавить сотрудника</h2>
+        <p class="hint">Сотрудник входит логином/паролем и работает на складе.</p>
+        <form id="create-user-form" class="create-user-form">
+          <div class="field">
+            <input id="new-username" name="username" type="text" required minlength="3" placeholder=" " />
+            <label for="new-username">Логин</label>
+          </div>
+          <div class="field">
+            <input id="new-password" name="password" type="password" required minlength="8" placeholder=" " />
+            <label for="new-password">Пароль</label>
+          </div>
+          <div class="auth-error" id="create-user-error"></div>
+          <div class="auth-actions" style="justify-content:flex-end">
+            <button class="btn-primary" type="submit">Зарегистрировать</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <h2>Склады</h2>
+        <p class="hint">Удаление скрывает склад. Новый склад — для филиалов `_base/`.</p>
+        <form id="create-wh-form" class="create-user-form" style="margin-bottom:16px">
+          <div class="field">
+            <input id="new-wh-name" name="name" type="text" required minlength="2" placeholder=" " />
+            <label for="new-wh-name">Название склада</label>
+          </div>
+          <div class="auth-error" id="create-wh-error"></div>
+          <div class="auth-actions" style="justify-content:flex-end">
+            <button class="btn-primary" type="submit">Добавить склад</button>
+          </div>
+        </form>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Название</th>
+              <th>Код</th>
+              <th>Позиций</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="warehouses-body"></tbody>
+        </table>
+      </div>
+
+      <div class="dash-grid">
+        <div class="card" style="grid-column: 1 / -1">
+          <h2>Пользователи</h2>
+          <p class="hint">Кто может войти в систему.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Логин</th>
+                <th>Роль</th>
+                <th>Вход</th>
+              </tr>
+            </thead>
+            <tbody id="users-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
+
+  <script>
+    function deventBase() {
+      const p = location.pathname;
+      const app = p.indexOf('/app/');
+      if (app >= 0) return p.slice(0, app);
+      if (/\/login\.html$/.test(p)) return p.replace(/\/login\.html$/, '');
+      if (/\/login\/?$/.test(p)) return p.replace(/\/login\/?$/, '');
+      return '';
+    }
+    const BASE = deventBase();
+    const deventUrl = (path) => path.startsWith('/') ? BASE + path : path;
+
+    const toast = (msg) => {
+      const el = document.querySelector('#toast');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(toast.t);
+      toast.t = setTimeout(() => el.classList.add('hidden'), 2800);
+    };
+
+    async function api(path, opts = {}) {
+      const res = await fetch(deventUrl(`/api/admin${path}`), {
+        headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
+        credentials: 'same-origin',
+        ...opts,
+      });
+      const text = await res.text();
+      let data;
+      try { data = text ? JSON.parse(text) : null; } catch { data = { detail: text }; }
+      if (!res.ok) {
+        const detail = data?.detail;
+        throw new Error(typeof detail === 'string' ? detail : (detail?.[0]?.msg || `Ошибка ${res.status}`));
+      }
+      return data;
+    }
+
+    const fmt = (v) => v ? new Date(v).toLocaleString('ru-RU') : '—';
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    const authBoard = document.querySelector('#auth-board');
+    const panel = document.querySelector('#panel');
+    const loginForm = document.querySelector('#login-form');
+    const adminKeyForm = document.querySelector('#admin-key-form');
+
+    function showLogin() {
+      loginForm.classList.remove('hidden');
+      adminKeyForm.classList.add('hidden');
+      document.querySelector('#auth-title').textContent = 'Вход';
+      document.querySelector('#auth-sub').textContent = 'Сотрудник склада — логин и пароль';
+      document.querySelector('#login-error').textContent = '';
+      document.querySelector('#login-username')?.focus();
+    }
+
+    function showAdminKey() {
+      adminKeyForm.classList.remove('hidden');
+      loginForm.classList.add('hidden');
+      document.querySelector('#auth-title').textContent = 'Администратор';
+      document.querySelector('#auth-sub').textContent = 'Вход по ADMIN_ACCESS_KEY';
+      document.querySelector('#admin-key-error').textContent = '';
+      document.querySelector('#admin-key')?.focus();
+    }
+
+    function showAuth() {
+      authBoard.classList.remove('is-hidden');
+      panel.classList.remove('is-open');
+      document.title = 'Склад Свит — вход';
+      if (location.pathname !== deventUrl('/login') && location.pathname !== deventUrl('/login') + '/') {
+        history.replaceState(null, '', deventUrl('/login'));
+      }
+      showLogin();
+    }
+
+    function showPanel() {
+      authBoard.classList.add('is-hidden');
+      panel.classList.add('is-open');
+      document.title = 'Склад Свит — админ';
+      if (location.pathname !== deventUrl('/login') && location.pathname !== deventUrl('/login') + '/') {
+        history.replaceState(null, '', deventUrl('/login'));
+      }
+    }
+
+    async function refresh() {
+      try {
+        const me = await api('/me');
+        if (me.role !== 'admin') {
+          window.location.href = deventUrl('/app/store');
+          return;
+        }
+        const [users, warehouses] = await Promise.all([api('/users'), api('/warehouses')]);
+        showPanel();
+        document.querySelector('#me').textContent =
+          'Админ по ключу · создаёт сотрудников, на склад не входит';
+        document.querySelector('#users-body').innerHTML = users.map((u) => `
+          <tr>
+            <td>${esc(u.username)}</td>
+            <td><span class="role-badge user">Сотрудник</span></td>
+            <td>${fmt(u.last_login_at)}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="3">Пока никого нет</td></tr>';
+        document.querySelector('#warehouses-body').innerHTML = warehouses.map((w) => `
+          <tr>
+            <td>${w.id}</td>
+            <td>${esc(w.name)}</td>
+            <td>${esc(w.code)}</td>
+            <td>${Number(w.stock_lines || 0).toLocaleString('ru-RU')}</td>
+            <td><button type="button" class="danger-link" data-del-wh="${w.id}" data-name="${esc(w.name)}">Удалить</button></td>
+          </tr>
+        `).join('') || '<tr><td colspan="5">Нет складов</td></tr>';
+      } catch {
+        showAuth();
+      }
+    }
+
+    document.querySelector('#to-admin-key').addEventListener('click', showAdminKey);
+    document.querySelector('#to-login').addEventListener('click', showLogin);
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.currentTarget;
+      const err = document.querySelector('#login-error');
+      const btn = document.querySelector('#login-submit');
+      err.textContent = '';
+      btn.disabled = true;
+      const fd = new FormData(form);
+      try {
+        const res = await api('/login', {
+          method: 'POST',
+          body: JSON.stringify(Object.fromEntries(fd.entries())),
+        });
+        form.reset();
+        toast('Вход на склад');
+        window.location.href = (function (dest) {
+          dest = dest || '/app/store';
+          if (BASE && dest.startsWith(BASE)) return dest;
+          return deventUrl(dest.startsWith('/') ? dest : '/' + dest);
+        })(res.redirect);
+      } catch (ex) {
+        err.textContent = ex.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    adminKeyForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.currentTarget;
+      const err = document.querySelector('#admin-key-error');
+      const btn = document.querySelector('#admin-key-submit');
+      err.textContent = '';
+      btn.disabled = true;
+      const fd = new FormData(form);
+      try {
+        await api('/login-key', {
+          method: 'POST',
+          body: JSON.stringify({ access_key: fd.get('access_key') }),
+        });
+        form.reset();
+        toast('Админ · панель');
+        await refresh();
+      } catch (ex) {
+        err.textContent = ex.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.querySelector('#create-user-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.currentTarget;
+      const err = document.querySelector('#create-user-error');
+      err.textContent = '';
+      const fd = new FormData(form);
+      try {
+        await api('/users', {
+          method: 'POST',
+          body: JSON.stringify({
+            username: fd.get('username'),
+            password: fd.get('password'),
+          }),
+        });
+        form.reset();
+        toast('Сотрудник добавлен');
+        refresh();
+      } catch (ex) {
+        err.textContent = ex.message;
+      }
+    });
+
+    document.querySelector('#create-wh-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.currentTarget;
+      const err = document.querySelector('#create-wh-error');
+      err.textContent = '';
+      const fd = new FormData(form);
+      try {
+        const res = await fetch(deventUrl('/api/v1/wms/warehouses'), {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: String(fd.get('name') || '').trim() }),
+        });
+        const text = await res.text();
+        let data;
+        try { data = text ? JSON.parse(text) : null; } catch { data = { detail: text }; }
+        if (!res.ok) throw new Error(typeof data?.detail === 'string' ? data.detail : `Ошибка ${res.status}`);
+        form.reset();
+        toast(`Склад «${data.name}» добавлен`);
+        refresh();
+      } catch (ex) {
+        err.textContent = ex.message;
+      }
+    });
+
+    document.querySelector('#logout').addEventListener('click', async () => {
+      await api('/logout', { method: 'POST', body: '{}' }).catch(() => {});
+      toast('Вы вышли');
+      refresh();
+    });
+
+    document.querySelector('#warehouses-body').addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-del-wh]');
+      if (!btn) return;
+      const id = btn.dataset.delWh;
+      const name = btn.dataset.name || id;
+      if (!confirm(`Удалить склад «${name}»?`)) return;
+      try {
+        await api(`/warehouses/${id}`, { method: 'DELETE' });
+        toast('Склад удалён');
+        refresh();
+      } catch (err) { toast(err.message); }
+    });
+
+    refresh();
+  </script>
+</body>
+</html>

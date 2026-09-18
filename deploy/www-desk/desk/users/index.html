@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Пользователи — Maniforge Desk</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="/assets/desk.css?v=20260917k">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/" aria-label="Maniforge">Mani<i>forge</i></a>
+  <nav class="nav nav-guest">
+    <a href="/about/">О проекте</a>
+    <a href="/about-us/">О нас</a>
+    <a href="/app/">Admin</a>
+    <a href="/api/">API</a>
+    <a class="nav-cta" href="/desk/login/">Вход</a>
+  </nav>
+  <nav class="nav nav-auth" hidden>
+    <a href="/desk/">Desk</a>
+    <a href="/desk/users/" aria-current="page">Пользователи</a>
+    <a href="/apps/">Apps</a>
+    <a href="/app/">Admin</a>
+    <a href="/scanner/">Scanner</a>
+    <a href="/api/">API</a>
+    <button type="button" data-logout>Выйти</button>
+  </nav>
+</header>
+<main class="main" style="max-width:44rem;margin:0 auto">
+  <p class="kicker">Identity · tenant_admin</p>
+  <h1>Пользователи</h1>
+  <p class="lead">Создание учёток в текущей организации. Роль по умолчанию — tenant_admin (может заводить следующих).</p>
+  <div class="card" style="margin-bottom:1.2rem">
+    <label for="login">Login</label>
+    <input id="login" autocomplete="off" placeholder="ivan">
+    <label for="phone">Телефон</label>
+    <input id="phone" type="tel" value="+7" autocomplete="tel">
+    <label for="password">Пароль (от 12 символов)</label>
+    <input id="password" type="password" autocomplete="new-password">
+    <label for="email">Email (необязательно)</label>
+    <input id="email" type="email" autocomplete="off">
+    <label for="role">Роль</label>
+    <input id="role" value="tenant_admin" autocomplete="off">
+    <div style="margin-top:1rem">
+      <button class="btn" id="go" type="button">Создать пользователя</button>
+    </div>
+    <div id="msg" class="msg"></div>
+  </div>
+  <div class="card">
+    <p class="kicker">Список</p>
+    <div id="list" class="empty">Загрузка…</div>
+  </div>
+</main>
+<script src="/assets/desk.js?v=20260916c"></script>
+<script src="/assets/site-header.js?v=20260917i"></script>
+<script>
+if (!ManiforgeDesk.requireAuth()) throw 0;
+const msg = (t, ok) => { const el = document.getElementById('msg'); el.textContent = t || ''; el.className = 'msg' + (ok ? ' ok' : ''); };
+async function reload() {
+  try {
+    const items = await ManiforgeDesk.listUsers();
+    const rows = Array.isArray(items) ? items : [];
+    document.getElementById('list').innerHTML = rows.length
+      ? `<table class="table"><thead><tr><th>id</th><th>login</th><th>status</th></tr></thead><tbody>${
+          rows.map(u => `<tr><td class="muted">${u.id||''}</td><td>${u.login||''}</td><td>${u.status||''}</td></tr>`).join('')
+        }</tbody></table>`
+      : '<div class="empty">Пока никого</div>';
+  } catch (e) {
+    document.getElementById('list').innerHTML = '<div class="empty">'+(e.message||e)+'</div>';
+  }
+}
+document.getElementById('go').onclick = async () => {
+  msg('');
+  try {
+    const user = await ManiforgeDesk.createUser({
+      login: document.getElementById('login').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      password: document.getElementById('password').value,
+      email: document.getElementById('email').value.trim(),
+      roleCode: document.getElementById('role').value.trim() || 'tenant_admin',
+      reason: 'desk-ui',
+    });
+    msg('Создан id=' + (user.id||''), true);
+    document.getElementById('password').value = '';
+    await reload();
+  } catch (e) { msg(e.message || String(e)); }
+};
+reload();
+</script>
+</body>
+</html>

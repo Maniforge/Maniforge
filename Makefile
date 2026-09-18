@@ -2,9 +2,10 @@
 GO ?= $(shell command -v go 2>/dev/null || echo $(HOME)/.local/go/bin/go)
 
 .PHONY: deps build migrate preflight test health \
-	siem-forward token-gen backup-drill \
+	siem-forward token-gen backup-drill bootstrap \
 	tl-expire-licenses tl-dispatch-events \
 	run-rbac run-tl run-manifest run-versioning run-realtime \
+	run-warehouses run-products run-inventory run-wms \
 	manifest-journey platform-ops-journey \
 	server-manifest-journey server-platform-ops-journey server-journey \
 	platform-init platform-up platform-down platform-logs platform-health platform-migrate platform-journey \
@@ -33,6 +34,11 @@ build:
 	$(GO) build -o bin/maniforge-platform-ops-journey ./cmd/platform-ops-journey
 	$(GO) build -o bin/maniforge-versioning ./cmd/versioning
 	$(GO) build -o bin/maniforge-realtime ./cmd/realtime
+	$(GO) build -o bin/maniforge-warehouses ./cmd/warehouses
+	$(GO) build -o bin/maniforge-products ./cmd/products
+	$(GO) build -o bin/maniforge-inventory ./cmd/inventory
+	$(GO) build -o bin/maniforge-wms ./cmd/wms
+	$(GO) build -o bin/maniforge-bootstrap ./cmd/bootstrap
 
 pg-up:
 	docker-compose up -d postgres || docker start maniforge-postgres
@@ -48,6 +54,11 @@ siem-forward: build
 
 token-gen: build
 	./bin/maniforge-token-gen
+
+# Demo admin for Desk/Admin. Requires MANIFORGE_ADMIN_LOGIN (phone) + MANIFORGE_ADMIN_PASSWORD.
+# tenantId = t- + first 16 hex of SHA-256(random UUID). Password is never written to bootstrap.json.
+bootstrap: build
+	bash -c 'set -a && [ -f deploy/.env.platform ] && source deploy/.env.platform; set +a && ./bin/maniforge-bootstrap'
 
 backup-drill: build
 	./bin/maniforge-backup-drill
@@ -73,6 +84,18 @@ run-versioning: build
 run-realtime: build
 	./bin/maniforge-realtime
 
+run-warehouses: build
+	./bin/maniforge-warehouses
+
+run-products: build
+	./bin/maniforge-products
+
+run-inventory: build
+	./bin/maniforge-inventory
+
+run-wms: build
+	./bin/maniforge-wms
+
 manifest-journey: build
 	./bin/maniforge-manifest-journey
 
@@ -93,6 +116,14 @@ test:
 health:
 	curl -s http://127.0.0.1:8093/rbac/health | jq .
 	curl -s http://127.0.0.1:8094/tenant-licensing/health | jq .
+	curl -sf http://127.0.0.1:8098/warehouses/health | jq .
+	curl -sf http://127.0.0.1:8099/products/health | jq .
+	curl -sf http://127.0.0.1:8100/inventory/health | jq .
+	curl -sf http://127.0.0.1:8101/wms/health | jq .
+	curl -sf http://127.0.0.1:18090/warehouses/health | jq . || curl -sf http://127.0.0.1:8080/warehouses/health | jq .
+	curl -sf http://127.0.0.1:18090/products/health | jq . || curl -sf http://127.0.0.1:8080/products/health | jq .
+	curl -sf http://127.0.0.1:18090/inventory/health | jq . || curl -sf http://127.0.0.1:8080/inventory/health | jq .
+	curl -sf http://127.0.0.1:18090/wms/health | jq . || curl -sf http://127.0.0.1:8080/wms/health | jq .
 
 platform-init:
 	@test -f deploy/.env.platform || cp deploy/.env.platform.example deploy/.env.platform
@@ -117,8 +148,16 @@ platform-health:
 	@curl -sf http://127.0.0.1:8095/health | jq . || echo "manifest-engine: down"
 	@curl -sf http://127.0.0.1:8096/versioning/health | jq . || echo "versioning: down"
 	@curl -sf http://127.0.0.1:8097/health | jq . || echo "realtime: down"
+	@curl -sf http://127.0.0.1:8098/warehouses/health | jq . || echo "warehouses: down"
+	@curl -sf http://127.0.0.1:8099/products/health | jq . || echo "products: down"
+	@curl -sf http://127.0.0.1:8100/inventory/health | jq . || echo "inventory: down"
+	@curl -sf http://127.0.0.1:8101/wms/health | jq . || echo "wms: down"
 	@echo "=== gateway :8080 ==="
 	@curl -sf http://127.0.0.1:8080/rbac/health | jq . || echo "gateway/rbac: down"
+	@curl -sf http://127.0.0.1:8080/warehouses/health | jq . || echo "gateway/warehouses: down"
+	@curl -sf http://127.0.0.1:8080/products/health | jq . || echo "gateway/products: down"
+	@curl -sf http://127.0.0.1:8080/inventory/health | jq . || echo "gateway/inventory: down"
+	@curl -sf http://127.0.0.1:8080/wms/health | jq . || echo "gateway/wms: down"
 
 platform-journey: platform-health manifest-journey platform-ops-journey
 

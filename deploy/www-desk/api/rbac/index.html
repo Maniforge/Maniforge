@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RBAC — Swagger</title>
+  <link rel="stylesheet" href="/assets/desk.css">
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui.css">
+  <style>body{margin:0} .swagger-ui{font-family:IBM Plex Sans,system-ui,sans-serif} .topbar{display:none!important}</style>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/" aria-label="Maniforge">Mani<i>forge</i></a>
+    <nav class="nav nav-guest">
+      <a href="/about/">О проекте</a>
+      <a href="/about-us/">О нас</a>
+      <a href="/app/">Admin</a>
+      <a href="/api/" aria-current="page">API</a>
+      <a class="nav-cta" href="/desk/login/">Вход</a>
+    </nav>
+    <nav class="nav nav-auth" hidden>
+      <a href="/desk/">Desk</a>
+      <a href="/desk/users/">Пользователи</a>
+      <a href="/apps/">Apps</a>
+      <a href="/app/">Admin</a>
+      <a href="/scanner/">Scanner</a>
+      <a href="/api/" aria-current="page">API</a>
+      <button type="button" data-logout>Выйти</button>
+    </nav>
+  </header>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-bundle.js"></script>
+  <script>
+    window.ui = SwaggerUIBundle({
+      url: '/docs/openapi/rbac.yaml',
+      dom_id: '#swagger-ui',
+      deepLinking: true,
+      presets: [SwaggerUIBundle.presets.apis],
+      layout: 'BaseLayout'
+    });
+  </script>
+  <script src="/assets/site-header.js?v=20260917i"></script>
+</body>
+</html>

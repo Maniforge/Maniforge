@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manifest Engine — Maniforge</title>
+  <link rel="stylesheet" href="/assets/desk.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/">Mani<i>forge</i></a>
+    <nav class="nav nav-guest">
+      <a href="/about/">О проекте</a>
+      <a href="/about-us/">О нас</a>
+      <a href="/api/" aria-current="page">API</a>
+      <a class="nav-cta" href="/desk/login/">Вход</a>
+    </nav>
+    <nav class="nav nav-auth" hidden>
+      <a href="/desk/">Desk</a>
+      <a href="/desk/users/">Пользователи</a>
+      <a href="/apps/">Apps</a>
+      <a href="/app/">Admin</a>
+      <a href="/scanner/">Scanner</a>
+      <a href="/api/" aria-current="page">API</a>
+      <button type="button" data-logout>Выйти</button>
+    </nav>
+  </header>
+  <main class="main" style="max-width:40rem;margin:0 auto">
+    <p class="kicker">Manifest Engine</p>
+    <h1>Live API</h1>
+    <p class="lead">OpenAPI yaml для Manifest на витрине пока нет. Сервис живой: без токена отвечает 401, не 503.</p>
+    <div class="card">
+      <p id="health" class="muted">Проверяю /manifest/health…</p>
+      <p class="muted">Эндпоинты: <code>/manifest/health</code>, <code>/manifest/api/v1/manifests</code>, <code>/manifest/api/v1/entities</code>, <code>/manifest/api/data/{code}</code></p>
+    </div>
+    <p style="margin-top:1rem"><a class="btn ghost" href="/api/">Назад к каталогу</a></p>
+  </main>
+  <script>
+    fetch('/manifest/health').then(r => r.json()).then(d => {
+      document.getElementById('health').textContent = JSON.stringify(d);
+      document.getElementById('health').className = d.ok ? 'msg ok' : 'msg';
+    }).catch(e => {
+      document.getElementById('health').textContent = String(e);
+      document.getElementById('health').className = 'msg';
+    });
+  </script>
+  <script src="/assets/site-header.js?v=20260917h"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW 2026 -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="120.656mm" height="120.656mm" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 12065.62 12065.62"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:xodm="http://www.corel.com/coreldraw/odm/2003">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .str0 {stroke:white;stroke-width:564.62;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:22.9256}
+    .fil1 {fill:none}
+    .fil2 {fill:none;fill-rule:nonzero}
+    .fil0 {fill:#DC2626;fill-rule:nonzero}
+   ]]>
+  </style>
+   <clipPath id="id0">
+    <path d="M6032.81 0c3331.83,0 6032.81,2700.98 6032.81,6032.81 0,3331.83 -2700.98,6032.81 -6032.81,6032.81 -3331.83,0 -6032.81,-2700.98 -6032.81,-6032.81 0,-3331.83 2700.98,-6032.81 6032.81,-6032.81z"/>
+   </clipPath>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <g>
+  </g>
+  <g style="clip-path:url(#id0)">
+   <g id="_2960762769152">
+    <path class="fil0" d="M1799.48 -740.52l8466.66 0c1402.57,0 2540,1137.43 2540,2540l0 8466.66c0,1402.56 -1137.43,2539.99 -2540,2539.99l-8466.66 0.01c-1402.56,-0.01 -2539.99,-1137.44 -2539.99,-2540.01l-0.01 -8466.65c0.01,-1402.57 1137.44,-2540 2540.01,-2540z"/>
+   </g>
+  </g>
+  <path class="fil1" d="M6032.81 0c3331.83,0 6032.81,2700.98 6032.81,6032.81 0,3331.83 -2700.98,6032.81 -6032.81,6032.81 -3331.83,0 -6032.81,-2700.98 -6032.81,-6032.81 0,-3331.83 2700.98,-6032.81 6032.81,-6032.81z"/>
+  <g id="_2960762769488">
+   <line class="fil2 str0" x1="7304.27" y1="5299.86" x2="4763.47" y2= "3834.67" />
+   <path class="fil2 str0" d="M8574.66 7163.11l0 -2258.48c0.09,-201.48 -107.68,-387.68 -282.14,-488.4l-1976.17 -1129.24c-85.7,-49.58 -183.33,-75.72 -282.34,-75.72 -99.01,0 -196.54,26.14 -282.32,75.65l-1976.17 1129.24c-174.48,100.79 -282.24,286.99 -282.35,488.54l0 2258.48c0.11,201.48 107.87,387.67 282.33,488.4l1976.17 1129.24c85.7,49.47 183.33,75.61 282.34,75.61 99.01,0 196.54,-26.14 282.32,-75.65l1976.17 -1129.24c174.48,-100.69 282.25,-286.88 282.35,-488.43l-0.19 0z"/>
+   <polyline class="fil2 str0" points="3569.3,4611.02 6033.87,6036.69 8498.44,4611.02 "/>
+   <line class="fil2 str0" x1="6033.87" y1="8879.56" x2="6033.87" y2= "6033.87" />
+  </g>
+ </g>
+</svg>

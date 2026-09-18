@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>О проекте — Maniforge</title>
+  <meta name="description" content="Maniforge — фреймворк на Go. Описали сущность — получили REST, OpenAPI, доступы и тенанты. Сейчас ставится на ваш сервер.">
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="/assets/desk.css?v=20260917k">
+  <style>
+    .about{max-width:52rem;margin:0 auto}
+    .about section{margin:2.2rem 0}
+    .about h2{margin:.2rem 0 .7rem;font-size:1.2rem;letter-spacing:-.02em}
+    .about .prose{color:var(--muted)}
+    .about .prose p{margin:0 0 .85rem}
+    .about .facts{display:flex;flex-wrap:wrap;gap:.4rem;margin:1rem 0 0}
+    .about .facts span{font-size:.78rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:.25rem .7rem}
+    .about .cta{display:flex;flex-wrap:wrap;gap:.55rem;margin:1.1rem 0 0}
+    .about .tag{display:block;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.35rem}
+    .about .card h3{margin:0 0 .3rem;font-size:1rem}
+    .about .card p{margin:0;color:var(--muted);font-size:.9rem}
+    .about pre{overflow-x:auto;background:#0f1218;border:1px solid var(--line);border-radius:14px;padding:1rem 1.1rem;font-size:.8rem;line-height:1.55;color:#d7e2f0}
+    .about .foot{margin-top:2.4rem;padding-top:1.1rem;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem;display:flex;flex-wrap:wrap;justify-content:space-between;gap:.8rem}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/" aria-label="Maniforge">Mani<i>forge</i></a>
+    <nav class="nav nav-guest">
+      <a href="/about/" aria-current="page">О проекте</a>
+      <a href="/about-us/">О нас</a>
+      <a href="/app/">Admin</a>
+      <a href="/api/">API</a>
+      <a class="nav-cta" href="/desk/login/">Вход</a>
+    </nav>
+    <nav class="nav nav-auth" hidden>
+      <a href="/desk/">Desk</a>
+      <a href="/desk/users/">Пользователи</a>
+      <a href="/apps/">Apps</a>
+      <a href="/app/">Admin</a>
+      <a href="/scanner/">Scanner</a>
+      <a href="/api/">API</a>
+      <button type="button" data-logout>Выйти</button>
+    </nav>
+  </header>
+  <main class="main about">
+    <p class="kicker">Go · PostgreSQL · Apache 2.0 · v0.1.2</p>
+    <h1>Описали сущность — получили API.</h1>
+    <p class="lead">Maniforge — фреймворк на Go. Манифест полей становится REST и OpenAPI, в ядре уже доступы и тенанты. Ставится на ваш Ubuntu. Это ранняя версия ядра, не готовая ERP.</p>
+    <div class="cta">
+      <a class="btn" href="https://github.com/Maniforge/Maniforge">Код на GitHub</a>
+      <a class="btn ghost" href="/api/">API</a>
+    </div>
+    <div class="facts">
+      <span>Manifest → REST</span>
+      <span>RBAC · тенанты · realtime</span>
+      <span>self-host</span>
+    </div>
+
+    <section>
+      <p class="kicker">Ориентир</p>
+      <h2>Что это</h2>
+      <div class="prose">
+        <p>Это каркас для учёта, склада и внутренних сервисов: сущность описывается, HTTP-слой появляется сам. Не сайт «под ключ» и не замена бухгалтерии 1С.</p>
+        <p>Если знаете Frappe или Django — ориентир такой: манифест ≈ DocType или модель. Дальше аналогия кончается: рабочего стола и готового ERP в релизе v0.1.2 нет.</p>
+        <p>Сейчас сервер и PostgreSQL ставите и обслуживаете вы. Позже сможем делать это за вас. Заказать такой хостинг пока нельзя.</p>
+      </div>
+    </section>
+
+    <section>
+      <p class="kicker">v0.1.2-box</p>
+      <h2>Что уже можно поставить</h2>
+      <p class="lead">Пять сервисов за Caddy, одна PostgreSQL 16. Это и есть публичный комплект.</p>
+      <div class="grid">
+        <article class="card">
+          <span class="tag">RBAC</span>
+          <h3>Доступ</h3>
+          <p>Сессии, роли, MFA, audit.</p>
+        </article>
+        <article class="card">
+          <span class="tag">Licensing</span>
+          <h3>Тенант</h3>
+          <p>Организация, план, квоты.</p>
+        </article>
+        <article class="card">
+          <span class="tag">Manifest</span>
+          <h3>Сущности</h3>
+          <p>Манифест → REST и OpenAPI.</p>
+        </article>
+        <article class="card">
+          <span class="tag">Versioning</span>
+          <h3>История</h3>
+          <p>След изменений конфигурации.</p>
+        </article>
+        <article class="card">
+          <span class="tag">Realtime</span>
+          <h3>События</h3>
+          <p>Live-события по сущностям.</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <p class="kicker">Дальше</p>
+      <h2>Не в этом релизе</h2>
+      <div class="prose">
+        <p>В очереди: рабочий стол из манифестов, склад и WMS как приложения на ядре, установка и сопровождение сервера с нашей стороны. Пока этого нельзя заказать как готовый продукт — только ядро и заказная сборка вокруг него.</p>
+      </div>
+    </section>
+
+    <section>
+      <p class="kicker">Запуск</p>
+      <h2>Как поставить ядро</h2>
+      <p class="lead">Ubuntu 22.04 или 24.04 LTS. Минимум 2 vCPU, 4 ГБ RAM, 40 ГБ SSD. Свои секреты, свой домен.</p>
+      <pre><code>git clone --branch platform-core https://github.com/Maniforge/Maniforge.git
+cd Maniforge
+cp deploy/.env.platform.server.example deploy/.env.platform
+sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com
+bash deploy/scripts/verify-maniforge.sh</code></pre>
+      <p class="muted">Полный runbook: <a href="https://github.com/Maniforge/Maniforge">github.com/Maniforge/Maniforge</a>. Каталог продуктов — на <a href="https://maniforge.ru/">maniforge.ru</a>.</p>
+    </section>
+
+    <div class="foot">
+      <span>Ядро — Apache 2.0. Релиз v0.1.2-box.</span>
+      <span><a href="mailto:hello@maniforge.ru">hello@maniforge.ru</a></span>
+    </div>
+  </main>
+  <script src="/assets/site-header.js?v=20260917i"></script>
+</body>
+</html>

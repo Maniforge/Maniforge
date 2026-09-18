@@ -267,8 +267,10 @@ func (s *RegistrationService) createUserInScope(
 		return map[string]any{"ok": false, "error": err.Error()}, fiber.StatusInternalServerError
 	}
 
-	if consentErr := s.pd.ValidateRegistrationConsents(tenantID, consents, s.cfg.RBACPDRegisterConsentRequired); consentErr != nil {
-		return consentErr, int(consentErr["status"].(int))
+	if c != nil {
+		if consentErr := s.pd.ValidateRegistrationConsents(tenantID, consents, s.cfg.RBACPDRegisterConsentRequired); consentErr != nil {
+			return consentErr, int(consentErr["status"].(int))
+		}
 	}
 
 	decision := s.licensing.AssertAccess(tenantID, "main", subtenantID)
@@ -326,7 +328,7 @@ func (s *RegistrationService) createUserInScope(
 	}
 
 	_ = s.roles.AssignRoleByCode(user.ID, tenantID, subtenantID, roleCode, user.ID)
-	if len(consents) > 0 {
+	if len(consents) > 0 && c != nil {
 		_ = s.pd.RecordRegistrationConsents(user.ID, tenantID, subtenantID, consents, c.IP(), string(c.Request().Header.UserAgent()))
 	}
 

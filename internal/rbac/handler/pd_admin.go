@@ -145,3 +145,15 @@ func (h *PDAdminHandler) ResolveSubjectRequest(c *fiber.Ctx) error {
 	payload, status := h.pd.ResolveSubjectRequest(session, input)
 	return httpx.JSON(c, status, payload)
 }
+
+func (h *PDAdminHandler) AcknowledgeDPA(c *fiber.Ctx) error {
+	session, ok := c.Locals("maniforge_session").(*repository.SessionRecord)
+	if !ok || session == nil {
+		return httpx.Fail(c, fiber.StatusUnauthorized, "Не авторизован")
+	}
+	if payload, status := h.guard.GuardAdmin(session, "admin.pd.operator.write", c); status != 0 {
+		return httpx.JSON(c, status, payload)
+	}
+	payload, status := h.pd.AcknowledgeDPA(session)
+	return httpx.JSON(c, status, payload)
+}

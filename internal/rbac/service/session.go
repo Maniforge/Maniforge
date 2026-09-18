@@ -182,6 +182,10 @@ func (s *SessionService) Authenticate(token string) (*repository.SessionRecord, 
 	return session, nil
 }
 
+func (s *SessionService) RevokeAllForUser(userID int64, reason string) (int, error) {
+	return s.sessions.RevokeAllForUser(userID, reason)
+}
+
 func (s *SessionService) RevokeByToken(token, reason string) bool {
 	if token == "" {
 		return false

@@ -75,3 +75,27 @@ func (s *RoleAdminService) actorMaxRoleLevel(actorUserID int64, tenantID, subten
 	}
 	return max
 }
+
+func (s *RoleAdminService) SimulateBatchSummary(tenantID, subtenantID string, items []repository.RoleMutation) repository.RoleBatchSummary {
+	summary := repository.RoleBatchSummary{Total: len(items)}
+	for _, item := range items {
+		hasRole, _ := s.roles.HasRoleInScope(item.UserID, tenantID, subtenantID, item.RoleCode)
+		switch item.Action {
+		case "assign":
+			if hasRole {
+				summary.Skipped++
+			} else {
+				summary.Assigned++
+			}
+		case "revoke":
+			if hasRole {
+				summary.Revoked++
+			} else {
+				summary.Skipped++
+			}
+		default:
+			summary.Skipped++
+		}
+	}
+	return summary
+}

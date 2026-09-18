@@ -110,6 +110,7 @@
 | Метод | Путь | Permission |
 |-------|------|------------|
 | GET/PUT | `/api/v1/admin/personal-data/operator-profile` | `admin.pd.operator.read` / `.write` |
+| POST | `/api/v1/admin/personal-data/dpa-acknowledge` | `admin.pd.operator.write` |
 | GET/POST/PATCH | `/api/v1/admin/personal-data/purposes` | `admin.pd.purposes.read` / `.write` |
 | GET | `/api/v1/admin/personal-data/subject-requests` | `admin.pd.requests.read` |
 | POST | `/api/v1/admin/personal-data/subject-requests/resolve` | `admin.pd.requests.handle` |

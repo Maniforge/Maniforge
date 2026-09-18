@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WB — Настройки</title>
+  <script src="js/base.js?v=1"></script>
+  <script src="js/theme.js?v=2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css?v=8" />
+</head>
+<body>
+  <div class="layout">
+    <header class="header">
+      <div>
+        <p class="eyebrow">Wildberries</p>
+        <h1>Настройки</h1>
+      </div>
+      <div class="header-actions">
+        <a class="btn" href="/app/stocks">← К остаткам</a>
+      </div>
+    </header>
+
+    <p class="settings-note card">
+      Изменения сохраняются в файл <code>.env</code> в корне проекта. Токен и пароли не показываются полностью.
+    </p>
+
+    <form id="settings-form" class="settings-form">
+      <section class="card settings-section">
+        <h2 class="section-title">Wildberries API</h2>
+        <div class="settings-grid">
+          <label class="check settings-check">
+            <input type="checkbox" id="wb-demo" />
+            Демо-режим (без реального API)
+          </label>
+          <label class="check settings-check">
+            <input type="checkbox" id="wb-sandbox" />
+            Sandbox API
+          </label>
+          <label class="field field-wide">
+            <span>API-токен <span id="token-status" class="token-status"></span></span>
+            <input type="password" id="wb-token" placeholder="Оставьте пустым, чтобы не менять" autocomplete="off" />
+          </label>
+        </div>
+      </section>
+
+      <section class="card settings-section">
+        <h2 class="section-title">Локальная база</h2>
+        <div class="settings-grid">
+          <label class="field field-wide">
+            <span>Путь к SQLite</span>
+            <input type="text" id="wb-db-path" />
+          </label>
+        </div>
+      </section>
+
+      <section class="card settings-section">
+        <h2 class="section-title">Интерфейс</h2>
+        <p class="field-hint section-hint">Сохраняется в браузере, не в .env</p>
+        <div class="settings-grid">
+          <div class="theme-picker" role="radiogroup" aria-label="Тема оформления">
+            <label class="theme-option">
+              <input type="radio" name="ui-theme" value="light" checked />
+              <span class="theme-card">
+                <span class="theme-preview theme-preview--light" aria-hidden="true"></span>
+                <span class="theme-label">Светлая</span>
+              </span>
+            </label>
+            <label class="theme-option">
+              <input type="radio" name="ui-theme" value="dark" />
+              <span class="theme-card">
+                <span class="theme-preview theme-preview--dark" aria-hidden="true"></span>
+                <span class="theme-label">Тёмная</span>
+              </span>
+            </label>
+            <label class="theme-option">
+              <input type="radio" name="ui-theme" value="system" />
+              <span class="theme-card">
+                <span class="theme-preview theme-preview--system" aria-hidden="true"></span>
+                <span class="theme-label">Как в системе</span>
+              </span>
+            </label>
+          </div>
+          <p class="field-hint section-hint" style="grid-column:1/-1;margin:0">Цветовая схема (акцент кнопок и заголовков)</p>
+          <div class="scheme-picker" role="radiogroup" aria-label="Цветовая схема">
+            <label class="scheme-option" title="Фиолетовый WB">
+              <input type="radio" name="ui-scheme" value="purple" checked />
+              <span class="scheme-swatch" style="--swatch:#7b2cbf"></span>
+              <span class="scheme-name">Purple</span>
+            </label>
+            <label class="scheme-option" title="Berry / magenta">
+              <input type="radio" name="ui-scheme" value="berry" />
+              <span class="scheme-swatch" style="--swatch:#cb11ab"></span>
+              <span class="scheme-name">Berry</span>
+            </label>
+            <label class="scheme-option" title="Ocean">
+              <input type="radio" name="ui-scheme" value="ocean" />
+              <span class="scheme-swatch" style="--swatch:#0284c7"></span>
+              <span class="scheme-name">Ocean</span>
+            </label>
+            <label class="scheme-option" title="Forest">
+              <input type="radio" name="ui-scheme" value="forest" />
+              <span class="scheme-swatch" style="--swatch:#059669"></span>
+              <span class="scheme-name">Forest</span>
+            </label>
+            <label class="scheme-option" title="Sunset">
+              <input type="radio" name="ui-scheme" value="sunset" />
+              <span class="scheme-swatch" style="--swatch:#d97706"></span>
+              <span class="scheme-name">Sunset</span>
+            </label>
+            <label class="scheme-option" title="Rose">
+              <input type="radio" name="ui-scheme" value="rose" />
+              <span class="scheme-swatch" style="--swatch:#e11d48"></span>
+              <span class="scheme-name">Rose</span>
+            </label>
+            <label class="scheme-option" title="Teal">
+              <input type="radio" name="ui-scheme" value="teal" />
+              <span class="scheme-swatch" style="--swatch:#0d9488"></span>
+              <span class="scheme-name">Teal</span>
+            </label>
+            <label class="scheme-option" title="Indigo">
+              <input type="radio" name="ui-scheme" value="indigo" />
+              <span class="scheme-swatch" style="--swatch:#4f46e5"></span>
+              <span class="scheme-name">Indigo</span>
+            </label>
+            <label class="scheme-option" title="Slate">
+              <input type="radio" name="ui-scheme" value="slate" />
+              <span class="scheme-swatch" style="--swatch:#475569"></span>
+              <span class="scheme-name">Slate</span>
+            </label>
+          </div>
+          <label class="field">
+            <span>Строк на странице</span>
+            <select id="ui-page-size">
+              <option value="25">25</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+            </select>
+          </label>
+          <label class="check settings-check">
+            <input type="checkbox" id="ui-only-stock" checked />
+            По умолчанию «только с остатком»
+          </label>
+        </div>
+      </section>
+
+      <section class="card settings-section" id="phone-section">
+        <h2 class="section-title">Доступ с телефона</h2>
+        <p class="field-hint section-hint">Телефон и ноутбук должны быть в одной Wi‑Fi сети</p>
+        <div id="phone-urls" class="phone-urls">Загрузка…</div>
+      </section>
+
+      <section class="card settings-section">
+        <h2 class="section-title">MariaDB и планировщик</h2>
+        <div class="settings-grid">
+          <label class="check settings-check">
+            <input type="checkbox" id="mariadb-enabled" />
+            MariaDB Maniforce включена
+          </label>
+          <label class="field">
+            <span>Хост MariaDB</span>
+            <input type="text" id="mariadb-host" />
+          </label>
+          <label class="field">
+            <span>Порт</span>
+            <input type="number" id="mariadb-port" min="1" max="65535" />
+          </label>
+          <label class="field field-wide">
+            <span>База данных</span>
+            <input type="text" id="mariadb-database" />
+          </label>
+          <label class="check settings-check">
+            <input type="checkbox" id="scheduler-enabled" />
+            Планировщик full-stock
+          </label>
+          <label class="field">
+            <span>Интервал синхронизации, мин</span>
+            <input type="number" id="scheduler-interval" min="1" max="1440" />
+          </label>
+        </div>
+      </section>
+
+      <div class="settings-actions">
+        <button type="submit" class="btn btn-primary" id="btn-save">Сохранить</button>
+        <button type="button" class="btn" id="btn-reset">Сбросить форму</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="js/settings.js?v=5"></script>
+</body>
+</html>

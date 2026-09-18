@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Вход — Maniforge Desk</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="/assets/desk.css?v=20260917k">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/" aria-label="Maniforge">Mani<i>forge</i></a>
+    <nav class="nav nav-guest">
+      <a href="/about/">О проекте</a>
+      <a href="/about-us/">О нас</a>
+      <a href="/app/">Admin</a>
+      <a href="/api/">API</a>
+      <a class="nav-cta" href="/desk/login/" aria-current="page">Вход</a>
+    </nav>
+    <nav class="nav nav-auth" hidden>
+      <a href="/desk/">Desk</a>
+      <a href="/desk/users/">Пользователи</a>
+      <a href="/apps/">Apps</a>
+      <a href="/app/">Admin</a>
+      <a href="/scanner/">Scanner</a>
+      <a href="/api/">API</a>
+      <button type="button" data-logout>Выйти</button>
+    </nav>
+  </header>
+  <div class="login-wrap">
+    <main class="card login-card">
+      <p class="kicker">Maniforge Desk</p>
+      <h1>Вход</h1>
+      <p class="lead">Закрытый контур. Аккаунт выдаёт администратор.</p>
+      <label for="tenant">Организация (tenant)</label>
+      <input id="tenant" type="text" autocomplete="organization" placeholder="код tenant">
+      <label for="subtenant">Workspace</label>
+      <input id="subtenant" type="text" value="main" autocomplete="off">
+      <label for="phone">Телефон</label>
+      <input id="phone" type="tel" value="+7" autocomplete="tel">
+      <label for="password">Пароль</label>
+      <input id="password" type="password" autocomplete="current-password">
+      <div style="margin-top:1rem">
+        <button class="btn" id="go" type="button" style="width:100%">Войти в Desk</button>
+      </div>
+      <div id="msg" class="msg"></div>
+    </main>
+  </div>
+  <script src="/assets/desk.js?v=20260917a"></script>
+  <script src="/assets/site-header.js?v=20260917i"></script>
+  <script>
+    const tenantEl = document.getElementById('tenant');
+    const subEl = document.getElementById('subtenant');
+    ManiforgeDesk.applyBootstrap().then(() => {
+      if (ManiforgeDesk.token()) location.href = '/desk/';
+    });
+    document.getElementById('go').onclick = async () => {
+      const el = document.getElementById('msg');
+      el.textContent = '';
+      try {
+        await ManiforgeDesk.loginRaw(
+          document.getElementById('phone').value.trim(),
+          document.getElementById('password').value,
+          tenantEl.value.trim(),
+          subEl.value.trim()
+        );
+        location.href = '/desk/';
+      } catch (e) {
+        el.textContent = e.message || String(e);
+      }
+    };
+  </script>
+</body>
+</html>

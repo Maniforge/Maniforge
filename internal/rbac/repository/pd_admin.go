@@ -151,8 +151,8 @@ func (r *PDRepository) ListSubjectRequestsForScope(tenantID, subtenantID, status
 func (r *PDRepository) ResolveSubjectRequest(id int64, tenantID, subtenantID, status string, handlerUserID int64, note *string) (map[string]any, error) {
 	res, err := r.db.Exec(
 		`UPDATE maniforge_pd_subject_requests SET
-			status=$4, handler_user_id=$5, handler_note=$6,
-			completed_at=CASE WHEN $4 IN ('completed','rejected') THEN NOW() ELSE completed_at END,
+			status=$4::text, handler_user_id=$5, handler_note=$6,
+			completed_at=CASE WHEN $4::text IN ('completed','rejected') THEN NOW() ELSE completed_at END,
 			updated_at=NOW()
 		 WHERE id=$1 AND tenant_id=$2 AND subtenant_id=$3`,
 		id, tenantID, subtenantID, status, handlerUserID, note)
@@ -385,6 +385,151 @@ func setNullString(m map[string]any, key string, v sql.NullString) {
 
 func itoa(n int) string {
 	return fmt.Sprint(n)
+}
+
+func (r *PDRepository) ListConsentsForUser(userID int64, tenantID, subtenantID string) ([]map[string]any, error) {
+	rows, err := r.db.Query(
+		`SELECT id, purpose_code, policy_version, granted_at, revoked_at, source
+		 FROM maniforge_pd_consents
+		 WHERE user_id = $1 AND tenant_id = $2 AND subtenant_id = $3
+		 ORDER BY granted_at DESC, id DESC
+		 LIMIT 200`,
+		userID, tenantID, subtenantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []map[string]any
+	for rows.Next() {
+		var (
+			id            int64
+			purpose, ver  string
+			source        string
+			granted       time.Time
+			revoked       sql.NullTime
+		)
+		if err := rows.Scan(&id, &purpose, &ver, &granted, &revoked, &source); err != nil {
+			return nil, err
+		}
+		item := map[string]any{
+			"id": id, "purpose_code": purpose, "policy_version": ver, "source": source,
+			"granted_at": granted.UTC().Format("2006-01-02 15:04:05"),
+		}
+		if revoked.Valid {
+			item["revoked_at"] = revoked.Time.UTC().Format("2006-01-02 15:04:05")
+		} else {
+			item["revoked_at"] = nil
+		}
+		items = append(items, item)
+	}
+	if items == nil {
+		items = []map[string]any{}
+	}
+	return items, rows.Err()
+}
+
+func (r *PDRepository) GrantConsent(userID int64, tenantID, subtenantID, purposeCode, policyVersion, source, ipHash, uaHash string) (map[string]any, error) {
+	if err := r.RevokeActiveConsent(userID, tenantID, subtenantID, purposeCode); err != nil {
+		return nil, err
+	}
+	var id int64
+	err := r.db.QueryRow(
+		`INSERT INTO maniforge_pd_consents (
+			user_id, tenant_id, subtenant_id, purpose_code, policy_version, source, ip_hash, user_agent_hash
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		 RETURNING id`,
+		userID, tenantID, subtenantID, purposeCode, policyVersion, source, ipHash, uaHash).Scan(&id)
+	if err != nil {
+		return nil, err
+	}
+	return r.findConsentByID(id)
+}
+
+func (r *PDRepository) RevokeActiveConsent(userID int64, tenantID, subtenantID, purposeCode string) error {
+	_, err := r.db.Exec(
+		`UPDATE maniforge_pd_consents SET revoked_at = NOW()
+		 WHERE user_id = $1 AND tenant_id = $2 AND subtenant_id = $3
+		   AND purpose_code = $4 AND revoked_at IS NULL`,
+		userID, tenantID, subtenantID, purposeCode)
+	return err
+}
+
+func (r *PDRepository) FindActivePurpose(tenantID, code string) (map[string]any, error) {
+	purpose, err := r.findPurposeByCode(tenantID, code)
+	if err != nil || purpose == nil {
+		return nil, err
+	}
+	if active, _ := purpose["is_active"].(bool); !active {
+		return nil, nil
+	}
+	return purpose, nil
+}
+
+func (r *PDRepository) ListSubjectRequestsForUser(userID int64, tenantID, subtenantID string, limit int) ([]map[string]any, error) {
+	if limit < 1 {
+		limit = 50
+	}
+	rows, err := r.db.Query(
+		`SELECT id, user_id, tenant_id, subtenant_id, request_type, status, payload_json,
+		        handler_user_id, handler_note, due_at, completed_at, created_at, updated_at
+		 FROM maniforge_pd_subject_requests
+		 WHERE user_id = $1 AND tenant_id = $2 AND subtenant_id = $3
+		 ORDER BY created_at DESC LIMIT $4`,
+		userID, tenantID, subtenantID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanSubjectRequestRows(rows)
+}
+
+func (r *PDRepository) CreateSubjectRequest(userID int64, tenantID, subtenantID, requestType string, payload map[string]any, dueAt time.Time) (map[string]any, error) {
+	var payloadJSON any
+	if payload != nil {
+		raw, err := json.Marshal(payload)
+		if err != nil {
+			return nil, err
+		}
+		payloadJSON = string(raw)
+	}
+	var id int64
+	err := r.db.QueryRow(
+		`INSERT INTO maniforge_pd_subject_requests (
+			user_id, tenant_id, subtenant_id, request_type, status, payload_json, due_at
+		) VALUES ($1, $2, $3, $4, 'pending', $5::jsonb, $6)
+		 RETURNING id`,
+		userID, tenantID, subtenantID, requestType, payloadJSON, dueAt).Scan(&id)
+	if err != nil {
+		return nil, err
+	}
+	return r.findSubjectRequestByID(id)
+}
+
+func (r *PDRepository) findConsentByID(id int64) (map[string]any, error) {
+	row := r.db.QueryRow(
+		`SELECT id, purpose_code, policy_version, granted_at, revoked_at, source
+		 FROM maniforge_pd_consents WHERE id = $1 LIMIT 1`, id)
+	var (
+		cid           int64
+		purpose, ver  string
+		source        string
+		granted       time.Time
+		revoked       sql.NullTime
+	)
+	if err := row.Scan(&cid, &purpose, &ver, &granted, &revoked, &source); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	item := map[string]any{
+		"id": cid, "purpose_code": purpose, "policy_version": ver, "source": source,
+		"granted_at": granted.UTC().Format("2006-01-02 15:04:05"),
+	}
+	if revoked.Valid {
+		item["revoked_at"] = revoked.Time.UTC().Format("2006-01-02 15:04:05")
+	}
+	return item, nil
 }
 
 func scanPurposeRows(rows *sql.Rows) ([]map[string]any, error) {

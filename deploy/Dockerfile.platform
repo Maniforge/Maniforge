@@ -18,7 +18,11 @@ RUN mkdir -p /out && \
     CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-tenant-licensing ./cmd/tenant-licensing && \
     CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-manifest-engine ./cmd/manifest-engine && \
     CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-versioning ./cmd/versioning && \
-    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-realtime ./cmd/realtime
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-realtime ./cmd/realtime && \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-warehouses ./cmd/warehouses && \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-products ./cmd/products && \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-inventory ./cmd/inventory && \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/maniforge-wms ./cmd/wms
 
 FROM alpine:3.21
 

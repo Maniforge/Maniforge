@@ -4,6 +4,7 @@ package versioninghttp
 import (
 	"database/sql"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -52,6 +53,24 @@ func NewApp(cfg config.Config, db *sql.DB) *fiber.App {
 			}
 			total, _ := verRepo.CountInScope(session.TenantID, session.SubtenantID, f)
 			return httpx.OK(c, fiber.Map{"ok": true, "items": items, "total": total, "limit": f.Limit, "offset": f.Offset})
+		})
+		api.Get("/changes/:id", func(c *fiber.Ctx) error {
+			session, err := requirePermission(c, rbac, "versioning.read")
+			if err != nil {
+				return err
+			}
+			id, convErr := strconv.ParseInt(c.Params("id"), 10, 64)
+			if convErr != nil || id <= 0 {
+				return httpx.Fail(c, fiber.StatusBadRequest, "invalid id")
+			}
+			item, findErr := verRepo.FindByIDInScope(id, session.TenantID, session.SubtenantID)
+			if findErr != nil {
+				return httpx.Fail(c, fiber.StatusInternalServerError, findErr.Error())
+			}
+			if item == nil {
+				return httpx.Fail(c, fiber.StatusNotFound, "Запись истории не найдена")
+			}
+			return httpx.OK(c, fiber.Map{"ok": true, "item": item})
 		})
 		api.Get("/registry", func(c *fiber.Ctx) error {
 			_, err := requirePermission(c, rbac, "versioning.registry.read")

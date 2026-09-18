@@ -17,6 +17,7 @@ import (
 	"maniforge/internal/rbac/repository"
 	"maniforge/internal/rbac/security"
 	"maniforge/internal/rbac/service"
+	"maniforge/internal/versioning"
 )
 
 type AuthHandler struct {
@@ -28,9 +29,14 @@ type AuthHandler struct {
 	actionTokens *service.ActionTokenService
 	contexts     *service.ContextService
 	mfa          *service.MFAService
+	org          *service.OrganizationService
+	projects     *service.ProjectService
+	audit        *repository.AuditRepository
 }
 
 func NewAuthHandler(cfg config.Config, db *sql.DB) *AuthHandler {
+	roles := repository.NewRoleRepository(db)
+	rbac := service.NewRbacService(roles)
 	return &AuthHandler{
 		auth:         service.NewAuthService(cfg, db),
 		sessions:     service.NewSessionService(cfg, db),
@@ -40,6 +46,15 @@ func NewAuthHandler(cfg config.Config, db *sql.DB) *AuthHandler {
 		actionTokens: service.NewActionTokenService(cfg, repository.NewActionTokenRepository(db)),
 		contexts:     service.NewContextService(cfg, db),
 		mfa:          service.NewMFAService(cfg, db),
+		org:          service.NewOrganizationService(cfg, db),
+		projects: service.NewProjectService(
+			repository.NewProjectRepository(db),
+			repository.NewScopeVariableRepository(db),
+			repository.NewUserRepository(db, cfg),
+			rbac,
+			versioning.NewRecorder(cfg, db),
+		),
+		audit: repository.NewAuditRepository(db),
 	}
 }
 
@@ -85,6 +100,79 @@ func (h *AuthHandler) Logout(c *fiber.Ctx) error {
 		return httpx.JSON(c, fiber.StatusNotFound, fiber.Map{"ok": false})
 	}
 	return httpx.JSON(c, fiber.StatusOK, fiber.Map{"ok": true})
+}
+
+func (h *AuthHandler) LogoutAll(c *fiber.Ctx) error {
+	session, ok := c.Locals("maniforge_session").(*repository.SessionRecord)
+	if !ok || session == nil {
+		return httpx.Fail(c, fiber.StatusUnauthorized, "Не авторизован")
+	}
+	count, err := h.sessions.RevokeAllForUser(session.UserID, "logout_all")
+	if err != nil {
+		return httpx.Fail(c, fiber.StatusInternalServerError, err.Error())
+	}
+	actor := session.UserID
+	_ = h.audit.Write("auth.logout_all", &actor, session.TenantID, session.SubtenantID, map[string]any{
+		"revoked_sessions": count,
+	})
+	return httpx.OK(c, fiber.Map{"ok": true, "revoked_sessions": count})
+}
+
+func (h *AuthHandler) AcceptInvite(c *fiber.Ctx) error {
+	session, ok := c.Locals("maniforge_session").(*repository.SessionRecord)
+	if !ok || session == nil {
+		return httpx.Fail(c, fiber.StatusUnauthorized, "Не авторизован")
+	}
+	var req struct {
+		InviteToken string `json:"invite_token"`
+	}
+	if err := c.BodyParser(&req); err != nil {
+		return httpx.Fail(c, fiber.StatusBadRequest, "invalid json")
+	}
+	payload, status := h.org.AcceptInvite(session, req.InviteToken)
+	return httpx.JSON(c, status, payload)
+}
+
+func (h *AuthHandler) SwitchProject(c *fiber.Ctx) error {
+	session, ok := c.Locals("maniforge_session").(*repository.SessionRecord)
+	if !ok || session == nil {
+		return httpx.Fail(c, fiber.StatusUnauthorized, "Не авторизован")
+	}
+	var input map[string]any
+	if err := c.BodyParser(&input); err != nil && len(c.Body()) > 0 {
+		return httpx.Fail(c, fiber.StatusBadRequest, "invalid json")
+	}
+	if input == nil {
+		input = map[string]any{}
+	}
+	var projectID *int64
+	if raw, exists := input["project_id"]; exists && raw != nil && raw != "" && raw != "null" {
+		id := parseInt64Input(raw)
+		if id <= 0 {
+			return httpx.Fail(c, fiber.StatusUnprocessableEntity, "Некорректный project_id")
+		}
+		projectID = &id
+	}
+	payload, status := h.projects.SwitchProject(session, projectID)
+	if status != fiber.StatusOK {
+		return httpx.JSON(c, status, payload)
+	}
+	sess, _ := payload["session"].(map[string]any)
+	if unchanged, _ := sess["unchanged"].(bool); unchanged {
+		return httpx.JSON(c, status, payload)
+	}
+	var bind sql.NullInt64
+	if projectID != nil {
+		bind = sql.NullInt64{Int64: *projectID, Valid: true}
+	}
+	okBind, err := h.sessionRepo.RebindProject(session.ID, bind)
+	if err != nil {
+		return httpx.Fail(c, fiber.StatusInternalServerError, err.Error())
+	}
+	if !okBind {
+		return httpx.Fail(c, fiber.StatusInternalServerError, "Не удалось переключить проект сессии")
+	}
+	return httpx.JSON(c, status, payload)
 }
 
 func (h *AuthHandler) SwitchContext(c *fiber.Ctx) error {

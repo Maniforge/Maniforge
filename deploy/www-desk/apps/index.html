@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apps — Maniforge</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="/assets/desk.css?v=20260917h">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/">Mani<i>forge</i></a>
+    <nav class="nav nav-guest">
+      <a href="/about/">О проекте</a>
+      <a href="/about-us/">О нас</a>
+      <a href="/api/">API</a>
+      <a class="nav-cta" href="/desk/login/">Вход</a>
+    </nav>
+    <nav class="nav nav-auth" hidden>
+      <a href="/desk/">Desk</a>
+      <a href="/desk/users/">Пользователи</a>
+      <a href="/apps/" aria-current="page">Apps</a>
+      <a href="/app/">Admin</a>
+      <a href="/scanner/">Scanner</a>
+      <a href="/api/">API</a>
+      <button type="button" data-logout>Выйти</button>
+    </nav>
+  </header>
+  <main class="main" style="max-width:52rem;margin:0 auto">
+    <p class="kicker">Visual apps · restored</p>
+    <h1>Приложения</h1>
+    <p class="lead">Refine-админка, сканер и складской UI, которые жили в platform-core.bak. API-методы — в PHP-роутерах и на странице <a href="/api/">API</a>.</p>
+    <div class="grid">
+      <a class="tile" href="/app/"><strong>Admin</strong><span class="muted">Dashboard, Manifest, Warehouses · /app/</span></a>
+      <a class="tile" href="/scanner/"><strong>Scanner</strong><span class="muted">КИЗ, паллеты, scan · /scanner/</span></a>
+      <a class="tile" href="/apps/devent/store.html"><strong>Склад Свит</strong><span class="muted">учёт остатков · store.html</span></a>
+      <a class="tile" href="/apps/devent/wms.html"><strong>WMS</strong><span class="muted">складские операции · wms.html</span></a>
+      <a class="tile" href="/apps/devent/index.html"><strong>WB — Остатки</strong><span class="muted">остатки на складах WB</span></a>
+      <a class="tile" href="/desk/"><strong>Desk</strong><span class="muted">Manifest Engine · сущности</span></a>
+    </div>
+  </main>
+  <script src="/assets/desk.js"></script>
+  <script src="/assets/site-header.js?v=20260917h"></script>
+  <script>if (!ManiforgeDesk.requireAuth()) throw 0;</script>
+</body>
+</html>

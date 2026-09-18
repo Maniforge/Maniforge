@@ -16,6 +16,7 @@ type WriteResult struct {
 	OK     bool
 	Status int
 	Error  string
+	Extra  map[string]any
 }
 
 func (r *Repository) CreateTenant(tenantCode, name, actor string, metadata map[string]any) WriteResult {
@@ -38,6 +39,24 @@ func (r *Repository) CreateTenant(tenantCode, name, actor string, metadata map[s
 	_ = r.writeAudit("tenant.created", actor, tenantCode, "", map[string]any{"name": name})
 	_ = r.enqueueEvent("tenant.created", tenantCode, "", map[string]any{"name": name})
 	return WriteResult{OK: true, Status: 201}
+}
+
+func (r *Repository) FindCodeBySource(source string) (string, error) {
+	source = strings.TrimSpace(source)
+	if source == "" {
+		return "", nil
+	}
+	var codeVal string
+	err := r.db.QueryRow(
+		`SELECT code FROM maniforge_tl_tenants
+		 WHERE metadata_json->>'source' = $1
+		 ORDER BY id ASC LIMIT 1`,
+		source,
+	).Scan(&codeVal)
+	if err == sql.ErrNoRows {
+		return "", nil
+	}
+	return strings.TrimSpace(codeVal), err
 }
 
 func (r *Repository) CreateSubtenant(tenantCode, subtenantCode, name, actor string, metadata map[string]any) WriteResult {

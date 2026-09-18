@@ -430,6 +430,42 @@ func RefreshExpiresAt(days int) string {
 	return time.Now().UTC().Add(time.Duration(days) * 24 * time.Hour).Format("2006-01-02 15:04:05")
 }
 
+func (r *SessionRepository) ListActiveForUser(userID int64, tenantID, subtenantID string, limit int) ([]map[string]any, error) {
+	if limit < 1 {
+		limit = 20
+	}
+	rows, err := r.db.Query(
+		`SELECT id, created_at, last_activity_at, expires_at
+		 FROM maniforge_sessions
+		 WHERE user_id = $1 AND tenant_id = $2 AND subtenant_id = $3
+		   AND revoked_at IS NULL AND expires_at > NOW()
+		 ORDER BY last_activity_at DESC
+		 LIMIT $4`,
+		userID, tenantID, subtenantID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []map[string]any
+	for rows.Next() {
+		var id string
+		var created, lastActivity, expires time.Time
+		if err := rows.Scan(&id, &created, &lastActivity, &expires); err != nil {
+			return nil, err
+		}
+		items = append(items, map[string]any{
+			"id":               id,
+			"created_at":       created.UTC().Format("2006-01-02 15:04:05"),
+			"last_activity_at": lastActivity.UTC().Format("2006-01-02 15:04:05"),
+			"expires_at":       expires.UTC().Format("2006-01-02 15:04:05"),
+		})
+	}
+	if items == nil {
+		items = []map[string]any{}
+	}
+	return items, rows.Err()
+}
+
 func (r *SessionRepository) CountActiveInScope(tenantID, subtenantID string) (int, error) {
 	var total int
 	err := r.db.QueryRow(

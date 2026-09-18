@@ -32,5 +32,10 @@ go build -trimpath -ldflags="-s -w" -o bin/maniforge-versioning ./cmd/versioning
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-manifest-journey ./cmd/manifest-journey
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-platform-ops-journey ./cmd/platform-ops-journey
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-realtime ./cmd/realtime
+go build -trimpath -ldflags="-s -w" -o bin/maniforge-warehouses ./cmd/warehouses
+go build -trimpath -ldflags="-s -w" -o bin/maniforge-products ./cmd/products
+go build -trimpath -ldflags="-s -w" -o bin/maniforge-inventory ./cmd/inventory
+go build -trimpath -ldflags="-s -w" -o bin/maniforge-wms ./cmd/wms
+go build -trimpath -ldflags="-s -w" -o bin/maniforge-bootstrap ./cmd/bootstrap
 
 echo "build ok"

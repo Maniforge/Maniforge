@@ -114,6 +114,58 @@ services:
       retries: 12
       start_period: 15s
 
+  warehouses:
+    <<: *maniforge-service
+    container_name: maniforge-platform-warehouses
+    command: ["maniforge-warehouses"]
+    ports:
+      - "8098:8098"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8098/warehouses/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  products:
+    <<: *maniforge-service
+    container_name: maniforge-platform-products
+    command: ["maniforge-products"]
+    ports:
+      - "8099:8099"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8099/products/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  inventory:
+    <<: *maniforge-service
+    container_name: maniforge-platform-inventory
+    command: ["maniforge-inventory"]
+    ports:
+      - "8100:8100"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8100/inventory/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  wms:
+    <<: *maniforge-service
+    container_name: maniforge-platform-wms
+    command: ["maniforge-wms"]
+    ports:
+      - "8101:8101"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8101/wms/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
   gateway:
     image: caddy:2-alpine
     container_name: maniforge-platform-gateway
@@ -134,6 +186,14 @@ services:
       versioning:
         condition: service_healthy
       realtime:
+        condition: service_healthy
+      warehouses:
+        condition: service_healthy
+      products:
+        condition: service_healthy
+      inventory:
+        condition: service_healthy
+      wms:
         condition: service_healthy
 
 networks:

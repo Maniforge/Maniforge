@@ -1,0 +1,238 @@
+@import url("/assets/fonts.css");
+
+/* Align Admin/Scanner SPA with Desk homepage. Loaded after hashed bundles. */
+:root {
+  color-scheme: dark;
+  --bg: #0c0d10;
+  --bg-2: #14161c;
+  --bg-3: #1c1f28;
+  --line: #2a2e38;
+  --text: #f2f3f5;
+  --muted: #8b90a0;
+  --accent: #7aa2ff;
+  --accent-2: #3ee0c5;
+  --radius: 16px;
+  --font: "IBM Plex Sans", system-ui, sans-serif;
+  --mf-bg: #0c0d10;
+  --mf-surface: #14161c;
+  --mf-border: #2a2e38;
+  --mf-text: #f2f3f5;
+  --mf-muted: #8b90a0;
+  --mf-primary: #7aa2ff;
+  --mf-primary-soft: rgb(122 162 255 / 0.14);
+  --mf-radius: 16px;
+  --mf-shadow: none;
+  --sc-bg: #0c0d10;
+  --sc-surface: #14161c;
+  --sc-border: #2a2e38;
+  --sc-text: #f2f3f5;
+  --sc-muted: #8b90a0;
+  --sc-primary: #7aa2ff;
+  --sc-primary-soft: rgb(122 162 255 / 0.14);
+  --sc-radius: 16px;
+  --site-content-max: 1180px;
+  --site-gutter: 1.6rem;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(1200px 500px at 70% -10%, rgb(122 162 255 / 0.16), transparent 55%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.55;
+}
+
+a {
+  color: var(--accent);
+}
+
+.mf-shell,
+.sc-shell {
+  background: transparent;
+  color: var(--text);
+}
+
+.mf-panel,
+.mf-card,
+.mf-modal,
+.sc-panel,
+.sc-op-card,
+.sc-modal {
+  background: var(--bg-2) !important;
+  border-color: var(--line) !important;
+  color: var(--text);
+  box-shadow: none !important;
+}
+
+.mf-kicker,
+.mf-module-card span,
+.mf-tree-type,
+.sc-preview-kind {
+  background: rgb(122 162 255 / 0.14);
+  color: var(--accent);
+}
+
+.mf-button,
+.sc-button,
+.mf-site-nav-auth-btn {
+  background: var(--accent) !important;
+  color: #0c0d10 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  font-weight: 600;
+}
+
+.mf-button-secondary,
+.sc-button-secondary,
+.mf-button-ghost {
+  background: transparent !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line) !important;
+}
+
+.mf-field,
+.sc-field,
+.mf-context-select,
+input.mf-field,
+textarea.mf-field,
+select.mf-field {
+  background: #0f1218 !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 12px;
+}
+
+.mf-field:focus,
+.sc-field:focus {
+  outline: none;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px rgb(122 162 255 / 0.22);
+}
+
+.mf-table th {
+  background: transparent !important;
+  color: var(--muted);
+}
+
+.mf-table th,
+.mf-table td {
+  border-bottom-color: var(--line);
+}
+
+.mf-module-card,
+.sc-op-card {
+  background: var(--bg-3) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 14px;
+}
+
+.mf-module-card:hover,
+.sc-op-card:hover {
+  border-color: var(--accent) !important;
+  transform: none;
+}
+
+.mf-error,
+.sc-error {
+  color: #e35d6a;
+}
+
+.sc-result,
+.sc-preview {
+  background: rgb(122 162 255 / 0.1);
+}
+
+.sc-success {
+  background: rgb(62 224 197 / 0.14);
+  color: var(--accent-2);
+}
+
+.sc-qr-payload,
+.sc-result pre {
+  background: #0f1218;
+  color: var(--text);
+}
+
+.sc-footer {
+  color: var(--muted);
+}
+
+.mf-tree-row-selected {
+  background: rgb(122 162 255 / 0.12);
+}
+
+.mf-topbar {
+  background: rgb(12 13 16 / 0.78);
+  color: var(--text);
+}
+
+/* Shared Desk chrome (same as assets/desk.css .top) */
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 64px;
+  padding: 0.85rem 1.6rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.06);
+  background: rgb(12 13 16 / 0.78);
+  backdrop-filter: blur(16px);
+}
+.brand {
+  flex: 0 0 auto;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--text) !important;
+  text-decoration: none !important;
+  font-size: 1.05rem;
+  font-family: var(--font);
+}
+.brand i {
+  font-style: normal;
+  color: var(--accent);
+}
+.nav {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  gap: 0.2rem;
+  align-items: center;
+  font-size: 0.9rem;
+}
+.nav a,
+.nav button {
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+}
+.nav a:hover,
+.nav a[aria-current='page'],
+.nav button:hover {
+  color: var(--text);
+  background: rgb(255 255 255 / 0.05);
+  text-decoration: none;
+}
+.nav .nav-cta {
+  background: var(--accent) !important;
+  color: #0c0d10 !important;
+  font-weight: 600;
+  padding: 0.45rem 1rem;
+}
+.nav .nav-cta:hover,
+.nav .nav-cta[aria-current='page'] {
+  background: #8eb0ff !important;
+  color: #0c0d10 !important;
+}

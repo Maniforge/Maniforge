@@ -203,3 +203,6 @@ make warehouses-journey    # supply chain склад
 |------|---------|---------------|
 | 2026-08-28 | План зафиксирован | Фаза A: compose.platform.yml |
 | 2026-08-28 | Фаза A черновик: `deploy/compose.platform.yml`, Caddy, Dockerfile, `make platform-up` | Прогнать `make platform-journey` локально |
+| 2026-09-17 | HTTP liveRoutes 197 в 9 сервисах; старт [плана шлюз + тесты](superpowers/plans/2026-09-17-api-holes-and-gateway.md) | — |
+| 2026-09-17 | **P2 (в коде):** `/warehouses`…`/wms` на Caddy (3 файла), compose, systemd, Makefile/`gateway-health.sh`. **Глубина тестов (Tasks 2–6):** `AssertLiveRoutesExact` (9 пакетов), `ListGrantPeers`, 6× inventory domain, 403/422/CSRF, живой WS broadcast | **Остаток:** живой `make platform-up` + `curl` через публичный Caddy/nzgapp не подтверждали (Docker daemon был down) |
+| 2026-09-17 | Task 7: журнал/DoD; PHP `app/Maniforge` на месте; `api-docs-catalog.json` не раздували | Прогнать gateway health на хосте после `platform-up` / `verify-production.sh` |

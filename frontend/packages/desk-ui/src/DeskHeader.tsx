@@ -12,6 +12,7 @@ type Props = {
 const GUEST = [
   { href: '/about/', label: 'О проекте' },
   { href: '/about-us/', label: 'О нас' },
+  { href: '/app/', label: 'Admin' },
   { href: '/api/', label: 'API' },
 ];
 
@@ -81,7 +82,7 @@ export function DeskHeader({ current, actions, onLogout }: Props) {
             Выйти
           </button>
         ) : (
-          <a className="nav-cta" href={path === '/' ? '#login' : '/desk/login/'}>
+          <a className="nav-cta" href="/desk/login/">
             Вход
           </a>
         )}

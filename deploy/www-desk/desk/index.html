@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Desk — Maniforge</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="/assets/desk.css?v=20260917k">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/" aria-label="Maniforge">Mani<i>forge</i></a>
+  <nav class="nav nav-guest">
+    <a href="/about/">О проекте</a>
+    <a href="/about-us/">О нас</a>
+    <a href="/app/">Admin</a>
+    <a href="/api/">API</a>
+    <a class="nav-cta" href="/desk/login/">Вход</a>
+  </nav>
+  <nav class="nav nav-auth" hidden>
+    <a href="/desk/" aria-current="page">Desk</a>
+    <a href="/desk/users/">Пользователи</a>
+    <a href="/apps/">Apps</a>
+    <a href="/app/">Admin</a>
+    <a href="/scanner/">Scanner</a>
+    <a href="/api/">API</a>
+    <button type="button" data-logout>Выйти</button>
+  </nav>
+</header>
+<div class="shell">
+  <aside class="side"><h2>Manifest</h2><div id="sideList"><div class="empty">Загрузка…</div></div></aside>
+  <main class="main">
+    <p class="kicker">Framework · Desk</p>
+    <h1 id="title">Сущности</h1>
+    <p class="lead" id="lead">Список Manifest из Manifest Engine.</p>
+    <div id="content" class="card"><div class="empty">Загрузка…</div></div>
+    <div id="msg" class="msg"></div>
+  </main>
+</div>
+<script src="/assets/desk.js"></script>
+<script src="/assets/site-header.js?v=20260917i"></script>
+<script>
+if (!ManiforgeDesk.requireAuth()) throw 0;
+const params = new URLSearchParams(location.search);
+const code = params.get('entity');
+const msg = (t)=>{ document.getElementById('msg').textContent=t||''; };
+(async()=>{
+  try{
+    const items = await ManiforgeDesk.listManifests();
+    const list = Array.isArray(items) ? items : [];
+    document.getElementById('sideList').innerHTML = list.map(m=>{
+      const c=m.code||'?'; return `<button type="button" class="entity-btn${code===c?' active':''}" data-code="${c}">${c}${m.origin?` <span class="badge">${m.origin}</span>`:''}</button>`;
+    }).join('') || '<div class="empty">Пусто</div>';
+    document.querySelectorAll('[data-code]').forEach(btn=>btn.onclick=()=>location.href='/desk/?entity='+encodeURIComponent(btn.dataset.code));
+    if(!code){
+      document.getElementById('content').innerHTML = `<div class="grid">${list.map(m=>{
+        const c=m.code||'?'; return `<a class="tile" href="/desk/?entity=${encodeURIComponent(c)}"><strong>${m.name||c}</strong><span class="muted">${c}</span></a>`;
+      }).join('')||'<div class="empty">Нет манифестов. Preset через API.</div>'}</div>`;
+    } else {
+      document.getElementById('title').textContent = code;
+      document.getElementById('lead').textContent = 'Записи · /manifest/api/data/'+code;
+      let records=[]; try{ records=await ManiforgeDesk.listRecords(code);}catch(e){msg(e.message);}
+      const rows=(Array.isArray(records)?records:[]).slice(0,100);
+      const keys=rows[0]?Object.keys(rows[0].data||rows[0]).slice(0,6):[];
+      document.getElementById('content').innerHTML = rows.length ? `<table class="table"><thead><tr><th>id</th>${keys.map(k=>'<th>'+k+'</th>').join('')}</tr></thead><tbody>${rows.map(r=>{
+        const id=r.id||''; const d=r.data||r; return `<tr><td class="muted">${id}</td>${keys.map(k=>'<td>'+String(d[k]??'')+'</td>').join('')}</tr>`;
+      }).join('')}</tbody></table>` : '<div class="empty">Записей нет</div>';
+    }
+  }catch(e){ msg(e.message||String(e)); document.getElementById('content').innerHTML='<div class="empty">Не удалось загрузить Desk</div>'; }
+})();
+</script>
+</body>
+</html>

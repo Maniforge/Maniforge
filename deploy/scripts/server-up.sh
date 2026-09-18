@@ -12,6 +12,10 @@ UNITS=(
   maniforge-manifest.service
   maniforge-versioning.service
   maniforge-realtime.service
+  maniforge-warehouses.service
+  maniforge-products.service
+  maniforge-inventory.service
+  maniforge-wms.service
   maniforge-caddy.service
 )
 OLD_CONTAINERS=(
@@ -71,6 +75,17 @@ systemd-run --quiet --wait --pipe --collect \
   --property="EnvironmentFile=${ENV_FILE}" \
   --working-directory="$ROOT" \
   "${ROOT}/bin/maniforge-migrate"
+
+if grep -qE '^MANIFORGE_ADMIN_LOGIN=.+' "$ENV_FILE" && grep -qE '^MANIFORGE_ADMIN_PASSWORD=.+' "$ENV_FILE"; then
+  echo "==> demo admin bootstrap (tenantId = SHA-256 of UUID; password not printed)"
+  systemd-run --quiet --wait --pipe --collect \
+    --property="EnvironmentFile=${ENV_FILE}" \
+    --property="Environment=MANIFORGE_ROOT=${ROOT}" \
+    --working-directory="$ROOT" \
+    "${ROOT}/bin/maniforge-bootstrap"
+else
+  echo "==> skip demo bootstrap (set MANIFORGE_ADMIN_LOGIN and MANIFORGE_ADMIN_PASSWORD)"
+fi
 
 echo "==> restart Go + Caddy"
 systemctl restart "${UNITS[@]}"

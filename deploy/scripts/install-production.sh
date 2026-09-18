@@ -13,6 +13,9 @@ DOMAIN="${MANIFORGE_DOMAIN:-}"
 NONINTERACTIVE="${MANIFORGE_NONINTERACTIVE:-0}"
 SKIP_APT="${MANIFORGE_SKIP_APT:-0}"
 EDGE_PROXY="${MANIFORGE_EDGE_PROXY:-0}"
+ADMIN_LOGIN="${MANIFORGE_ADMIN_LOGIN:-}"
+ADMIN_PASSWORD="${MANIFORGE_ADMIN_PASSWORD:-}"
+ADMIN_ORG="${MANIFORGE_ADMIN_ORG:-}"
 
 usage() {
   cat <<'EOF'
@@ -23,12 +26,16 @@ Options:
   --root PATH          Install tree (default: /opt/maniforge/platform-core)
   --domain FQDN        Enable HTTPS via Caddyfile.production (requires DNS + :80/:443)
   --edge-proxy         Production profile with gateway on :18090; TLS on shared edge
+  --admin-login PHONE  Demo admin login (телефон, +7999…)
+  --admin-password STR Demo admin password (min 12 chars; not printed)
+  --admin-org NAME     Organization name for the demo tenant (default: Demo)
   --non-interactive    No prompts; fail if .env.platform missing
   --skip-apt           Skip apt/docker/go/caddy install (deps already present)
   -h, --help           Show help
 
 Environment:
   MANIFORGE_ROOT, MANIFORGE_DOMAIN, MANIFORGE_EDGE_PROXY, MANIFORGE_NONINTERACTIVE, MANIFORGE_SKIP_APT
+  MANIFORGE_ADMIN_LOGIN, MANIFORGE_ADMIN_PASSWORD, MANIFORGE_ADMIN_ORG
 
 Example (clean Ubuntu, source already at /opt/maniforge/platform-core):
   sudo bash deploy/scripts/install-maniforge.sh --domain platform.customer.ru
@@ -88,6 +95,18 @@ parse_args() {
       --skip-apt)
         SKIP_APT=1
         shift
+        ;;
+      --admin-login)
+        ADMIN_LOGIN="$2"
+        shift 2
+        ;;
+      --admin-password)
+        ADMIN_PASSWORD="$2"
+        shift 2
+        ;;
+      --admin-org)
+        ADMIN_ORG="$2"
+        shift 2
         ;;
       -h|--help)
         usage
@@ -190,6 +209,42 @@ prompt_domain() {
   fi
   read -r -p "Production domain for HTTPS (empty = IP:18090 staging): " DOMAIN || true
   DOMAIN="${DOMAIN:-}"
+}
+
+prompt_admin() {
+  cd "$DEPLOY"
+  local env_file=".env.platform"
+  ENV="$env_file"
+  # shellcheck source=server-public-urls.sh
+  . "${SCRIPT_DIR}/server-public-urls.sh"
+
+  local login pass org
+  login="${ADMIN_LOGIN:-$(_env_get MANIFORGE_ADMIN_LOGIN)}"
+  pass="${ADMIN_PASSWORD:-$(_env_get MANIFORGE_ADMIN_PASSWORD)}"
+  org="${ADMIN_ORG:-$(_env_get MANIFORGE_ADMIN_ORG)}"
+
+  if [ "$NONINTERACTIVE" != "1" ]; then
+    if [ -z "$login" ]; then
+      read -r -p "Логин админки (телефон, +79991234567): " login || true
+    fi
+    if [ -z "$pass" ]; then
+      read -r -s -p "Пароль админки (не короче 12 символов): " pass || true
+      echo
+    fi
+    if [ -z "$org" ]; then
+      read -r -p "Название организации [Demo]: " org || true
+      org="${org:-Demo}"
+    fi
+  fi
+
+  if [ -z "$login" ] || [ -z "$pass" ] || [[ "$pass" == CHANGE_ME* ]]; then
+    echo "нужны MANIFORGE_ADMIN_LOGIN (телефон) и MANIFORGE_ADMIN_PASSWORD (мин. 12 символов)" >&2
+    exit 1
+  fi
+
+  _env_upsert MANIFORGE_ADMIN_LOGIN "$login"
+  _env_upsert MANIFORGE_ADMIN_PASSWORD "$pass"
+  _env_upsert MANIFORGE_ADMIN_ORG "${org:-Demo}"
 }
 
 configure_env() {
@@ -320,6 +375,7 @@ main() {
   fix_deploy_script_perms
   prompt_domain
   configure_env
+  prompt_admin
   render_caddy
   patch_caddy_systemd
 

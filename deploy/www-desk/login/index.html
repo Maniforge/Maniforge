@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Вход — Maniforge Identity</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="/assets/desk.css?v=20260917h">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/">Mani<i>forge</i></a>
+    <nav class="nav nav-guest">
+      <a href="/about/">О проекте</a>
+      <a href="/about-us/">О нас</a>
+      <a href="/api/">API</a>
+      <a class="nav-cta" href="/desk/login/" aria-current="page">Вход</a>
+    </nav>
+    <nav class="nav nav-auth" hidden>
+      <a href="/desk/">Desk</a>
+      <a href="/desk/users/">Пользователи</a>
+      <a href="/apps/">Apps</a>
+      <a href="/app/">Admin</a>
+      <a href="/scanner/">Scanner</a>
+      <a href="/api/">API</a>
+      <button type="button" data-logout>Выйти</button>
+    </nav>
+  </header>
+  <div class="login-wrap">
+    <main class="card login-card">
+      <p class="kicker">Identity · closed</p>
+      <h1>Вход</h1>
+      <p class="lead">Аккаунт выдаёт администратор. Публичной регистрации нет.</p>
+      <label for="tenant">Организация (tenant)</label>
+      <input id="tenant" type="text" autocomplete="organization" placeholder="код tenant">
+      <label for="subtenant">Workspace</label>
+      <input id="subtenant" type="text" value="main" autocomplete="off">
+      <label for="phone">Телефон</label>
+      <input id="phone" type="tel" value="+7" autocomplete="tel">
+      <label for="password">Пароль</label>
+      <input id="password" type="password" autocomplete="current-password">
+      <div style="margin-top:1rem"><button class="btn" id="btnLogin" type="button" style="width:100%">Войти</button></div>
+      <div id="msg" class="msg"></div>
+    </main>
+  </div>
+  <script src="/assets/auth.js"></script>
+  <script src="/assets/site-header.js?v=20260917h"></script>
+  <script>
+    ManiforgeAuth.applyBootstrap();
+    document.getElementById('btnLogin').onclick = () => ManiforgeAuth.doLogin();
+  </script>
+</body>
+</html>

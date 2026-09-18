@@ -1,0 +1,146 @@
+.docs-body {
+  padding-bottom: 24px;
+}
+
+.docs-toc {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.docs-toc a {
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--muted);
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-subtle);
+}
+
+.docs-toc a:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--accent-bg);
+}
+
+.docs-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.docs-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.docs-card .section-title {
+  font-size: 1rem;
+  margin: 0 0 10px;
+}
+
+.docs-lead {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+.docs-lead code,
+.docs-note code,
+.docs-list code,
+.docs-meta code {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  background: var(--bg-subtle);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.docs-list {
+  margin: 0 0 10px;
+  padding-left: 1.2rem;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.docs-note {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 8px 0 0;
+  line-height: 1.45;
+}
+
+.docs-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 10px 0 0;
+}
+
+.docs-meta a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.docs-code {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-subtle);
+  overflow-x: auto;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.docs-code code {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  color: var(--text);
+  white-space: pre;
+}
+
+.docs-table-wrap {
+  overflow-x: auto;
+  margin: 0 0 8px;
+}
+
+.docs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.docs-table th,
+.docs-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.docs-table th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.docs-table code {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+}

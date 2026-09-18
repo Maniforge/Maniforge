@@ -1,52 +1,34 @@
-import { useEffect } from 'react';
-import { hasDeskSession } from '@maniforge/desk-ui';
-import { LoginForm } from './LoginForm';
-
-const MANIFEST = `name: item
-fields:
-  sku: string
-  qty: integer`;
-
-const HTTP = `GET    /item
-POST   /item
-GET    /item/{id}
-PATCH  /item/{id}`;
-
 export function HomePage() {
-  useEffect(() => {
-    if (hasDeskSession()) window.location.href = '/desk/';
-  }, []);
-
   return (
     <div className="split">
-      <section className="pane-greet" aria-label="О продукте">
-        <h1>Описали сущность — получили API.</h1>
-        <p className="lead">Фреймворк на Go. Манифест полей становится REST.</p>
-        <div className="forge">
-          <pre className="proof">
-            <span className="proof-label">Манифест</span>
-            <code>{MANIFEST}</code>
-          </pre>
-          <span className="forge-arrow" aria-hidden="true">
-            →
-          </span>
-          <pre className="proof proof-out">
-            <span className="proof-label">HTTP</span>
-            <code>{HTTP}</code>
-          </pre>
+      <section className="pane-greet">
+        <p className="kicker">v0.1.2-box</p>
+        <h1>Ядро запущено.</h1>
+        <p className="lead">Maniforge отвечает на этом сервере. Справа — вход в Desk.</p>
+        <div className="grid">
+          <a className="tile" href="/about/">
+            <strong>Документация</strong>
+            <span>Что уже в ядре</span>
+          </a>
+          <a className="tile" href="/api/">
+            <strong>API</strong>
+            <span>Каталог методов</span>
+          </a>
+          <a className="tile" href="/app/">
+            <strong>Admin</strong>
+            <span>Консоль тенанта</span>
+          </a>
         </div>
-        <p className="cta">
-          <a className="btn" href="https://github.com/Maniforge/Maniforge">
-            Код на GitHub
-          </a>
-          <a className="btn ghost" href="/about/">
-            О проекте
-          </a>
-        </p>
-        <p className="status">Go · PostgreSQL 16 · self-host</p>
       </section>
-      <section className="pane-login" id="login" aria-label="Вход">
-        <LoginForm titleTag="h2" />
+      <section className="pane-login">
+        <div className="card login-card">
+          <p className="kicker">Production Box</p>
+          <h2>Framework → Desk → Apps</h2>
+          <p className="muted">Публично — проект, команда, API и Admin. Desk, Scanner и приложения открываются после входа.</p>
+          <p style={{ marginTop: '1rem' }}>
+            <a className="btn" href="/desk/login/">Вход</a>
+          </p>
+        </div>
       </section>
     </div>
   );

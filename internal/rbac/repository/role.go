@@ -114,6 +114,106 @@ func (r *RoleRepository) AssignRoleByCode(userID int64, tenantID, subtenantID, r
 	return err == nil
 }
 
+func (r *RoleRepository) RevokeRoleByCode(userID int64, tenantID, subtenantID, roleCode string) bool {
+	var roleID int64
+	err := r.db.QueryRow(`SELECT id FROM maniforge_roles WHERE code = $1 LIMIT 1`, roleCode).Scan(&roleID)
+	if err != nil {
+		return false
+	}
+	res, err := r.db.Exec(
+		`DELETE FROM maniforge_user_roles
+		 WHERE user_id = $1 AND role_id = $2 AND tenant_id = $3 AND subtenant_id = $4`,
+		userID, roleID, tenantID, subtenantID)
+	if err != nil {
+		return false
+	}
+	n, _ := res.RowsAffected()
+	return n > 0
+}
+
+type RoleMutation struct {
+	UserID   int64
+	RoleCode string
+	Action   string
+}
+
+type RoleBatchSummary struct {
+	Assigned int `json:"assigned"`
+	Revoked  int `json:"revoked"`
+	Skipped  int `json:"skipped"`
+	Total    int `json:"total"`
+}
+
+func (s RoleBatchSummary) ToMap() map[string]any {
+	return map[string]any{
+		"assigned": s.Assigned, "revoked": s.Revoked, "skipped": s.Skipped, "total": s.Total,
+	}
+}
+
+func (r *RoleRepository) ApplyRoleMutationsBatch(tenantID, subtenantID string, assignedBy int64, ops []RoleMutation) (RoleBatchSummary, error) {
+	summary := RoleBatchSummary{Total: len(ops)}
+	tx, err := r.db.Begin()
+	if err != nil {
+		return summary, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	for _, op := range ops {
+		var roleID int64
+		if err := tx.QueryRow(`SELECT id FROM maniforge_roles WHERE code = $1 LIMIT 1`, op.RoleCode).Scan(&roleID); err != nil {
+			return summary, fmt.Errorf("role not found: %s", op.RoleCode)
+		}
+		switch op.Action {
+		case "assign":
+			var existing int64
+			err := tx.QueryRow(
+				`SELECT id FROM maniforge_user_roles
+				 WHERE user_id = $1 AND role_id = $2 AND tenant_id = $3 AND subtenant_id = $4
+				   AND (expires_at IS NULL OR expires_at > NOW())
+				 LIMIT 1`,
+				op.UserID, roleID, tenantID, subtenantID).Scan(&existing)
+			if err == nil {
+				summary.Skipped++
+				continue
+			}
+			if err != sql.ErrNoRows {
+				return summary, err
+			}
+			if _, err := tx.Exec(
+				`INSERT INTO maniforge_user_roles (user_id, role_id, tenant_id, subtenant_id, assigned_by)
+				 VALUES ($1, $2, $3, $4, $5)`,
+				op.UserID, roleID, tenantID, subtenantID, assignedBy); err != nil {
+				if strings.Contains(strings.ToLower(err.Error()), "duplicate key") {
+					summary.Skipped++
+					continue
+				}
+				return summary, err
+			}
+			summary.Assigned++
+		case "revoke":
+			res, err := tx.Exec(
+				`DELETE FROM maniforge_user_roles
+				 WHERE user_id = $1 AND role_id = $2 AND tenant_id = $3 AND subtenant_id = $4`,
+				op.UserID, roleID, tenantID, subtenantID)
+			if err != nil {
+				return summary, err
+			}
+			n, _ := res.RowsAffected()
+			if n > 0 {
+				summary.Revoked++
+			} else {
+				summary.Skipped++
+			}
+		default:
+			return summary, fmt.Errorf("unsupported action: %s", op.Action)
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return summary, err
+	}
+	return summary, nil
+}
+
 func (r *RoleRepository) HasRoleInScope(userID int64, tenantID, subtenantID, roleCode string) (bool, error) {
 	codes, err := r.ListRoleCodesForUser(userID, tenantID, subtenantID)
 	if err != nil {

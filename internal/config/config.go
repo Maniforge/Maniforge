@@ -44,6 +44,7 @@ type Config struct {
 	WarehousesAddr      string
 	ProductsAddr        string
 	InventoryAddr       string
+	WmsAddr             string
 	RealtimeAddr        string
 	RealtimeInternalURL string
 
@@ -146,6 +147,7 @@ func Load() (Config, error) {
 		WarehousesAddr:      env("MANIFORGE_WAREHOUSES_ADDR", ":8098"),
 		ProductsAddr:        env("MANIFORGE_PRODUCTS_ADDR", ":8099"),
 		InventoryAddr:       env("MANIFORGE_INVENTORY_ADDR", ":8100"),
+		WmsAddr:             env("MANIFORGE_WMS_ADDR", ":8101"),
 		RealtimeAddr:        env("MANIFORGE_REALTIME_ADDR", ":8097"),
 		RealtimeInternalURL: strings.TrimRight(strings.TrimSpace(os.Getenv("MANIFORGE_REALTIME_INTERNAL_URL")), "/"),
 

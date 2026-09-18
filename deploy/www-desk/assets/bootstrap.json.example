@@ -1,0 +1,7 @@
+{
+  "tenant_id": "t-xxxxxxxxxxxxxxxx",
+  "subtenant_id": "main",
+  "phone": "+79991234567",
+  "source": "demo_bootstrap",
+  "written_at": "2026-09-17T00:00:00Z"
+}

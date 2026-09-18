@@ -1,6 +1,6 @@
 [Unit]
 Description=Maniforge Caddy gateway (:18090)
-After=network-online.target maniforge-rbac.service
+After=network-online.target maniforge-rbac.service maniforge-warehouses.service maniforge-products.service maniforge-inventory.service maniforge-wms.service
 Wants=network-online.target
 
 [Service]

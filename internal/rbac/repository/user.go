@@ -331,6 +331,19 @@ func (r *UserRepository) CreateUser(input CreateUserInput) (*User, error) {
 	return r.FindByIDInScope(id, input.TenantID, input.SubtenantID)
 }
 
+func (r *UserRepository) FindByPhoneInScope(phone, tenantID, subtenantID string) (*User, error) {
+	users, err := r.FindAllByPhone(phone)
+	if err != nil {
+		return nil, err
+	}
+	for i := range users {
+		if users[i].TenantID == tenantID && users[i].SubtenantID == subtenantID {
+			return &users[i], nil
+		}
+	}
+	return nil, nil
+}
+
 func (r *UserRepository) FindStatusInScope(userID int64, tenantID, subtenantID string) (*string, error) {
 	var status string
 	err := r.db.QueryRow(
@@ -344,6 +357,17 @@ func (r *UserRepository) FindStatusInScope(userID int64, tenantID, subtenantID s
 		return nil, err
 	}
 	return &status, nil
+}
+
+func (r *UserRepository) DeleteInScope(userID int64, tenantID, subtenantID string) (bool, error) {
+	res, err := r.db.Exec(
+		`DELETE FROM maniforge_users WHERE id = $1 AND tenant_id = $2 AND subtenant_id = $3`,
+		userID, tenantID, subtenantID)
+	if err != nil {
+		return false, err
+	}
+	n, _ := res.RowsAffected()
+	return n > 0, nil
 }
 
 func (r *UserRepository) ListUsers(tenantID, subtenantID string, limit int) ([]User, error) {
