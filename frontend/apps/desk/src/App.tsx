@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { DeskHeader } from '@maniforge/desk-ui';
+import { DeskHeader, hasDeskSession } from '@maniforge/desk-ui';
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
 import { AboutUsPage } from './pages/AboutUsPage';
@@ -18,6 +18,13 @@ function Shell({ children }: { children: ReactNode }) {
   );
 }
 
+function RequireDeskSession({ children }: { children: ReactNode }) {
+  if (!hasDeskSession()) {
+    return <Navigate to="/desk/login" replace />;
+  }
+  return children;
+}
+
 export function App() {
   return (
     <BrowserRouter>
@@ -31,10 +38,46 @@ export function App() {
         <Route path="/api/" element={<Shell><ApiDocsPage /></Shell>} />
         <Route path="/desk/login" element={<Shell><LoginPage /></Shell>} />
         <Route path="/desk/login/" element={<Shell><LoginPage /></Shell>} />
-        <Route path="/desk" element={<Shell><DeskHomePage /></Shell>} />
-        <Route path="/desk/" element={<Shell><DeskHomePage /></Shell>} />
-        <Route path="/desk/users" element={<Shell><UsersPage /></Shell>} />
-        <Route path="/desk/users/" element={<Shell><UsersPage /></Shell>} />
+        <Route
+          path="/desk"
+          element={
+            <Shell>
+              <RequireDeskSession>
+                <DeskHomePage />
+              </RequireDeskSession>
+            </Shell>
+          }
+        />
+        <Route
+          path="/desk/"
+          element={
+            <Shell>
+              <RequireDeskSession>
+                <DeskHomePage />
+              </RequireDeskSession>
+            </Shell>
+          }
+        />
+        <Route
+          path="/desk/users"
+          element={
+            <Shell>
+              <RequireDeskSession>
+                <UsersPage />
+              </RequireDeskSession>
+            </Shell>
+          }
+        />
+        <Route
+          path="/desk/users/"
+          element={
+            <Shell>
+              <RequireDeskSession>
+                <UsersPage />
+              </RequireDeskSession>
+            </Shell>
+          }
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

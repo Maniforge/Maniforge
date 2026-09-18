@@ -2,6 +2,7 @@ package legacyref
 
 import (
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -44,5 +45,43 @@ func TestReactDeskServesApiDocsRoute(t *testing.T) {
 		if !strings.Contains(router, n) {
 			t.Errorf("desk App missing %s", n)
 		}
+	}
+}
+
+func TestAdminRouterChecksAuthBeforeDashboardRedirect(t *testing.T) {
+	raw := readFile(t, filepath.Join(repoRoot(t), "frontend", "apps", "admin", "src", "app", "router.tsx"))
+	if !strings.Contains(raw, "<ProtectedRoute>") {
+		t.Fatal("admin router missing ProtectedRoute")
+	}
+	unguarded := regexp.MustCompile(`</Route>\s*<Route path="/" element=\{<Navigate to="/dashboard"`)
+	if unguarded.MatchString(raw) {
+		t.Fatal("admin sends /app/ to /dashboard before auth; default redirect must be nested in ProtectedRoute")
+	}
+	if !strings.Contains(raw, `Navigate to="/dashboard"`) {
+		t.Fatal("authenticated /app/ still needs / → /dashboard")
+	}
+}
+
+func TestScannerRouterChecksAuthBeforeHubRedirect(t *testing.T) {
+	raw := readFile(t, filepath.Join(repoRoot(t), "frontend", "apps", "scanner", "src", "app", "router.tsx"))
+	if !strings.Contains(raw, "<ProtectedRoute>") {
+		t.Fatal("scanner router missing ProtectedRoute")
+	}
+	unguarded := regexp.MustCompile(`</Route>\s*<Route path="\*" element=\{<Navigate to="/"`)
+	if unguarded.MatchString(raw) {
+		t.Fatal("scanner catch-all redirects to hub before auth; it must be nested in ProtectedRoute")
+	}
+	if !strings.Contains(raw, `path="*"`) || !strings.Contains(raw, `Navigate to="/"`) {
+		t.Fatal("scanner catch-all missing")
+	}
+}
+
+func TestDeskGuardsPrivateRoutesBeforeRender(t *testing.T) {
+	raw := readFile(t, filepath.Join(repoRoot(t), "frontend", "apps", "desk", "src", "App.tsx"))
+	if !strings.Contains(raw, "RequireDeskSession") {
+		t.Fatal("desk must wrap /desk and /desk/users so session is checked before the page renders")
+	}
+	if !strings.Contains(raw, `path="/desk"`) || !strings.Contains(raw, `path="/desk/users"`) {
+		t.Fatal("desk private routes missing")
 	}
 }

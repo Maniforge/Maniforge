@@ -5,7 +5,6 @@ const RBAC = '/rbac/api/v1';
 
 export function LoginPage() {
   const [tenant, setTenant] = useState('');
-  const [subtenant, setSubtenant] = useState('main');
   const [phone, setPhone] = useState('+7');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,7 +20,6 @@ export function LoginPage() {
       .then((data: { tenant_id?: string; subtenant_id?: string; phone?: string } | null) => {
         if (!data) return;
         if (data.tenant_id) setTenant((cur) => cur || data.tenant_id || '');
-        if (data.subtenant_id) setSubtenant((cur) => cur || data.subtenant_id || 'main');
         if (data.phone) setPhone((cur) => (!cur || cur === '+7' ? data.phone || cur : cur));
       })
       .catch(() => undefined);
@@ -33,8 +31,8 @@ export function LoginPage() {
     setError('');
     try {
       const tenantId = tenant.trim();
-      const subId = subtenant.trim() || 'main';
-      if (!tenantId) throw new Error('Укажите код организации (tenant)');
+      const subId = 'main';
+      if (!tenantId) throw new Error('Укажите код организации');
       const res = await fetch(RBAC + '/auth/login', {
         method: 'POST',
         headers: {
@@ -70,12 +68,8 @@ export function LoginPage() {
         <p className="lead">Закрытый контур. Аккаунт выдаёт администратор.</p>
         <form onSubmit={onSubmit}>
           <label>
-            Организация (tenant)
-            <input value={tenant} onChange={(e) => setTenant(e.target.value)} placeholder="код tenant" />
-          </label>
-          <label>
-            Workspace
-            <input value={subtenant} onChange={(e) => setSubtenant(e.target.value)} />
+            Организация
+            <input value={tenant} onChange={(e) => setTenant(e.target.value)} placeholder="код организации" />
           </label>
           <label>
             Телефон

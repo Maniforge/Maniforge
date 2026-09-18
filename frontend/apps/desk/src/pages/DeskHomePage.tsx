@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { hasDeskSession } from '@maniforge/desk-ui';
 
 type Manifest = { code?: string; name?: string; origin?: string };
 
@@ -8,10 +7,6 @@ export function DeskHomePage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!hasDeskSession()) {
-      window.location.href = '/desk/login/';
-      return;
-    }
     const token = localStorage.getItem('maniforge_access_token') || '';
     fetch('/manifest/api/v1/manifests', {
       headers: { Accept: 'application/json', Authorization: 'Bearer ' + token },

@@ -1,15 +1,10 @@
-import { FormEvent, useEffect, useState } from 'react';
-import { hasDeskSession } from '@maniforge/desk-ui';
+import { FormEvent, useState } from 'react';
 
 export function UsersPage() {
   const [login, setLogin] = useState('');
   const [phone, setPhone] = useState('+7');
   const [password, setPassword] = useState('');
   const [msg, setMsg] = useState('');
-
-  useEffect(() => {
-    if (!hasDeskSession()) window.location.href = '/desk/login/';
-  }, []);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();

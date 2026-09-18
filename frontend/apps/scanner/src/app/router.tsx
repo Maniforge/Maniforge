@@ -26,8 +26,8 @@ export function AppRouter() {
           <Route path="/issue" element={<MovementPage movementType="issue" />} />
           <Route path="/group" element={<GroupPage />} />
           <Route path="/pallet" element={<PalletPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
