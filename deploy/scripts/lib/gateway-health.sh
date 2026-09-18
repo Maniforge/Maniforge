@@ -38,7 +38,7 @@ gateway_health_check() {
 
   check() {
     local path="$1" label="$2"
-    if ! curl -sf "${base}${path}" >/dev/null; then
+    if ! curl -sf -m 8 "${base}${path}" >/dev/null; then
       echo "health fail: ${label} (${base}${path})" >&2
       fail=1
     fi
@@ -50,7 +50,7 @@ gateway_health_check() {
       check "$p" "$p"
     done
     for p in ${MANIFORGE_DIRECT_HEALTH:-}; do
-      if ! curl -sf "$p" >/dev/null; then
+      if ! curl -sf -m 8 "$p" >/dev/null; then
         echo "health fail: direct (${p})" >&2
         fail=1
       fi
@@ -67,7 +67,7 @@ gateway_health_check() {
     local rt_addr
     rt_addr="$(grep -E '^MANIFORGE_REALTIME_ADDR=' "$ENV" 2>/dev/null | head -1 | cut -d= -f2-)"
     rt_addr="${rt_addr:-127.0.0.1:8097}"
-    if ! curl -sf "http://${rt_addr}/health" >/dev/null; then
+    if ! curl -sf -m 8 "http://${rt_addr}/health" >/dev/null; then
       echo "health fail: realtime (http://${rt_addr}/health)" >&2
       fail=1
     fi

@@ -117,6 +117,23 @@ func TestUnknownPackage(t *testing.T) {
 	}
 }
 
+func TestServerUpKeepsHTTP18090(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join(repoRoot(t), "deploy", "scripts", "server-up.sh"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := string(raw)
+	if !strings.Contains(body, `CADDY_LISTEN=":18090"`) {
+		t.Fatal("server-up must default Caddy to :18090")
+	}
+	if !strings.Contains(body, "Caddyfile.active") {
+		t.Fatal("server-up must render Caddyfile.active")
+	}
+	if strings.Contains(body, `[ "${gw_port}" = "443" ]`) {
+		t.Fatal("server-up must not bind Caddy to MANIFORGE_GATEWAY_PORT=443")
+	}
+}
+
 func TestDocsMentionMakeUpAndModules(t *testing.T) {
 	root := repoRoot(t)
 	files := []string{

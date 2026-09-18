@@ -34,15 +34,33 @@ UNITS=(${MANIFORGE_SYSTEMD_ENABLE})
 # shellcheck disable=SC2206
 DISABLE_UNITS=(${MANIFORGE_SYSTEMD_DISABLE})
 
+# Host Caddy is :18090. MANIFORGE_GATEWAY_PORT=443 is the public origin behind
+# an edge proxy — not this unit. Direct TLS: MANIFORGE_CADDY_TLS=1 + PUBLIC_HOST.
 CADDY_LISTEN=":18090"
-gw_port="$(grep -E '^MANIFORGE_GATEWAY_PORT=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
-pub_host="$(grep -E '^MANIFORGE_PUBLIC_HOST=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
-if [ "${gw_port}" = "443" ] && [ -n "$pub_host" ]; then
+caddy_tls="$(grep -E '^MANIFORGE_CADDY_TLS=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
+caddy_listen_over="$(grep -E '^MANIFORGE_CADDY_LISTEN=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
+if [ -n "$caddy_listen_over" ]; then
+  CADDY_LISTEN="$caddy_listen_over"
+elif [ "${caddy_tls}" = "1" ]; then
+  pub_host="$(grep -E '^MANIFORGE_PUBLIC_HOST=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
+  if [ -z "$pub_host" ]; then
+    echo "MANIFORGE_CADDY_TLS=1 requires MANIFORGE_PUBLIC_HOST" >&2
+    exit 1
+  fi
   CADDY_LISTEN="$pub_host"
 fi
-caddy_out="$(grep -E '^MANIFORGE_CADDYFILE=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
-caddy_out="${caddy_out:-${DEPLOY}/Caddyfile.active}"
+# Always generate the gitignored active file. Never overwrite Caddyfile.server.
+caddy_out="${DEPLOY}/Caddyfile.active"
 "$MODULES_BIN" caddy --root "$ROOT" --env "$ENV_FILE" --mode host --listen "$CADDY_LISTEN" -o "$caddy_out"
+ENV="$ENV_FILE"
+# shellcheck source=server-public-urls.sh
+. "${DEPLOY}/scripts/server-public-urls.sh"
+_env_upsert MANIFORGE_CADDYFILE "$caddy_out"
+# Apply/verify hit this process, not the host edge on :443.
+health_url="$(grep -E '^MANIFORGE_GATEWAY_HEALTH_URL=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
+if [ "$CADDY_LISTEN" = ":18090" ] && [[ "$health_url" != *":18090"* ]]; then
+  _env_upsert MANIFORGE_GATEWAY_HEALTH_URL "http://127.0.0.1:18090"
+fi
 
 echo "==> stop orphan Go/Caddy containers (keep postgres volumes)"
 for c in "${OLD_CONTAINERS[@]}"; do
@@ -100,14 +118,27 @@ else
 fi
 
 echo "==> restart Go + Caddy"
+systemctl reset-failed maniforge-caddy.service >/dev/null 2>&1 || true
 systemctl restart "${UNITS[@]}"
 
 echo "==> health (gateway — buyer-facing path)"
-sleep 1
 ENV="$ENV_FILE"
 MANIFORGE_ROOT="$ROOT"
 # shellcheck source=lib/gateway-health.sh
 . "${DEPLOY}/scripts/lib/gateway-health.sh"
+ready=0
+for _ in $(seq 1 25); do
+  if curl -sf -m 3 "http://127.0.0.1:18090/rbac/health" >/dev/null 2>&1; then
+    ready=1
+    break
+  fi
+  sleep 1
+done
+if [ "$ready" -ne 1 ]; then
+  echo "caddy not accepting :18090 (see journalctl -u maniforge-caddy)" >&2
+  journalctl -u maniforge-caddy -n 20 --no-pager >&2 || true
+  exit 1
+fi
 gateway_health_check
 
 echo "==> replication"

@@ -360,7 +360,7 @@ patch_caddy_systemd() {
     sed -i "s|^EnvironmentFile=.*|EnvironmentFile=${DEPLOY}/.env.platform|" "$unit" 2>/dev/null || \
       sed -i "/^\[Service\]/a EnvironmentFile=${DEPLOY}/.env.platform" "$unit"
   fi
-  sed -i "s|ExecStart=.*|ExecStart=/bin/bash -c '/usr/local/bin/caddy run --config \"\${MANIFORGE_CADDYFILE:-${DEPLOY}/Caddyfile.server}\" --adapter caddyfile'|" "$unit"
+  sed -i "s|ExecStart=.*|ExecStart=/bin/bash -c '/usr/local/bin/caddy run --config \"\${MANIFORGE_CADDYFILE:-${DEPLOY}/Caddyfile.active}\" --adapter caddyfile'|" "$unit"
 }
 
 
