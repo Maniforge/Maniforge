@@ -52,7 +52,7 @@ services:
       REPLICATOR_PASSWORD: ${REPLICATOR_PASSWORD}
       PRIMARY_HOST: postgres-primary
       PGDATA: /var/lib/postgresql/data
-    entrypoint: ["/replica-entrypoint.sh"]
+    entrypoint: ["/bin/sh", "/replica-entrypoint.sh"]
     ports:
       - "127.0.0.1:${MANIFORGE_PG_REPLICA_PORT:-18097}:5432"
     volumes:

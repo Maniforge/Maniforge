@@ -66,6 +66,9 @@ if [ "$CADDY_LISTEN" = ":18090" ] && [[ "$health_url" != *":18090"* ]]; then
   _env_upsert MANIFORGE_GATEWAY_HEALTH_URL "http://127.0.0.1:18090"
 fi
 
+echo "==> postgres script perms"
+find "${DEPLOY}/postgres" -type f -name "*.sh" -exec sed -i "s/\r$//" {} + -exec chmod +x {} + 2>/dev/null || true
+
 echo "==> stop orphan Go/Caddy containers (keep postgres volumes)"
 for c in "${OLD_CONTAINERS[@]}"; do
   docker rm -f "$c" >/dev/null 2>&1 || true

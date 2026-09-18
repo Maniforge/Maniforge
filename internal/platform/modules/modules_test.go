@@ -135,6 +135,16 @@ func TestServerUpKeepsHTTP18090(t *testing.T) {
 	if strings.Contains(body, `[ "${gw_port}" = "443" ]`) {
 		t.Fatal("server-up must not bind Caddy to MANIFORGE_GATEWAY_PORT=443")
 	}
+	if !strings.Contains(body, "postgres script perms") {
+		t.Fatal("server-up must chmod replica-entrypoint before compose")
+	}
+	compose, err := os.ReadFile(filepath.Join(repoRoot(t), "deploy", "compose.platform.server.yml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(compose), `entrypoint: ["/bin/sh", "/replica-entrypoint.sh"]`) {
+		t.Fatal("replica must start via /bin/sh so missing +x is not fatal")
+	}
 }
 
 func TestDocsMentionMakeUpAndModules(t *testing.T) {
