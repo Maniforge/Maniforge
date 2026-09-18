@@ -9,6 +9,7 @@ type CaddyOpts struct {
 	Listen   string // ":8080", ":18090", or hostname for TLS site
 	Mode     string // compose | host
 	Fallback string
+	WebRoot  string // host mode: deploy/www-desk; empty keeps a text fallback
 }
 
 func RenderCaddy(r Resolved, opts CaddyOpts) string {
@@ -30,6 +31,7 @@ func RenderCaddy(r Resolved, opts CaddyOpts) string {
 			fallback = "Maniforge platform"
 		}
 	}
+	webRoot := strings.ReplaceAll(strings.TrimSpace(opts.WebRoot), `\`, `/`)
 
 	var b strings.Builder
 	fmt.Fprintf(&b, "%s {\n", listen)
@@ -47,7 +49,14 @@ func RenderCaddy(r Resolved, opts CaddyOpts) string {
 		fmt.Fprintf(&b, "	}\n\n")
 	}
 	fmt.Fprintf(&b, "	handle {\n")
-	fmt.Fprintf(&b, "		respond %q 200\n", fallback)
+	if webRoot != "" {
+		fmt.Fprintf(&b, "		root * %s\n", webRoot)
+		fmt.Fprintf(&b, "		encode gzip\n")
+		fmt.Fprintf(&b, "		try_files {path} {path}/ {path}/index.html\n")
+		fmt.Fprintf(&b, "		file_server\n")
+	} else {
+		fmt.Fprintf(&b, "		respond %q 200\n", fallback)
+	}
 	fmt.Fprintf(&b, "	}\n")
 	fmt.Fprintf(&b, "}\n")
 	return b.String()

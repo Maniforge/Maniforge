@@ -17,7 +17,7 @@ func main() {
 		cmd = args[0]
 		args = args[1:]
 	}
-	root, envFile, format, mode, listen, out, spec := parseFlags(args)
+	root, envFile, format, mode, listen, out, spec, webRoot := parseFlags(args)
 	if root == "" {
 		wd, _ := os.Getwd()
 		root = wd
@@ -50,7 +50,10 @@ func main() {
 		if mode == "" {
 			mode = "host"
 		}
-		body := modules.RenderCaddy(resolved, modules.CaddyOpts{Mode: mode, Listen: listen})
+		if webRoot == "" && mode == "host" {
+			webRoot = deskWebRoot(root)
+		}
+		body := modules.RenderCaddy(resolved, modules.CaddyOpts{Mode: mode, Listen: listen, WebRoot: webRoot})
 		if out == "" {
 			fmt.Print(body)
 			return
@@ -65,8 +68,11 @@ func main() {
 		if listen == "" {
 			listen = ":18090"
 		}
+		if webRoot == "" {
+			webRoot = deskWebRoot(root)
+		}
 		active := filepath.Join(root, "deploy", "Caddyfile.active")
-		body := modules.RenderCaddy(resolved, modules.CaddyOpts{Mode: "host", Listen: listen})
+		body := modules.RenderCaddy(resolved, modules.CaddyOpts{Mode: "host", Listen: listen, WebRoot: webRoot})
 		if err := os.WriteFile(active, []byte(body), 0o644); err != nil {
 			fail(err)
 		}
@@ -79,7 +85,7 @@ func main() {
 	}
 }
 
-func parseFlags(args []string) (root, env, format, mode, listen, out, spec string) {
+func parseFlags(args []string) (root, env, format, mode, listen, out, spec, webRoot string) {
 	format = "shell"
 	for i := 0; i < len(args); i++ {
 		a := args[i]
@@ -105,11 +111,21 @@ func parseFlags(args []string) (root, env, format, mode, listen, out, spec strin
 			out = next()
 		case "--modules":
 			spec = next()
+		case "--web-root":
+			webRoot = next()
 		default:
 			fail(fmt.Errorf("unknown flag %s", a))
 		}
 	}
 	return
+}
+
+func deskWebRoot(root string) string {
+	dir := filepath.Join(root, "deploy", "www-desk")
+	if st, err := os.Stat(dir); err == nil && st.IsDir() {
+		return dir
+	}
+	return ""
 }
 
 func fail(err error) {

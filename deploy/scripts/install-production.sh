@@ -38,6 +38,10 @@ Environment:
   MANIFORGE_ADMIN_LOGIN, MANIFORGE_ADMIN_PASSWORD, MANIFORGE_ADMIN_ORG
                     (if omitted: demo +79991234567 / DemoAdmin!12345 / Demo)
 
+Example (one command: clone GitHub + install + Desk on shared edge):
+  curl -fsSL https://raw.githubusercontent.com/Maniforge/Maniforge/platform-core/deploy/scripts/install-from-git.sh \\
+    | sudo bash -s -- --domain nzgapp.ru --edge-proxy --skip-apt
+
 Example (clean Ubuntu, source already at /opt/maniforge/platform-core):
   sudo bash deploy/scripts/install-maniforge.sh --domain platform.customer.ru
 
@@ -368,8 +372,15 @@ main() {
   log "build Go binaries"
   MANIFORGE_ROOT="$ROOT" bash "${DEPLOY}/scripts/server-build.sh"
 
-  log "postgres + migrate + systemd + health"
+  log "postgres + migrate + systemd + health + Desk"
   MANIFORGE_ROOT="$ROOT" bash "${DEPLOY}/scripts/server-up.sh"
+
+  if [ "$EDGE_PROXY" = "1" ]; then
+    log "edge TLS -> :18090 (www-desk)"
+    # shellcheck source=lib/apply-edge-desk.sh
+    . "${SCRIPT_DIR}/lib/apply-edge-desk.sh"
+    apply_edge_desk
+  fi
 
   log "verify"
   MANIFORGE_ROOT="$ROOT" bash "${DEPLOY}/scripts/verify-maniforge.sh"

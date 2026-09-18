@@ -166,6 +166,46 @@ func TestPromptAdminHelper(t *testing.T) {
 	}
 }
 
+func TestHostCaddyServesDesk(t *testing.T) {
+	r, err := Resolve(testCatalog(t), "full")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := RenderCaddy(r, CaddyOpts{
+		Mode:    "host",
+		Listen:  ":18090",
+		WebRoot: "/opt/maniforge/platform-core/deploy/www-desk",
+	})
+	for _, needle := range []string{"file_server", "try_files {path} {path}/ {path}/index.html", "root * /opt/maniforge/platform-core/deploy/www-desk"} {
+		if !strings.Contains(body, needle) {
+			t.Fatalf("host caddy missing %s:\n%s", needle, body)
+		}
+	}
+	if strings.Contains(body, `respond "Maniforge platform`) {
+		t.Fatal("host caddy should serve Desk, not a text stub")
+	}
+}
+
+func TestInstallFromGitIsOneCommand(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join(repoRoot(t), "deploy", "scripts", "install-from-git.sh"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := string(raw)
+	for _, needle := range []string{"git clone", "install-maniforge.sh", "compose.platform.server.yml"} {
+		if !strings.Contains(body, needle) {
+			t.Errorf("install-from-git.sh missing %s", needle)
+		}
+	}
+	edge, err := os.ReadFile(filepath.Join(repoRoot(t), "deploy", "scripts", "lib", "apply-edge-desk.sh"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(edge), "apply_edge_desk") {
+		t.Fatal("apply-edge-desk.sh missing apply_edge_desk")
+	}
+}
+
 func TestDocsMentionMakeUpAndModules(t *testing.T) {
 	root := repoRoot(t)
 	files := []string{
