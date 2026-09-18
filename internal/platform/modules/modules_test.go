@@ -129,6 +129,9 @@ func TestServerUpKeepsHTTP18090(t *testing.T) {
 	if !strings.Contains(body, "Caddyfile.active") {
 		t.Fatal("server-up must render Caddyfile.active")
 	}
+	if !strings.Contains(body, "env_get()") {
+		t.Fatal("optional env keys must use env_get so missing grep does not trip set -e")
+	}
 	if strings.Contains(body, `[ "${gw_port}" = "443" ]`) {
 		t.Fatal("server-up must not bind Caddy to MANIFORGE_GATEWAY_PORT=443")
 	}

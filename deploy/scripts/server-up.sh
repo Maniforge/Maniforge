@@ -34,15 +34,19 @@ UNITS=(${MANIFORGE_SYSTEMD_ENABLE})
 # shellcheck disable=SC2206
 DISABLE_UNITS=(${MANIFORGE_SYSTEMD_DISABLE})
 
+env_get() {
+  grep -E "^$1=" "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2- || true
+}
+
 # Host Caddy is :18090. MANIFORGE_GATEWAY_PORT=443 is the public origin behind
 # an edge proxy — not this unit. Direct TLS: MANIFORGE_CADDY_TLS=1 + PUBLIC_HOST.
 CADDY_LISTEN=":18090"
-caddy_tls="$(grep -E '^MANIFORGE_CADDY_TLS=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
-caddy_listen_over="$(grep -E '^MANIFORGE_CADDY_LISTEN=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
+caddy_tls="$(env_get MANIFORGE_CADDY_TLS)"
+caddy_listen_over="$(env_get MANIFORGE_CADDY_LISTEN)"
 if [ -n "$caddy_listen_over" ]; then
   CADDY_LISTEN="$caddy_listen_over"
 elif [ "${caddy_tls}" = "1" ]; then
-  pub_host="$(grep -E '^MANIFORGE_PUBLIC_HOST=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
+  pub_host="$(env_get MANIFORGE_PUBLIC_HOST)"
   if [ -z "$pub_host" ]; then
     echo "MANIFORGE_CADDY_TLS=1 requires MANIFORGE_PUBLIC_HOST" >&2
     exit 1
@@ -57,7 +61,7 @@ ENV="$ENV_FILE"
 . "${DEPLOY}/scripts/server-public-urls.sh"
 _env_upsert MANIFORGE_CADDYFILE "$caddy_out"
 # Apply/verify hit this process, not the host edge on :443.
-health_url="$(grep -E '^MANIFORGE_GATEWAY_HEALTH_URL=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
+health_url="$(env_get MANIFORGE_GATEWAY_HEALTH_URL)"
 if [ "$CADDY_LISTEN" = ":18090" ] && [[ "$health_url" != *":18090"* ]]; then
   _env_upsert MANIFORGE_GATEWAY_HEALTH_URL "http://127.0.0.1:18090"
 fi
