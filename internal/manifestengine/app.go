@@ -78,6 +78,7 @@ func NewApp(cfg config.Config, sqlDB *sql.DB) *fiber.App {
 
 	register(app)
 	register(app.Group("/manifest-engine"))
+	register(app.Group("/manifest"))
 
 	app.Use(func(c *fiber.Ctx) error {
 		return httpx.Fail(c, fiber.StatusNotFound, "not_found")

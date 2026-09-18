@@ -41,7 +41,7 @@ packages:
         default_addr: ":8095"
         health_path: /health
         caddy_name: manifest
-        caddy_paths: [/api/*, /health, /manifest-engine/*]
+        caddy_paths: [/api/*, /health, /manifest-engine, /manifest-engine/*, /manifest, /manifest/*]
         compose_upstream: manifest-engine:8095
         host_upstream: 127.0.0.1:8095
       - id: gateway

@@ -76,6 +76,16 @@ func TestScannerRouterChecksAuthBeforeHubRedirect(t *testing.T) {
 	}
 }
 
+func TestDeskLoadsManifestsFromEnginePrefix(t *testing.T) {
+	raw := readFile(t, filepath.Join(repoRoot(t), "frontend", "apps", "desk", "src", "pages", "DeskHomePage.tsx"))
+	if strings.Contains(raw, `fetch('/manifest/api/v1/manifests'`) {
+		t.Fatal("Desk must not call /manifest/api — Caddy does not proxy that prefix (empty 404)")
+	}
+	if !strings.Contains(raw, `fetch('/manifest-engine/api/v1/manifests'`) {
+		t.Fatal("Desk must list manifests via /manifest-engine/api/v1/manifests")
+	}
+}
+
 func TestDeskGuardsPrivateRoutesBeforeRender(t *testing.T) {
 	raw := readFile(t, filepath.Join(repoRoot(t), "frontend", "apps", "desk", "src", "App.tsx"))
 	if !strings.Contains(raw, "RequireDeskSession") {

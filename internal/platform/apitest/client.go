@@ -218,7 +218,7 @@ func Nested(root map[string]any, keys ...string) any {
 
 func CanonicalRoute(method, path string) string {
 	method = strings.ToUpper(method)
-	for _, prefix := range []string{"/rbac", "/manifest-engine", "/tenant-licensing", "/versioning", "/realtime", "/warehouses", "/products", "/inventory", "/wms"} {
+	for _, prefix := range []string{"/rbac", "/manifest-engine", "/manifest", "/tenant-licensing", "/versioning", "/realtime", "/warehouses", "/products", "/inventory", "/wms"} {
 		path = strings.TrimPrefix(path, prefix)
 	}
 	if path == "" {

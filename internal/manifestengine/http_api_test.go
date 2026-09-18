@@ -43,6 +43,14 @@ func TestManifestProtectedRoutesRequireAuth(t *testing.T) {
 	if status != http.StatusUnauthorized {
 		t.Fatalf("GET /api/v1/manifests: %d %v", status, out)
 	}
+	status, out = c.JSON("GET", "/manifest-engine/api/v1/manifests", nil)
+	if status != http.StatusUnauthorized {
+		t.Fatalf("GET /manifest-engine/api/v1/manifests: %d %v", status, out)
+	}
+	status, out = c.JSON("GET", "/manifest/api/v1/manifests", nil)
+	if status != http.StatusUnauthorized {
+		t.Fatalf("GET /manifest/api/v1/manifests: %d %v", status, out)
+	}
 }
 
 func TestManifestHTTPAllLiveMethods(t *testing.T) {

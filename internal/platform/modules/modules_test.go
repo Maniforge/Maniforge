@@ -78,7 +78,7 @@ func TestFullHasEveryPrefix(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	needles := []string{"/rbac", "/tenant-licensing", "/versioning", "/warehouses", "/products", "/inventory", "/wms"}
+	needles := []string{"/rbac", "/tenant-licensing", "/versioning", "/warehouses", "/products", "/inventory", "/wms", "/manifest-engine", "/manifest"}
 	body := RenderCaddy(r, CaddyOpts{Mode: "compose", Listen: ":8080"})
 	for _, n := range needles {
 		if !strings.Contains(body, n) {

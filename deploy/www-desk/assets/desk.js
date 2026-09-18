@@ -1,5 +1,5 @@
 const RBAC = '/rbac/api/v1';
-const ME = '/manifest/api/v1';
+const ME = '/manifest-engine/api/v1';
 const KEYS = {
   access: 'maniforge_access_token',
   refresh: 'maniforge_refresh_token',
@@ -129,7 +129,7 @@ async function listRecords(code) {
   const sub = localStorage.getItem(KEYS.subtenantCode);
   if (tenant) headers['X-Tenant-ID'] = tenant;
   if (sub) headers['X-Subtenant-ID'] = sub;
-  const res = await fetch('/manifest/api/data/' + encodeURIComponent(code), { headers });
+  const res = await fetch('/manifest-engine/api/data/' + encodeURIComponent(code), { headers });
   const data = await res.json().catch(() => ({}));
   if (res.status === 401) {
     logout();
