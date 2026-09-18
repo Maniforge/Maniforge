@@ -201,8 +201,12 @@ func TestInstallFromGitIsOneCommand(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(edge), "apply_edge_desk") {
+	bodyEdge := string(edge)
+	if !strings.Contains(bodyEdge, "apply_edge_desk") {
 		t.Fatal("apply-edge-desk.sh missing apply_edge_desk")
+	}
+	if !strings.Contains(bodyEdge, `(?m)^`) {
+		t.Fatal("apply-edge-desk.sh must match site names at line start, not inside www.domain")
 	}
 }
 

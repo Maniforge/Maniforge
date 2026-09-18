@@ -27,14 +27,17 @@ apply_edge_desk() {
   fi
 
   python3 - "$edge" "$tmpl" "$domain" "$upstream" <<'PY'
-import shutil, sys, time
+import re, shutil, sys, time
 from pathlib import Path
 
 edge_path, tmpl_path, domain, upstream = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
-text = Path(edge_path).read_text()
+text = Path(edge_path).read_text(encoding="utf-8").replace("\ufeff", "").replace("\r\n", "\n").replace("\r", "\n")
 snippet = (
     Path(tmpl_path)
-    .read_text()
+    .read_text(encoding="utf-8")
+    .replace("\ufeff", "")
+    .replace("\r\n", "\n")
+    .replace("\r", "\n")
     .replace("{domain}", domain)
     .replace("{upstream}", upstream)
     .strip()
@@ -57,28 +60,20 @@ def end_of_block(src: str, brace_at: int) -> int:
 
 
 def replace_site(src: str, name: str, body: str) -> str:
-    needle = f"{name} {{"
-    start = 0
-    while True:
-        i = src.find(needle, start)
-        if i < 0:
-            return src.rstrip() + "\n\n" + body + "\n"
-        prev = src[max(0, i - 4) : i]
-        if prev.endswith("www."):
-            start = i + 1
-            continue
-        brace = i + len(name) + 1  # space before { in needle is included... needle is "name {"
-        brace = src.find("{", i)
-        end = end_of_block(src, brace)
-        # include trailing newline
-        j = end + 1
-        if j < len(src) and src[j] == "\n":
-            j += 1
-        return src[:i] + body + src[j:]
+    pattern = re.compile(rf"(?m)^{re.escape(name)} \{{")
+    m = pattern.search(src)
+    if not m:
+        return src.rstrip() + "\n\n" + body + "\n"
+    brace = src.find("{", m.start())
+    end = end_of_block(src, brace)
+    j = end + 1
+    if j < len(src) and src[j] == "\n":
+        j += 1
+    return src[: m.start()] + body + src[j:]
 
 
 text = replace_site(text, domain, snippet)
-Path(edge_path).write_text(text)
+Path(edge_path).write_text(text, encoding="utf-8")
 print(f"edge site {domain} -> {upstream}")
 PY
 
