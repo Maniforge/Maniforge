@@ -140,15 +140,24 @@ func TestDocsMentionMakeUpAndModules(t *testing.T) {
 }
 
 func TestShellExport(t *testing.T) {
-	r, err := Resolve(testCatalog(t), "core")
+	full, err := Resolve(testCatalog(t), "full")
 	if err != nil {
 		t.Fatal(err)
 	}
-	sh := ShellExport(r)
-	if !strings.Contains(sh, "MANIFORGE_HEALTH_PATHS=") {
-		t.Fatal(sh)
+	sh := ShellExport(full)
+	if !strings.Contains(sh, "MANIFORGE_COMPOSE_SERVICES='") {
+		t.Fatalf("unquoted compose services would break eval:\n%s", sh)
 	}
-	if strings.Contains(sh, "/wms/health") {
+	if strings.Contains(sh, "MANIFORGE_COMPOSE_SERVICES=postgres migrate") {
+		t.Fatal("bare unquoted assignment")
+	}
+
+	core, err := Resolve(testCatalog(t), "core")
+	if err != nil {
+		t.Fatal(err)
+	}
+	coreSh := ShellExport(core)
+	if strings.Contains(coreSh, "/wms/health") {
 		t.Fatal("core shell leaked wms health")
 	}
 }

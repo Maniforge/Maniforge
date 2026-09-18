@@ -177,12 +177,15 @@ func ReadModulesSpec(envFile string) string {
 
 func ShellExport(r Resolved) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "MANIFORGE_RESOLVED_PACKAGES=%s\n", strings.Join(r.Packages, ","))
-	fmt.Fprintf(&b, "MANIFORGE_COMPOSE_PROFILES=%s\n", strings.Join(r.ComposeProfiles, ","))
-	fmt.Fprintf(&b, "MANIFORGE_COMPOSE_SERVICES=%s\n", strings.Join(r.ComposeServices, " "))
-	fmt.Fprintf(&b, "MANIFORGE_SYSTEMD_ENABLE=%s\n", strings.Join(r.SystemdEnable, " "))
-	fmt.Fprintf(&b, "MANIFORGE_SYSTEMD_DISABLE=%s\n", strings.Join(r.SystemdDisable, " "))
-	fmt.Fprintf(&b, "MANIFORGE_HEALTH_PATHS=%s\n", strings.Join(r.HealthPaths, " "))
-	fmt.Fprintf(&b, "MANIFORGE_DIRECT_HEALTH=%s\n", strings.Join(r.DirectHealth, " "))
+	assign := func(key, val string) {
+		fmt.Fprintf(&b, "%s='%s'\n", key, strings.ReplaceAll(val, `'`, `'"'"'`))
+	}
+	assign("MANIFORGE_RESOLVED_PACKAGES", strings.Join(r.Packages, ","))
+	assign("MANIFORGE_COMPOSE_PROFILES", strings.Join(r.ComposeProfiles, ","))
+	assign("MANIFORGE_COMPOSE_SERVICES", strings.Join(r.ComposeServices, " "))
+	assign("MANIFORGE_SYSTEMD_ENABLE", strings.Join(r.SystemdEnable, " "))
+	assign("MANIFORGE_SYSTEMD_DISABLE", strings.Join(r.SystemdDisable, " "))
+	assign("MANIFORGE_HEALTH_PATHS", strings.Join(r.HealthPaths, " "))
+	assign("MANIFORGE_DIRECT_HEALTH", strings.Join(r.DirectHealth, " "))
 	return b.String()
 }
