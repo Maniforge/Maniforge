@@ -122,19 +122,7 @@ func TestRBACEmptyCSRFRejected(t *testing.T) {
 	sqlDB, cfg := apitest.OpenDB(t)
 	app := NewApp(cfg, sqlDB)
 	admin := apitest.RegisterTenantAdmin(t, app, "+7920", "CSRF Neg")
-	c := apitest.WithoutCSRF(admin)
-
-	method, path := "POST", "/rbac/api/v1/auth/logout"
-	var body any
-	status, out, _ := c.Do(method, path, body)
-	if status == http.StatusOK {
-		method, path = "PATCH", "/rbac/api/v1/me/profile"
-		body = map[string]any{"display_name": "csrf-neg"}
-		status, out, _ = c.Do(method, path, body)
-	}
-	if status == http.StatusOK {
-		t.Fatalf("%s %s empty CSRF: 200 body=%v", method, path, out)
-	}
+	apitest.MustForbidden(apitest.WithoutCSRF(admin), "POST", "/rbac/api/v1/auth/logout", nil)
 }
 
 func TestRBACHTTPAllLiveMethods(t *testing.T) {

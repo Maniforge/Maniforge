@@ -278,8 +278,8 @@ configure_env() {
     _env_upsert RBAC_REGISTRATION_ENABLED "false"
     _env_upsert RBAC_PII_ENCRYPTION_ENABLED "true"
     if [ "$EDGE_PROXY" = "1" ]; then
-      log "edge-proxy mode: production env + Caddyfile.server (:18090); TLS on host edge"
-      _env_upsert MANIFORGE_CADDYFILE "${DEPLOY}/Caddyfile.server"
+      log "edge-proxy mode: production env + Caddyfile.active (:18090); TLS on host edge"
+      _env_upsert MANIFORGE_CADDYFILE "${DEPLOY}/Caddyfile.active"
       _env_upsert MANIFORGE_GATEWAY_HEALTH_URL "http://127.0.0.1:18090"
     else
       _env_upsert MANIFORGE_CADDYFILE "${DEPLOY}/Caddyfile.active"
@@ -287,7 +287,7 @@ configure_env() {
   else
     log "staging profile (IP:18090, no TLS)"
     _env_upsert MANIFORGE_GATEWAY_PORT "18090"
-    _env_upsert MANIFORGE_CADDYFILE "${DEPLOY}/Caddyfile.server"
+    _env_upsert MANIFORGE_CADDYFILE "${DEPLOY}/Caddyfile.active"
   fi
 
   # Merge secrets from production example placeholders if still CHANGE_ME*
@@ -328,14 +328,24 @@ apply_production_secrets() {
 
 render_caddy() {
   cd "$DEPLOY"
+  local bin="${ROOT}/bin/maniforge-modules"
+  local listen=":18090" out="${DEPLOY}/Caddyfile.active"
   if [ -n "$DOMAIN" ] && [ "$EDGE_PROXY" != "1" ]; then
-    log "render Caddyfile.active for ${DOMAIN}"
-    sed "s/{domain}/${DOMAIN}/g" Caddyfile.production > Caddyfile.active
+    listen="$DOMAIN"
+    out="${DEPLOY}/Caddyfile.active"
+    log "render Caddyfile.active for ${DOMAIN} from MANIFORGE_MODULES"
   elif [ -n "$DOMAIN" ] && [ "$EDGE_PROXY" = "1" ]; then
-    log "edge-proxy: skip Caddyfile.active (use Caddyfile.server); see deploy/caddy/edge-platform.caddy"
+    log "edge-proxy: Caddyfile.active on :18090; see deploy/caddy/edge-platform.caddy"
     sed "s/{domain}/${DOMAIN}/g" caddy/edge-platform.caddy > "caddy/edge-${DOMAIN}.caddy" 2>/dev/null || true
   else
-    log "use Caddyfile.server (:18090)"
+    log "render Caddyfile.active (:18090) from MANIFORGE_MODULES"
+  fi
+  if [ -x "$bin" ]; then
+    "$bin" caddy --root "$ROOT" --env "${DEPLOY}/.env.platform" --mode host --listen "$listen" -o "$out"
+  elif [ -n "$DOMAIN" ] && [ "$EDGE_PROXY" != "1" ]; then
+    sed "s/{domain}/${DOMAIN}/g" Caddyfile.production > Caddyfile.active
+  else
+    cp -f Caddyfile.server Caddyfile.active
   fi
 }
 

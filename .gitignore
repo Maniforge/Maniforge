@@ -35,6 +35,7 @@ Thumbs.db
 # Runtime / secrets
 .env
 deploy/.env.platform
+deploy/Caddyfile.active
 **/*.apk
 
 # Generated at bootstrap (tenant_id + phone, no password)

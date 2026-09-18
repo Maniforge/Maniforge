@@ -185,3 +185,15 @@ func TestTLHTTPAllLiveMethods(t *testing.T) {
 		}
 	}
 }
+
+func TestTLNegativeHTTP(t *testing.T) {
+	sqlDB, cfg := apitest.OpenDB(t)
+	app := NewApp(cfg, sqlDB)
+	admin := &apitest.Client{T: t, App: app, Auth: true, Session: apitest.Session{Token: apitest.TLAdminToken}}
+	apitest.MustUnprocessable(admin, "POST", "/tenant-licensing/api/v1/tenants", map[string]any{})
+
+	wrong := &apitest.Client{T: t, App: app, Auth: true, Session: apitest.Session{Token: apitest.InternalToken}}
+	apitest.MustUnauthorized(wrong, "POST", "/tenant-licensing/api/v1/tenants", map[string]any{
+		"code": "wrongtok", "name": "Wrong service token",
+	})
+}

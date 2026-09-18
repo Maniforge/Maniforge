@@ -90,6 +90,7 @@ services:
 
   versioning:
     <<: *maniforge-service
+    profiles: ["versioning"]
     container_name: maniforge-platform-versioning
     command: ["maniforge-versioning"]
     ports:
@@ -103,6 +104,7 @@ services:
 
   realtime:
     <<: *maniforge-service
+    profiles: ["realtime"]
     container_name: maniforge-platform-realtime
     command: ["maniforge-realtime"]
     ports:
@@ -116,6 +118,7 @@ services:
 
   warehouses:
     <<: *maniforge-service
+    profiles: ["supply"]
     container_name: maniforge-platform-warehouses
     command: ["maniforge-warehouses"]
     ports:
@@ -129,6 +132,7 @@ services:
 
   products:
     <<: *maniforge-service
+    profiles: ["supply"]
     container_name: maniforge-platform-products
     command: ["maniforge-products"]
     ports:
@@ -142,6 +146,7 @@ services:
 
   inventory:
     <<: *maniforge-service
+    profiles: ["supply"]
     container_name: maniforge-platform-inventory
     command: ["maniforge-inventory"]
     ports:
@@ -155,6 +160,7 @@ services:
 
   wms:
     <<: *maniforge-service
+    profiles: ["wms"]
     container_name: maniforge-platform-wms
     command: ["maniforge-wms"]
     ports:
@@ -173,7 +179,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./Caddyfile.active:/etc/caddy/Caddyfile:ro
     networks:
       - platform
     depends_on:
@@ -182,18 +188,6 @@ services:
       tenant-licensing:
         condition: service_healthy
       manifest-engine:
-        condition: service_healthy
-      versioning:
-        condition: service_healthy
-      realtime:
-        condition: service_healthy
-      warehouses:
-        condition: service_healthy
-      products:
-        condition: service_healthy
-      inventory:
-        condition: service_healthy
-      wms:
         condition: service_healthy
 
 networks:

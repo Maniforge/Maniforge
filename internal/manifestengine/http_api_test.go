@@ -150,3 +150,16 @@ func TestManifestHTTPAllLiveMethods(t *testing.T) {
 		}
 	}
 }
+
+func TestManifestNegativeHTTP(t *testing.T) {
+	sqlDB, cfg := apitest.OpenDB(t)
+	rbacApp := rbac.NewApp(cfg, sqlDB)
+	app := NewApp(cfg, sqlDB)
+	admin := apitest.RegisterTenantAdmin(t, rbacApp, "+7924", "ME Neg")
+	apitest.MustUnprocessable(apitest.DomainClient(t, app, admin.Session), "POST", "/api/v1/manifests", map[string]any{})
+
+	member := apitest.RegisterUserWithoutWrite(t, rbacApp, admin)
+	apitest.MustForbidden(apitest.DomainClient(t, app, member.Session), "POST", "/api/v1/manifests", map[string]any{
+		"code": "neg_note", "name": "Запрещённый манифест",
+	})
+}

@@ -1,0 +1,130 @@
+# Desired-state catalog. Packages are product SKUs, not a free-form process list.
+# Apply: make up  (reads MANIFORGE_MODULES from deploy/.env.platform)
+
+default: full
+
+aliases:
+  full: [core, versioning, realtime, supply, wms]
+
+packages:
+  core:
+    always: true
+    services:
+      - id: postgres
+        compose: postgres
+      - id: migrate
+        compose: migrate
+      - id: rbac
+        compose: rbac
+        systemd: maniforge-rbac.service
+        binary: maniforge-rbac
+        default_addr: ":8093"
+        health_path: /rbac/health
+        caddy_name: rbac
+        caddy_paths: [/rbac, /rbac/*]
+        compose_upstream: rbac:8093
+        host_upstream: 127.0.0.1:8093
+      - id: tenant-licensing
+        compose: tenant-licensing
+        systemd: maniforge-tl.service
+        binary: maniforge-tenant-licensing
+        default_addr: ":8094"
+        health_path: /tenant-licensing/health
+        caddy_name: tl
+        caddy_paths: [/tenant-licensing, /tenant-licensing/*]
+        compose_upstream: tenant-licensing:8094
+        host_upstream: 127.0.0.1:8094
+      - id: manifest-engine
+        compose: manifest-engine
+        systemd: maniforge-manifest.service
+        binary: maniforge-manifest-engine
+        default_addr: ":8095"
+        health_path: /health
+        caddy_name: manifest
+        caddy_paths: [/api/*, /health, /manifest-engine/*]
+        compose_upstream: manifest-engine:8095
+        host_upstream: 127.0.0.1:8095
+      - id: gateway
+        compose: gateway
+        systemd: maniforge-caddy.service
+        binary: caddy
+
+  versioning:
+    requires: [core]
+    compose_profile: versioning
+    services:
+      - id: versioning
+        compose: versioning
+        systemd: maniforge-versioning.service
+        binary: maniforge-versioning
+        default_addr: ":8096"
+        health_path: /versioning/health
+        caddy_name: versioning
+        caddy_paths: [/versioning, /versioning/*]
+        compose_upstream: versioning:8096
+        host_upstream: 127.0.0.1:8096
+
+  realtime:
+    requires: [core]
+    compose_profile: realtime
+    services:
+      - id: realtime
+        compose: realtime
+        systemd: maniforge-realtime.service
+        binary: maniforge-realtime
+        default_addr: ":8097"
+        direct_health: http://127.0.0.1:8097/health
+        caddy_name: realtime
+        caddy_paths: [/ws, /ws/*, /realtime, /realtime/*]
+        compose_upstream: realtime:8097
+        host_upstream: 127.0.0.1:8097
+
+  supply:
+    requires: [core]
+    compose_profile: supply
+    services:
+      - id: warehouses
+        compose: warehouses
+        systemd: maniforge-warehouses.service
+        binary: maniforge-warehouses
+        default_addr: ":8098"
+        health_path: /warehouses/health
+        caddy_name: warehouses
+        caddy_paths: [/warehouses, /warehouses/*]
+        compose_upstream: warehouses:8098
+        host_upstream: 127.0.0.1:8098
+      - id: products
+        compose: products
+        systemd: maniforge-products.service
+        binary: maniforge-products
+        default_addr: ":8099"
+        health_path: /products/health
+        caddy_name: products
+        caddy_paths: [/products, /products/*]
+        compose_upstream: products:8099
+        host_upstream: 127.0.0.1:8099
+      - id: inventory
+        compose: inventory
+        systemd: maniforge-inventory.service
+        binary: maniforge-inventory
+        default_addr: ":8100"
+        health_path: /inventory/health
+        caddy_name: inventory
+        caddy_paths: [/inventory, /inventory/*]
+        compose_upstream: inventory:8100
+        host_upstream: 127.0.0.1:8100
+
+  wms:
+    requires: [core, supply]
+    compose_profile: wms
+    services:
+      - id: wms
+        compose: wms
+        systemd: maniforge-wms.service
+        binary: maniforge-wms
+        default_addr: ":8101"
+        health_path: /wms/health
+        caddy_name: wms
+        caddy_paths: [/wms, /wms/*]
+        compose_upstream: wms:8101
+        host_upstream: 127.0.0.1:8101

@@ -3,6 +3,7 @@ package versioninghttp
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"strconv"
 	"strings"
@@ -18,6 +19,8 @@ import (
 	"maniforge/internal/rbac/service"
 	"maniforge/internal/versioning"
 )
+
+var errAuthzWritten = errors.New("authz response written")
 
 func NewApp(cfg config.Config, db *sql.DB) *fiber.App {
 	app := fiber.New(fiber.Config{AppName: "maniforge-versioning", ServerHeader: "maniforge-versioning"})
@@ -38,7 +41,7 @@ func NewApp(cfg config.Config, db *sql.DB) *fiber.App {
 		api.Get("/changes", func(c *fiber.Ctx) error {
 			session, err := requirePermission(c, rbac, "versioning.read")
 			if err != nil {
-				return err
+				return nil
 			}
 			f := versioning.ChangeFilters{
 				EntityTable: strings.TrimSpace(c.Query("entity_table")),
@@ -57,7 +60,7 @@ func NewApp(cfg config.Config, db *sql.DB) *fiber.App {
 		api.Get("/changes/:id", func(c *fiber.Ctx) error {
 			session, err := requirePermission(c, rbac, "versioning.read")
 			if err != nil {
-				return err
+				return nil
 			}
 			id, convErr := strconv.ParseInt(c.Params("id"), 10, 64)
 			if convErr != nil || id <= 0 {
@@ -75,7 +78,7 @@ func NewApp(cfg config.Config, db *sql.DB) *fiber.App {
 		api.Get("/registry", func(c *fiber.Ctx) error {
 			_, err := requirePermission(c, rbac, "versioning.registry.read")
 			if err != nil {
-				return err
+				return nil
 			}
 			items, err := verRepo.ListRegistry(true)
 			if err != nil {
@@ -115,14 +118,17 @@ func sessionAuth(sessions *service.SessionService) fiber.Handler {
 func requirePermission(c *fiber.Ctx, rbac *service.RbacService, perm string) (*repository.SessionRecord, error) {
 	session, ok := c.Locals("maniforge_session").(*repository.SessionRecord)
 	if !ok || session == nil {
-		return nil, httpx.Fail(c, fiber.StatusUnauthorized, "Не авторизован")
+		_ = httpx.Fail(c, fiber.StatusUnauthorized, "Не авторизован")
+		return nil, errAuthzWritten
 	}
 	has, err := rbac.HasPermission(session.UserID, session.TenantID, session.SubtenantID, perm)
 	if err != nil {
-		return nil, httpx.Fail(c, fiber.StatusInternalServerError, err.Error())
+		_ = httpx.Fail(c, fiber.StatusInternalServerError, err.Error())
+		return nil, errAuthzWritten
 	}
 	if !has {
-		return nil, httpx.Fail(c, fiber.StatusForbidden, "Недостаточно permissions")
+		_ = httpx.Fail(c, fiber.StatusForbidden, "Недостаточно permissions")
+		return nil, errAuthzWritten
 	}
 	return session, nil
 }

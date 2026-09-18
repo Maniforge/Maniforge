@@ -108,7 +108,8 @@ POST /inventory/api/v1/movements
 
 ## Ограничения
 
-- Отрицательный остаток запрещён (`insufficient_qty`).
+- Отрицательный остаток запрещён (`insufficient_qty`). Проведение issue/transfer берёт строку `maniforge_inv_balances` с `SELECT … FOR UPDATE`, чтобы два параллельных списания не ушли в минус.
+- Сторно: `POST .../movements/{id}/reverse` — обратные строки + откат статусов КИЗ (WMS). Повторное сторно того же posted — `409 already_reversed`.
 - Сторно: `POST .../movements/{id}/reverse` — обратные строки + откат статусов КИЗ (WMS).
 - **Go:** сторно `adjustment` строит обратные строки из JSONB метаданных проводки (inverse lines), как у остальных типов с line journal.
 - **PHP (эталон):** `InventoryPostingService::reverse` для adjustment по-прежнему откатывает по плоским `product_id` / `qty_after` в шапке движения — до полного паритета с Go.

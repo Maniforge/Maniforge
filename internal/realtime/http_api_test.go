@@ -155,8 +155,8 @@ func TestRealtimeWebSocketSessionBroadcast(t *testing.T) {
 	if anonResp != nil {
 		_, _ = io.Copy(io.Discard, anonResp.Body)
 		_ = anonResp.Body.Close()
-		if anonResp.StatusCode == http.StatusSwitchingProtocols {
-			t.Fatalf("dial без токена: handshake %d", anonResp.StatusCode)
+		if anonResp.StatusCode != http.StatusUnauthorized {
+			t.Fatalf("dial без токена: want 401 got %d", anonResp.StatusCode)
 		}
 	}
 

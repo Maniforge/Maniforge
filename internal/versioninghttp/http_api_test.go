@@ -96,6 +96,52 @@ func TestVersioningHTTPAllLiveMethods(t *testing.T) {
 	}
 }
 
+func TestVersioningNegativeHTTP(t *testing.T) {
+	sqlDB, cfg := apitest.OpenDB(t)
+	rbacApp := rbac.NewApp(cfg, sqlDB)
+	verApp := NewApp(cfg, sqlDB)
+	admin := apitest.RegisterTenantAdmin(t, rbacApp, "+7925", "Ver Neg")
+	reauth := admin.MustOK("POST", "/rbac/api/v1/auth/reauth", map[string]any{"password": admin.Session.Password})
+	action := apitest.Map(apitest.Nested(reauth, "credentials", "action"))
+	admin.Session.ActionToken = fmt.Sprint(action["action_token"])
+	admin.Action = true
+
+	member := apitest.RegisterUserWithoutWrite(t, rbacApp, admin)
+	if member.Session.UserID <= 0 {
+		me := apitest.DomainClient(t, rbacApp, member.Session).MustOK("GET", "/rbac/api/v1/me", nil)
+		member.Session.UserID = apitest.AsInt64(apitest.Nested(me, "user", "id"))
+		if member.Session.UserID <= 0 {
+			member.Session.UserID = apitest.AsInt64(me["id"])
+		}
+	}
+	if member.Session.UserID <= 0 {
+		t.Fatalf("нет user id у member: %+v", member.Session)
+	}
+
+	suffix := fmt.Sprintf("%d", time.Now().UnixNano()%1_000_000_000)
+	roleCode := "vernone" + suffix[:6]
+	created := admin.MustStatus("POST", "/rbac/api/v1/admin/roles", map[string]any{
+		"code": roleCode, "name": "Versioning no registry", "reason": "ver_neg",
+	}, http.StatusCreated)
+	fullCode := fmt.Sprint(apitest.Map(created["role"])["code"])
+	if fullCode == "" || fullCode == "<nil>" {
+		t.Fatalf("нет role.code: %v", created)
+	}
+	admin.MustOK("PUT", "/rbac/api/v1/admin/role-permissions", map[string]any{
+		"role_code": fullCode, "permissions": []any{"versioning.read"}, "reason": "ver_neg",
+	})
+	admin.MustOK("POST", "/rbac/api/v1/admin/user-roles/assign", map[string]any{
+		"user_id": member.Session.UserID, "role_code": fullCode, "reason": "ver_neg",
+	})
+	admin.MustOK("POST", "/rbac/api/v1/admin/user-roles/revoke", map[string]any{
+		"user_id": member.Session.UserID, "role_code": "user", "reason": "ver_neg",
+	})
+
+	c := apitest.DomainClient(t, verApp, member.Session)
+	apitest.MustForbidden(c, "GET", "/versioning/api/v1/registry", nil)
+	apitest.MustBadRequest(c, "GET", "/versioning/api/v1/changes/not-an-id", nil)
+}
+
 func applySession(t *testing.T, c *apitest.Client, login map[string]any) {
 	t.Helper()
 	sess := apitest.Map(login["session"])

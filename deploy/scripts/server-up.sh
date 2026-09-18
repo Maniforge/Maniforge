@@ -6,18 +6,6 @@ ROOT="${MANIFORGE_ROOT:-/opt/maniforge/platform-core}"
 DEPLOY="${ROOT}/deploy"
 ENV_FILE="${DEPLOY}/.env.platform"
 COMPOSE_FILE="${DEPLOY}/compose.platform.server.yml"
-UNITS=(
-  maniforge-rbac.service
-  maniforge-tl.service
-  maniforge-manifest.service
-  maniforge-versioning.service
-  maniforge-realtime.service
-  maniforge-warehouses.service
-  maniforge-products.service
-  maniforge-inventory.service
-  maniforge-wms.service
-  maniforge-caddy.service
-)
 OLD_CONTAINERS=(
   maniforge-platform-rbac
   maniforge-platform-tl
@@ -34,6 +22,27 @@ if [ ! -f "$ENV_FILE" ]; then
   echo "missing $ENV_FILE" >&2
   exit 1
 fi
+
+MODULES_BIN="${ROOT}/bin/maniforge-modules"
+if [ ! -x "$MODULES_BIN" ]; then
+  echo "missing $MODULES_BIN (run make build)" >&2
+  exit 1
+fi
+eval "$("$MODULES_BIN" resolve --root "$ROOT" --env "$ENV_FILE")"
+# shellcheck disable=SC2206
+UNITS=(${MANIFORGE_SYSTEMD_ENABLE})
+# shellcheck disable=SC2206
+DISABLE_UNITS=(${MANIFORGE_SYSTEMD_DISABLE})
+
+CADDY_LISTEN=":18090"
+gw_port="$(grep -E '^MANIFORGE_GATEWAY_PORT=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
+pub_host="$(grep -E '^MANIFORGE_PUBLIC_HOST=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
+if [ "${gw_port}" = "443" ] && [ -n "$pub_host" ]; then
+  CADDY_LISTEN="$pub_host"
+fi
+caddy_out="$(grep -E '^MANIFORGE_CADDYFILE=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
+caddy_out="${caddy_out:-${DEPLOY}/Caddyfile.active}"
+"$MODULES_BIN" caddy --root "$ROOT" --env "$ENV_FILE" --mode host --listen "$CADDY_LISTEN" -o "$caddy_out"
 
 echo "==> stop orphan Go/Caddy containers (keep postgres volumes)"
 for c in "${OLD_CONTAINERS[@]}"; do
@@ -68,6 +77,9 @@ if [ ! -x /usr/local/bin/caddy ]; then
 fi
 systemctl daemon-reload
 systemctl enable "${UNITS[@]}" >/dev/null
+if [ "${#DISABLE_UNITS[@]}" -gt 0 ]; then
+  systemctl disable --now "${DISABLE_UNITS[@]}" >/dev/null 2>&1 || true
+fi
 
 echo "==> migrate"
 # EnvironmentFile (not bash source) — values with spaces stay intact; secrets stay in the file.
@@ -93,6 +105,7 @@ systemctl restart "${UNITS[@]}"
 echo "==> health (gateway — buyer-facing path)"
 sleep 1
 ENV="$ENV_FILE"
+MANIFORGE_ROOT="$ROOT"
 # shellcheck source=lib/gateway-health.sh
 . "${DEPLOY}/scripts/lib/gateway-health.sh"
 gateway_health_check

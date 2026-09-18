@@ -202,7 +202,7 @@ profile patch  → user_profile only (сессии живут)
 | `deploy/systemd/maniforge-inventory.service` | `bin/maniforge-inventory` (`:8100`) |
 | `deploy/systemd/maniforge-wms.service` | `bin/maniforge-wms` (`:8101`) |
 
-Caddy (host): `deploy/Caddyfile.server` / `Caddyfile.production` → `127.0.0.1:8098–8101`. Локальный compose: `deploy/Caddyfile` → сервисы `warehouses`…`wms`.
+Caddy (host): `maniforge-modules caddy` → `deploy/Caddyfile.active` (`:18090` / FQDN). Каталог prefix — `deploy/modules.yaml`. Статические `Caddyfile*` — полный набор для справки.
 
 ## Принципы проекта
 

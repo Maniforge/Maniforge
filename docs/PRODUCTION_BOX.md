@@ -1,6 +1,6 @@
 ﻿# Maniforge Production Box
 
-**Коммерческий пакет развёртывания** платформенного ядра: RBAC, Tenant Licensing, Manifest Engine, Versioning, Realtime. Прикладные модули (WMS, avtosbor, `.mfpack`) — отдельные фазы и лицензии.
+**Коммерческий пакет развёртывания** платформенного ядра и опционального supply chain. Пакеты задаются `MANIFORGE_MODULES` (см. `deploy/modules.yaml`). Runtime `.mfpack` / App Store — отдельная фаза.
 
 **Аудитория:** sales engineering, DevOps покупателя, согласование COO.
 
@@ -13,14 +13,12 @@
 ```bash
 git clone --branch platform-core https://github.com/Maniforge/Maniforge.git
 cd Maniforge
-# или: git clone --branch platform-core https://github.com/Maniforge/Maniforge.git /opt/maniforge/platform-core
-# cd /opt/maniforge/platform-core
 
 cp deploy/.env.platform.server.example deploy/.env.platform
-# отредактируйте секреты в deploy/.env.platform — не коммитьте этот файл
+# MANIFORGE_MODULES=core,supply,wms
 
-sudo bash deploy/scripts/install-maniforge.sh --skip-apt --non-interactive
-bash deploy/scripts/verify-maniforge.sh
+make up
+make verify
 ```
 
 **Production с HTTPS** — после того как DNS A-record вашего FQDN указывает на сервер:
@@ -36,8 +34,8 @@ bash deploy/scripts/verify-maniforge.sh
 
 | Включено | Не включено (v0.1.2-box) |
 |----------|--------------------------|
-| 5 Go-сервисов platform core | App Store / `.mfpack` runtime |
-| PostgreSQL 16 primary + streaming replica | Supply-chain modules (warehouses, WMS) |
+| Platform core + optional supply/WMS (`MANIFORGE_MODULES`) | App Store / `.mfpack` runtime |
+| PostgreSQL 16 primary + streaming replica | Полный CI/CD pipeline заказчика |
 | Caddy gateway (HTTPS по вашему FQDN или IP:18090 staging на вашем сервере) | Полный CI/CD pipeline заказчика |
 | systemd restart policies | Managed SaaS multi-tenant hosting |
 | Скрипты install / verify / upgrade | PHP reference stack |
@@ -92,6 +90,7 @@ sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com
 
 **Модель URL (обязательно):**
 
+- `MANIFORGE_MODULES=` — пакеты (`full` или `core,supply,wms`); apply: `make up`
 - `APP_URL` — только `scheme://host` (`https://platform.example.com`)
 - `MANIFORGE_GATEWAY_PORT` — `443` (HTTPS) или `18090` (staging)
 - `MANIFORGE_PUBLIC_HOST` — FQDN или IP для скриптов
@@ -106,18 +105,14 @@ sudo bash deploy/scripts/install-maniforge.sh --domain platform.example.com
 
 | Профиль | Файл | Порт |
 |---------|------|------|
-| Staging на IP заказчика | `deploy/Caddyfile.server` | `:18090` |
-| Production (domain) | `deploy/Caddyfile.production` → `Caddyfile.active` | `:443` auto HTTPS |
-
-Ручной рендер:
+| Staging / native | `maniforge-modules caddy` → `Caddyfile.active` | `:18090` |
+| Production (domain) | тот же рендер, listen = FQDN | `:443` auto HTTPS |
 
 ```bash
-sed 's/{domain}/platform.example.com/g' deploy/Caddyfile.production > deploy/Caddyfile.active
-# В .env.platform:
-# MANIFORGE_CADDYFILE=/opt/maniforge/platform-core/deploy/Caddyfile.active
-# APP_URL=https://platform.example.com
-# MANIFORGE_GATEWAY_PORT=443
-systemctl restart maniforge-caddy
+bin/maniforge-modules caddy --mode host --listen :18090 -o deploy/Caddyfile.active
+# MANIFORGE_MODULES=core,supply,wms
+make up
+# MANIFORGE_CADDYFILE=.../deploy/Caddyfile.active
 ```
 
 Требования: DNS → сервер, порты 80/443 открыты.

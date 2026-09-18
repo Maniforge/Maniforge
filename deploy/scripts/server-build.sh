@@ -36,6 +36,7 @@ go build -trimpath -ldflags="-s -w" -o bin/maniforge-warehouses ./cmd/warehouses
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-products ./cmd/products
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-inventory ./cmd/inventory
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-wms ./cmd/wms
+go build -trimpath -ldflags="-s -w" -o bin/maniforge-modules ./cmd/modules
 go build -trimpath -ldflags="-s -w" -o bin/maniforge-bootstrap ./cmd/bootstrap
 
 echo "build ok"

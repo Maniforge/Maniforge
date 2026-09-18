@@ -1,5 +1,10 @@
 # Prefer PATH go (CI / system); fall back to local toolchain install.
 GO ?= $(shell command -v go 2>/dev/null || echo $(HOME)/.local/go/bin/go)
+ifeq ($(OS),Windows_NT)
+EXE := .exe
+else
+EXE :=
+endif
 
 .PHONY: deps build migrate preflight test health \
 	siem-forward token-gen backup-drill bootstrap \
@@ -8,6 +13,7 @@ GO ?= $(shell command -v go 2>/dev/null || echo $(HOME)/.local/go/bin/go)
 	run-warehouses run-products run-inventory run-wms \
 	manifest-journey platform-ops-journey \
 	server-manifest-journey server-platform-ops-journey server-journey \
+	up verify \
 	platform-init platform-up platform-down platform-logs platform-health platform-migrate platform-journey \
 	install-maniforge verify-maniforge
 
@@ -38,6 +44,7 @@ build:
 	$(GO) build -o bin/maniforge-products ./cmd/products
 	$(GO) build -o bin/maniforge-inventory ./cmd/inventory
 	$(GO) build -o bin/maniforge-wms ./cmd/wms
+	$(GO) build -o bin/maniforge-modules$(EXE) ./cmd/modules
 	$(GO) build -o bin/maniforge-bootstrap ./cmd/bootstrap
 
 pg-up:
@@ -111,7 +118,7 @@ server-platform-ops-journey: build
 server-journey: server-platform-ops-journey server-manifest-journey
 
 test:
-	$(GO) test ./...
+	$(GO) test -p 1 ./...
 
 health:
 	curl -s http://127.0.0.1:8093/rbac/health | jq .
@@ -129,11 +136,18 @@ platform-init:
 	@test -f deploy/.env.platform || cp deploy/.env.platform.example deploy/.env.platform
 	@echo "deploy/.env.platform ready"
 
-platform-up: platform-init
-	$(PLATFORM_COMPOSE) up -d --build
+# Desired-state apply: MANIFORGE_MODULES → compose profiles | systemd | native.
+up: platform-init
+	$(GO) build -o bin/maniforge-modules$(EXE) ./cmd/modules
+	bash deploy/scripts/maniforge-up.sh || ./bin/maniforge-modules$(EXE) up-native --root .
+
+verify:
+	bash deploy/scripts/verify-maniforge.sh
+
+platform-up: up
 
 platform-down:
-	$(PLATFORM_COMPOSE) down
+	$(PLATFORM_COMPOSE) --profile versioning --profile realtime --profile supply --profile wms down
 
 platform-logs:
 	$(PLATFORM_COMPOSE) logs -f --tail=100

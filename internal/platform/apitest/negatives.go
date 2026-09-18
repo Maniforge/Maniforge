@@ -44,3 +44,15 @@ func MustUnprocessable(c *Client, method, path string, body any) map[string]any 
 	c.T.Helper()
 	return MustStatus(c, method, path, body, http.StatusUnprocessableEntity)
 }
+
+// MustUnauthorized — 401.
+func MustUnauthorized(c *Client, method, path string, body any) map[string]any {
+	c.T.Helper()
+	return MustStatus(c, method, path, body, http.StatusUnauthorized)
+}
+
+// MustBadRequest — 400.
+func MustBadRequest(c *Client, method, path string, body any) map[string]any {
+	c.T.Helper()
+	return MustStatus(c, method, path, body, http.StatusBadRequest)
+}

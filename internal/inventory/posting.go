@@ -448,7 +448,7 @@ func (e *Engine) requireStock(sess *repository.SessionRecord, id int64) (map[str
 
 func (e *Engine) qtyOnHand(tx *sql.Tx, tenantID string, productID, stockID int64) string {
 	var q string
-	row := queryRow(tx, e.db, `SELECT COALESCE(qty::text,'0') FROM maniforge_inv_balances WHERE tenant_id=$1 AND product_id=$2 AND stock_id=$3`,
+	row := queryRow(tx, e.db, `SELECT COALESCE(qty::text,'0') FROM maniforge_inv_balances WHERE tenant_id=$1 AND product_id=$2 AND stock_id=$3 FOR UPDATE`,
 		tenantID, productID, stockID)
 	if err := row.Scan(&q); err != nil {
 		return "0"

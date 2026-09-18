@@ -6,7 +6,7 @@
 |----------|------------|
 | [PRODUCTION_BOX.md](PRODUCTION_BOX.md) | Production Box — установка, verify, backup, upgrade |
 | [PRODUCTION_PLAN.md](PRODUCTION_PLAN.md) | Фазы до production (A–D) |
-| [superpowers/plans/2026-09-17-api-holes-and-gateway.md](superpowers/plans/2026-09-17-api-holes-and-gateway.md) | Supply chain на шлюзе (8098–8101) в репо; Tasks 2–6 в коде; DoD — публичный gateway health и `go test` с Postgres |
+| [superpowers/plans/2026-09-17-api-holes-and-gateway.md](superpowers/plans/2026-09-17-api-holes-and-gateway.md) | Supply chain на шлюзе (8098–8101); HTTP-дыры 2026-09-18: `-p 1`, CSRF, negatives, `already_reversed`, `FOR UPDATE`, Caddyfile prefixes |
 | [MANIFORGE_PLATFORM_OVERVIEW.md](MANIFORGE_PLATFORM_OVERVIEW.md) | Обзор платформы |
 | [MANIFORGE_ARCHITECTURE.md](MANIFORGE_ARCHITECTURE.md) | Архитектура и границы сервисов |
 | [MANIFORGE_NEW_USER_WORKFLOW.md](MANIFORGE_NEW_USER_WORKFLOW.md) | Onboarding администратора |

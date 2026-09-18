@@ -9,27 +9,23 @@ DEPLOY="${ROOT}/deploy"
 ENV_FILE="${DEPLOY}/.env.platform"
 COMPOSE_FILE="${DEPLOY}/compose.platform.server.yml"
 
-UNITS=(
-  maniforge-rbac.service
-  maniforge-tl.service
-  maniforge-manifest.service
-  maniforge-versioning.service
-  maniforge-realtime.service
-  maniforge-warehouses.service
-  maniforge-products.service
-  maniforge-inventory.service
-  maniforge-wms.service
-  maniforge-caddy.service
-)
-
-fail=0
-
-cd "$DEPLOY"
-
 if [ ! -f "$ENV_FILE" ]; then
   echo "missing $ENV_FILE" >&2
   exit 1
 fi
+
+fail=0
+
+MODULES_BIN="${ROOT}/bin/maniforge-modules"
+if [ ! -x "$MODULES_BIN" ]; then
+  echo "missing $MODULES_BIN" >&2
+  exit 1
+fi
+eval "$("$MODULES_BIN" resolve --root "$ROOT" --env "$ENV_FILE")"
+# shellcheck disable=SC2206
+UNITS=(${MANIFORGE_SYSTEMD_ENABLE})
+
+cd "$DEPLOY"
 
 echo "==> systemd"
 for u in "${UNITS[@]}"; do
@@ -43,6 +39,7 @@ done
 
 echo "==> gateway health"
 ENV="$ENV_FILE"
+MANIFORGE_ROOT="$ROOT"
 # shellcheck source=lib/gateway-health.sh
 . "${SCRIPT_DIR}/lib/gateway-health.sh"
 if ! gateway_health_check; then

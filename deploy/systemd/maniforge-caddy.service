@@ -1,12 +1,12 @@
 [Unit]
 Description=Maniforge Caddy gateway (:18090)
-After=network-online.target maniforge-rbac.service maniforge-warehouses.service maniforge-products.service maniforge-inventory.service maniforge-wms.service
+After=network-online.target maniforge-rbac.service maniforge-tl.service maniforge-manifest.service
 Wants=network-online.target
 
 [Service]
 Type=simple
 EnvironmentFile=/opt/maniforge/platform-core/deploy/.env.platform
-ExecStart=/bin/bash -c '/usr/local/bin/caddy run --config "${MANIFORGE_CADDYFILE:-/opt/maniforge/platform-core/deploy/Caddyfile.server}" --adapter caddyfile'
+ExecStart=/bin/bash -c '/usr/local/bin/caddy run --config "${MANIFORGE_CADDYFILE:-/opt/maniforge/platform-core/deploy/Caddyfile.active}" --adapter caddyfile'
 Restart=always
 RestartSec=2
 NoNewPrivileges=true

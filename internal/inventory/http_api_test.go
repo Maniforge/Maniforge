@@ -1,16 +1,24 @@
 package inventory
 
 import (
+	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 
+	"maniforge/internal/config"
 	"maniforge/internal/platform/apitest"
 	"maniforge/internal/products"
 	"maniforge/internal/rbac"
+	"maniforge/internal/rbac/service"
 	"maniforge/internal/warehouses"
 )
 
@@ -101,7 +109,8 @@ func TestInventoryHTTPAllLiveMethods(t *testing.T) {
 		t.Fatalf("сторно должно создать новое движение: %v", rev)
 	}
 	mark("POST /api/v1/movements/:id/reverse")
-	c.MustStatus("POST", fmt.Sprintf("/api/v1/movements/%d/reverse", mid), map[string]any{}, http.StatusConflict)
+	twice := c.MustStatus("POST", fmt.Sprintf("/api/v1/movements/%d/reverse", mid), map[string]any{}, http.StatusConflict)
+	assertConflictCode(t, twice, "already_reversed")
 
 	c.MustStatus("POST", "/api/v1/movements", map[string]any{
 		"movement_type": "receipt", "product_id": productID, "stock_id": fromID, "qty": 20,
@@ -182,6 +191,8 @@ func TestInventoryHTTPAllLiveMethods(t *testing.T) {
 
 type invHTTPFixture struct {
 	c            *apitest.Client
+	db           *sql.DB
+	cfg          config.Config
 	fromID, toID int64
 	productID    int64
 }
@@ -198,6 +209,8 @@ func newInvHTTPFixture(t *testing.T, phonePrefix string) invHTTPFixture {
 	prod := apitest.Map(pr.MustStatus("POST", "/api/v1/products", map[string]any{"name": "Одеяло домен"}, http.StatusCreated)["product"])
 	return invHTTPFixture{
 		c:         c,
+		db:        sqlDB,
+		cfg:       cfg,
 		fromID:    apitest.AsInt64(from["id"]),
 		toID:      apitest.AsInt64(to["id"]),
 		productID: apitest.AsInt64(prod["id"]),
@@ -267,6 +280,13 @@ func assertInsufficientBody(t *testing.T, out map[string]any) {
 	}
 }
 
+func assertConflictCode(t *testing.T, out map[string]any, want string) {
+	t.Helper()
+	if fmt.Sprint(out["code"]) != want {
+		t.Fatalf("ожидали code=%s: %v", want, out)
+	}
+}
+
 func TestInventoryIssueWithoutStockConflict(t *testing.T) {
 	f := newInvHTTPFixture(t, "+7910")
 	out := f.c.MustStatus("POST", "/api/v1/movements", map[string]any{
@@ -293,8 +313,197 @@ func TestInventoryReceiptIssueReverseRestoresQty(t *testing.T) {
 	}
 	assertQty(t, f.c, f.productID, f.fromID, 5)
 
-	f.c.MustStatus("POST", fmt.Sprintf("/api/v1/movements/%d/reverse", issueID), map[string]any{}, http.StatusConflict)
+	again := f.c.MustStatus("POST", fmt.Sprintf("/api/v1/movements/%d/reverse", issueID), map[string]any{}, http.StatusConflict)
+	assertConflictCode(t, again, "already_reversed")
 	assertQty(t, f.c, f.productID, f.fromID, 5)
+}
+
+func TestInventoryConcurrentIssueDoesNotGoNegative(t *testing.T) {
+	f := newInvHTTPFixture(t, "+7918")
+	f.c.MustStatus("POST", "/api/v1/movements", map[string]any{
+		"movement_type": "receipt", "product_id": f.productID, "stock_id": f.fromID, "qty": 5,
+	}, http.StatusCreated)
+
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	serveErr := make(chan error, 1)
+	go func() { serveErr <- f.c.App.Listener(ln) }()
+	t.Cleanup(func() {
+		_ = f.c.App.Shutdown()
+		_ = ln.Close()
+		select {
+		case <-serveErr:
+		case <-time.After(2 * time.Second):
+		}
+	})
+	base := "http://" + ln.Addr().String()
+	waitInventoryReady(t, base+"/health")
+
+	const workers = 8
+	type hit struct {
+		status int
+		body   map[string]any
+	}
+	ch := make(chan hit, workers)
+	var wg sync.WaitGroup
+	client := &http.Client{Timeout: 15 * time.Second}
+	for i := 0; i < workers; i++ {
+		i := i
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			body, _ := json.Marshal(map[string]any{
+				"movement_type": "issue", "product_id": f.productID, "stock_id": f.fromID, "qty": 3,
+				"doc_number": fmt.Sprintf("http-race-%d-%d", time.Now().UnixNano(), i),
+			})
+			req, err := http.NewRequest(http.MethodPost, base+"/api/v1/movements", bytes.NewReader(body))
+			if err != nil {
+				ch <- hit{status: -1, body: map[string]any{"error": err.Error()}}
+				return
+			}
+			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("Authorization", "Bearer "+f.c.Session.Token)
+			resp, err := client.Do(req)
+			if err != nil {
+				ch <- hit{status: -1, body: map[string]any{"error": err.Error()}}
+				return
+			}
+			raw, _ := io.ReadAll(resp.Body)
+			_ = resp.Body.Close()
+			var out map[string]any
+			_ = json.Unmarshal(raw, &out)
+			ch <- hit{status: resp.StatusCode, body: out}
+		}()
+	}
+	wg.Wait()
+	close(ch)
+
+	created, conflict := 0, 0
+	for h := range ch {
+		switch h.status {
+		case http.StatusCreated:
+			created++
+		case http.StatusConflict:
+			conflict++
+			assertConflictCode(t, h.body, "insufficient_qty")
+		default:
+			t.Errorf("issue: status %d body=%v", h.status, h.body)
+		}
+	}
+	if created != 1 || conflict != workers-1 {
+		t.Fatalf("параллельные issue qty=3 при остатке 5: created=%d conflict=%d want 1/%d", created, conflict, workers-1)
+	}
+
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/v1/balances?product_id=%d&stock_id=%d", base, f.productID, f.fromID), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Authorization", "Bearer "+f.c.Session.Token)
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("GET balances: %v", err)
+	}
+	raw, _ := io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("GET balances: %d %s", resp.StatusCode, raw)
+	}
+	var out map[string]any
+	if err := json.Unmarshal(raw, &out); err != nil {
+		t.Fatalf("balances json: %v", err)
+	}
+	qty := 0.0
+	found := false
+	for _, item := range apitest.Slice(out["items"]) {
+		row := apitest.Map(item)
+		if apitest.AsInt64(row["product_id"]) == f.productID && apitest.AsInt64(row["stock_id"]) == f.fromID {
+			qty = asQty(row["qty"])
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatal("остаток не найден после параллельных issue")
+	}
+	if qty != 2 {
+		t.Fatalf("остаток после гонок: qty=%v, ожидали 2 (один issue из 3)", qty)
+	}
+	if qty < 0 {
+		t.Fatalf("остаток ушёл в минус: qty=%v", qty)
+	}
+}
+
+func waitInventoryReady(t *testing.T, healthURL string) {
+	t.Helper()
+	client := &http.Client{Timeout: 200 * time.Millisecond}
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		resp, err := client.Get(healthURL)
+		if err == nil {
+			_, _ = io.Copy(io.Discard, resp.Body)
+			_ = resp.Body.Close()
+			if resp.StatusCode == http.StatusOK {
+				return
+			}
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	t.Fatalf("не дождались %s", healthURL)
+}
+
+func TestInventoryConcurrentIssueEngineDoesNotGoNegative(t *testing.T) {
+	f := newInvHTTPFixture(t, "+7917")
+	f.c.MustStatus("POST", "/api/v1/movements", map[string]any{
+		"movement_type": "receipt", "product_id": f.productID, "stock_id": f.fromID, "qty": 5,
+	}, http.StatusCreated)
+	sess, err := service.NewSessionService(f.cfg, f.db).Authenticate(f.c.Session.Token)
+	if err != nil || sess == nil {
+		t.Fatalf("session: %v %#v", err, sess)
+	}
+	eng := NewEngine(f.db)
+	const workers = 8
+	start := make(chan struct{})
+	type hit struct {
+		status int
+		out    map[string]any
+	}
+	ch := make(chan hit, workers)
+	var wg sync.WaitGroup
+	for i := 0; i < workers; i++ {
+		i := i
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			<-start
+			out, st := eng.Post(sess, map[string]any{
+				"movement_type": "issue", "product_id": f.productID, "stock_id": f.fromID, "qty": 3,
+				"doc_number": fmt.Sprintf("eng-race-%d-%d", time.Now().UnixNano(), i),
+			}, false)
+			ch <- hit{status: st, out: out}
+		}()
+	}
+	close(start)
+	wg.Wait()
+	close(ch)
+	created, conflict := 0, 0
+	for h := range ch {
+		switch h.status {
+		case http.StatusCreated:
+			created++
+		case http.StatusConflict:
+			conflict++
+			assertConflictCode(t, h.out, "insufficient_qty")
+		default:
+			t.Errorf("engine issue: status %d body=%v", h.status, h.out)
+		}
+	}
+	if created != 1 || conflict != workers-1 {
+		t.Fatalf("engine issue qty=3 при остатке 5: created=%d conflict=%d want 1/%d", created, conflict, workers-1)
+	}
+	assertQty(t, f.c, f.productID, f.fromID, 2)
+	assertNotNegative(t, f.c, f.productID, f.fromID)
 }
 
 func TestInventoryTransferReverseRestoresSource(t *testing.T) {

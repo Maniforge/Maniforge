@@ -2,6 +2,10 @@
 
 Операционная документация по развёртыванию платформы. Два контура: **production server** (покупатель / on-premise) и **local dev** (разработка).
 
+**Три шага:** clone → `MANIFORGE_MODULES=` в `deploy/.env.platform` → `make up` && `make verify`.
+
+Пакеты (`deploy/modules.yaml`): `core` (всегда: postgres, rbac, tl, manifest, caddy), `versioning`, `realtime`, `supply` (warehouses/products/inventory), `wms` (требует `supply`). Алиас `full`. Пример: `MANIFORGE_MODULES=core,supply,wms`.
+
 **Спецификация Production Box:** [docs/PRODUCTION_BOX.md](../docs/PRODUCTION_BOX.md) · релиз [`v0.1.2-box`](https://github.com/Maniforge/Maniforge/releases/tag/v0.1.2-box)
 
 ---
@@ -96,9 +100,12 @@ bash deploy/scripts/verify-maniforge.sh
 
 ```bash
 cp deploy/.env.platform.example deploy/.env.platform
-make platform-up
+# MANIFORGE_MODULES=full
+make up
 make platform-health
 ```
+
+Windows без GNU make: `go build -o bin/maniforge-modules.exe ./cmd/modules` затем `bin\maniforge-modules.exe up-native --root .`.
 
 | Service | Host port | Health |
 |---------|-----------|--------|
@@ -120,7 +127,10 @@ Compose: `deploy/compose.platform.yml`. Journeys с хоста — напрям�
 
 ```bash
 make platform-init      # copy deploy/.env.platform.example → deploy/.env.platform
-make platform-up        # build + docker compose up -d
+make up                 # desired-state apply (compose | systemd | native)
+make verify             # health только для enabled пакетов
+make platform-up        # alias на make up
+make platform-down      # остановить compose-стек
 make platform-down      # остановить стек
 make platform-logs      # логи всех сервисов
 make platform-health    # curl health всех сервисов + gateway

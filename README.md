@@ -23,7 +23,7 @@
 
 **Production Box** — это готовый к установке комплект платформенного ядра Maniforge для **самостоятельного** развёртывания на сервере. Вы получаете исходный код, скрипты установки и проверки, конфигурацию шлюза и базы данных, а также документацию по эксплуатации. Установка на **вашей** Ubuntu 22.04/24.04 LTS: `git clone` → `cp deploy/.env.platform.server.example deploy/.env.platform` → правка секретов → `install-maniforge.sh --domain <ваш-fqdn>`.
 
-Комплект **не** является облачным SaaS, **не** предполагает хостинг у Maniforge и **не** включает прикладные модули (WMS, supply chain, `.mfpack`) — они поставляются отдельными фазами. Версия **v0.1.2-box** — коммерчески воспроизводимый релиз platform core, публичен на GitHub, готов к передаче DevOps-команде.
+Комплект **не** является облачным SaaS и **не** предполагает хостинг у Maniforge. Supply chain (warehouses / products / inventory / WMS, порты **8098–8101**) входит в дерево и включается пакетами `MANIFORGE_MODULES`. Runtime `.mfpack` / App Store — отдельная фаза. Версия **v0.1.2-box** — коммерчески воспроизводимый релиз, публичен на GitHub.
 
 ---
 
@@ -31,9 +31,9 @@
 
 | Включено | Не включено (v0.1.2-box) |
 |----------|--------------------------|
-| 5 Go-сервисов platform core (RBAC, Tenant Licensing, Manifest Engine, Versioning, Realtime) | App Store / runtime `.mfpack` |
-| PostgreSQL 16 — primary + streaming replica | Модули supply chain (warehouses, WMS, inventory) |
-| Caddy gateway (HTTPS по вашему FQDN или staging по IP:18090 на вашем сервере) | Managed SaaS / мульти-тенант хостинг |
+| Platform core + optional supply/WMS (`MANIFORGE_MODULES`) | App Store / runtime `.mfpack` |
+| PostgreSQL 16 — primary + streaming replica | Managed SaaS / мульти-тенант хостинг |
+| Caddy gateway (HTTPS по вашему FQDN или staging по IP:18090) | Полный CI/CD pipeline заказчика |
 | systemd unit-файлы с политикой перезапуска | Полный CI/CD pipeline заказчика |
 | Скрипты `install-maniforge.sh`, `verify-maniforge.sh`, upgrade path | PHP reference stack |
 
@@ -62,14 +62,18 @@
 ```bash
 git clone --branch platform-core https://github.com/Maniforge/Maniforge.git
 cd Maniforge
-# или сразу в целевой каталог:
-# git clone --branch platform-core https://github.com/Maniforge/Maniforge.git /opt/maniforge/platform-core
-# cd /opt/maniforge/platform-core
 
 cp deploy/.env.platform.server.example deploy/.env.platform
-# отредактируйте секреты в deploy/.env.platform — не коммитьте этот файл
+# секреты + пакеты, например:
+# MANIFORGE_MODULES=core,supply,wms
 
-# Staging без TLS на вашем IP (порт 18090) — опционально до выдачи домена:
+make up
+make verify
+```
+
+Ubuntu production (systemd), staging без TLS на IP:18090:
+
+```bash
 sudo bash deploy/scripts/install-maniforge.sh --skip-apt --non-interactive
 bash deploy/scripts/verify-maniforge.sh
 ```
@@ -176,7 +180,8 @@ flowchart LR
 git clone --branch platform-core https://github.com/Maniforge/Maniforge.git
 cd Maniforge
 cp deploy/.env.platform.example deploy/.env.platform
-make platform-up
+# MANIFORGE_MODULES=full   # or core,supply,wms
+make up
 make platform-health
 make manifest-journey
 ```
