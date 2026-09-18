@@ -36,6 +36,7 @@ Options:
 Environment:
   MANIFORGE_ROOT, MANIFORGE_DOMAIN, MANIFORGE_EDGE_PROXY, MANIFORGE_NONINTERACTIVE, MANIFORGE_SKIP_APT
   MANIFORGE_ADMIN_LOGIN, MANIFORGE_ADMIN_PASSWORD, MANIFORGE_ADMIN_ORG
+                    (if omitted: demo +79991234567 / DemoAdmin!12345 / Demo)
 
 Example (clean Ubuntu, source already at /opt/maniforge/platform-core):
   sudo bash deploy/scripts/install-maniforge.sh --domain platform.customer.ru
@@ -213,38 +214,13 @@ prompt_domain() {
 
 prompt_admin() {
   cd "$DEPLOY"
-  local env_file=".env.platform"
-  ENV="$env_file"
+  ENV=".env.platform"
   # shellcheck source=server-public-urls.sh
   . "${SCRIPT_DIR}/server-public-urls.sh"
-
-  local login pass org
-  login="${ADMIN_LOGIN:-$(_env_get MANIFORGE_ADMIN_LOGIN)}"
-  pass="${ADMIN_PASSWORD:-$(_env_get MANIFORGE_ADMIN_PASSWORD)}"
-  org="${ADMIN_ORG:-$(_env_get MANIFORGE_ADMIN_ORG)}"
-
-  if [ "$NONINTERACTIVE" != "1" ]; then
-    if [ -z "$login" ]; then
-      read -r -p "Логин админки (телефон, +79991234567): " login || true
-    fi
-    if [ -z "$pass" ]; then
-      read -r -s -p "Пароль админки (не короче 12 символов): " pass || true
-      echo
-    fi
-    if [ -z "$org" ]; then
-      read -r -p "Название организации [Demo]: " org || true
-      org="${org:-Demo}"
-    fi
-  fi
-
-  if [ -z "$login" ] || [ -z "$pass" ] || [[ "$pass" == CHANGE_ME* ]]; then
-    echo "нужны MANIFORGE_ADMIN_LOGIN (телефон) и MANIFORGE_ADMIN_PASSWORD (мин. 12 символов)" >&2
-    exit 1
-  fi
-
-  _env_upsert MANIFORGE_ADMIN_LOGIN "$login"
-  _env_upsert MANIFORGE_ADMIN_PASSWORD "$pass"
-  _env_upsert MANIFORGE_ADMIN_ORG "${org:-Demo}"
+  # shellcheck source=lib/prompt-admin.sh
+  . "${SCRIPT_DIR}/lib/prompt-admin.sh"
+  export MANIFORGE_NONINTERACTIVE="$NONINTERACTIVE"
+  maniforge_fill_admin
 }
 
 configure_env() {

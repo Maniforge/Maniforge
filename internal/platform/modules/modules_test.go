@@ -145,6 +145,25 @@ func TestServerUpKeepsHTTP18090(t *testing.T) {
 	if !strings.Contains(string(compose), `entrypoint: ["/bin/sh", "/replica-entrypoint.sh"]`) {
 		t.Fatal("replica must start via /bin/sh so missing +x is not fatal")
 	}
+	if !strings.Contains(body, "maniforge_fill_admin") {
+		t.Fatal("server-up must fill ADMIN_LOGIN/PASSWORD/ORG (demo defaults if unset)")
+	}
+}
+
+func TestPromptAdminHelper(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join(repoRoot(t), "deploy", "scripts", "lib", "prompt-admin.sh"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := string(raw)
+	for _, needle := range []string{"ADMIN_LOGIN", "ADMIN_PASSWORD", "ADMIN_ORG", "+79991234567", "DemoAdmin!12345"} {
+		if !strings.Contains(body, needle) {
+			t.Errorf("prompt-admin.sh missing %s", needle)
+		}
+	}
+	if strings.Contains(body, "skip demo bootstrap") {
+		t.Fatal("zero-config install must not skip demo admin")
+	}
 }
 
 func TestDocsMentionMakeUpAndModules(t *testing.T) {

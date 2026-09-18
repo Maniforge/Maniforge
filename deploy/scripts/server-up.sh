@@ -113,16 +113,16 @@ systemd-run --quiet --wait --pipe --collect \
   --working-directory="$ROOT" \
   "${ROOT}/bin/maniforge-migrate"
 
-if grep -qE '^MANIFORGE_ADMIN_LOGIN=.+' "$ENV_FILE" && grep -qE '^MANIFORGE_ADMIN_PASSWORD=.+' "$ENV_FILE"; then
-  echo "==> demo admin bootstrap (tenantId = SHA-256 of UUID; password not printed)"
-  systemd-run --quiet --wait --pipe --collect \
-    --property="EnvironmentFile=${ENV_FILE}" \
-    --property="Environment=MANIFORGE_ROOT=${ROOT}" \
-    --working-directory="$ROOT" \
-    "${ROOT}/bin/maniforge-bootstrap"
-else
-  echo "==> skip demo bootstrap (set MANIFORGE_ADMIN_LOGIN and MANIFORGE_ADMIN_PASSWORD)"
-fi
+ENV="$ENV_FILE"
+# shellcheck source=lib/prompt-admin.sh
+. "${DEPLOY}/scripts/lib/prompt-admin.sh"
+maniforge_fill_admin
+echo "==> demo admin bootstrap (tenantId = SHA-256 of UUID; password not printed)"
+systemd-run --quiet --wait --pipe --collect \
+  --property="EnvironmentFile=${ENV_FILE}" \
+  --property="Environment=MANIFORGE_ROOT=${ROOT}" \
+  --working-directory="$ROOT" \
+  "${ROOT}/bin/maniforge-bootstrap"
 
 echo "==> restart Go + Caddy"
 systemctl reset-failed maniforge-caddy.service >/dev/null 2>&1 || true
